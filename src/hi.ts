@@ -27,7 +27,8 @@ export function modifyYaml() {
     if (parsedYaml?.SR?.was && Array.isArray(parsedYaml.SR.was)) {
         const index = parsedYaml.SR.was.indexOf("B");
         if (index !== -1) {
-            parsedYaml.SR.was.splice(index + 1, 0, "hi");
+            // parsedYaml.SR.was.splice(index + 1, 0, "hi");
+            parsedYaml.SR.was.push("hi");
         } else {
             vscode.window.showErrorMessage('"B" not found in "SR.was".');
             return;
