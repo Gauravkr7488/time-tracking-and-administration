@@ -14,33 +14,43 @@ export function modifyYaml() {
         return;
     }
 
+    // Get cursor position and the word under cursor
+    const cursorPosition = editor.selection.active;
+    const wordRange = document.getWordRangeAtPosition(cursorPosition);
+    if (!wordRange) {
+        vscode.window.showErrorMessage("No word found at cursor position. Place cursor on a YAML key.");
+        return;
+    }
+
+    // Get the word and remove any trailing colon
+    let srcode = document.getText(wordRange).replace(/:$/, ''); // Remove trailing colon if present
     let text = document.getText();
     let doc;
 
     try {
-        doc = yaml.parseDocument(text); // Parse only once
+        doc = yaml.parseDocument(text);
     } catch (error) {
-        vscode.window.showErrorMessage("Failed to parse YAML.");
+        vscode.window.showErrorMessage("Failed to parse YAML");
         return;
     }
 
-    // Find "SR"
-    const srNode = doc.get("SR", true);
+    // Find the node with the name from srcode
+    const srNode = doc.get(srcode, true);
     if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
-        vscode.window.showErrorMessage('Invalid YAML structure. "SR" not found.');
+        vscode.window.showErrorMessage(`Invalid YAML structure. "${srcode}" not found or not an object.`);
         return;
     }
 
-    // Find "was" inside "SR"
-    let wasNode = srNode.get("was", true);
+    // Find "was" inside the srcode node
+    let wasNode = srNode.get("was", true) || srNode.get("Was", true); // Check both "was" and "Was"
     if (!wasNode) {
-        vscode.window.showErrorMessage('Invalid YAML structure. "SR.was" not found.');
+        vscode.window.showErrorMessage(`Invalid YAML structure. "${srcode}.was" not found.`);
         return;
     }
 
     // Ensure "was" is a sequence (array)
     if (!(wasNode instanceof yaml.YAMLSeq)) {
-        vscode.window.showErrorMessage('Invalid YAML structure. "SR.was" is not a list.');
+        vscode.window.showErrorMessage(`Invalid YAML structure. "${srcode}.was" is not a list.`);
         return;
     }
 
