@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import * as yaml from 'js-yaml';
+import * as yaml from 'yaml';
 
 export function modifyYaml() {
     const editor = vscode.window.activeTextEditor;
@@ -15,30 +15,40 @@ export function modifyYaml() {
     }
 
     let text = document.getText();
-    let parsedYaml: any;
+    let doc;
 
     try {
-        parsedYaml = yaml.load(text);
+        doc = yaml.parseDocument(text); // Parse only once
     } catch (error) {
         vscode.window.showErrorMessage("Failed to parse YAML.");
         return;
     }
 
-    if (parsedYaml?.SR?.was && Array.isArray(parsedYaml.SR.was)) {
-        const index = parsedYaml.SR.was.indexOf("B");
-        if (index !== -1) {
-            // parsedYaml.SR.was.splice(index + 1, 0, "hi");
-            parsedYaml.SR.was.push("hi");
-        } else {
-            vscode.window.showErrorMessage('"B" not found in "SR.was".');
-            return;
-        }
-    } else {
+    // Find "SR"
+    const srNode = doc.get("SR", true);
+    if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
+        vscode.window.showErrorMessage('Invalid YAML structure. "SR" not found.');
+        return;
+    }
+
+    // Find "was" inside "SR"
+    let wasNode = srNode.get("was", true);
+    if (!wasNode) {
         vscode.window.showErrorMessage('Invalid YAML structure. "SR.was" not found.');
         return;
     }
 
-    const updatedYaml = yaml.dump(parsedYaml);
+    // Ensure "was" is a sequence (array)
+    if (!(wasNode instanceof yaml.YAMLSeq)) {
+        vscode.window.showErrorMessage('Invalid YAML structure. "SR.was" is not a list.');
+        return;
+    }
+
+    // Append "hi" to the sequence
+    wasNode.add("hi");
+
+    // Convert back to YAML
+    const updatedYaml = String(doc);
 
     editor.edit((editBuilder) => {
         const fullRange = new vscode.Range(
