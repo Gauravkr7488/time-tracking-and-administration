@@ -16,6 +16,10 @@
       {
         "command": "time-tracking-and-administration.insertHi",
         "title": "insertHi"
+      },
+      {
+        "command": "time-tracking-and-administration.insertHi2",
+        "title": "insertHi2"
       }
     ]
   },

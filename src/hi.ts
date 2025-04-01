@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { extractYamlKey } from './keyExtractor'; // Adjust the path as needed
 
-export function modifyYaml() {
+export function modifyYaml(srcode : string, ymlLink : string) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage("No active text editor.");
@@ -14,13 +14,6 @@ export function modifyYaml() {
         vscode.window.showErrorMessage("This command only works with YAML files.");
         return;
     }
-
-    // Extract the key using the imported function
-    const srcode = extractYamlKey(editor);
-    if (!srcode) {
-        return; // Error message already shown in extractYamlKey
-    }
-
     let text = document.getText();
     let doc;
 
@@ -52,7 +45,7 @@ export function modifyYaml() {
     }
 
     // Append "hi" to the sequence
-    wasNode.add("hi");
+    wasNode.add(ymlLink);
 
     // Convert back to YAML
     const updatedYaml = String(doc);
