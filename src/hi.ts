@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
+import { extractYamlKey } from './keyExtractor'; // Adjust the path as needed
 
 export function modifyYaml() {
     const editor = vscode.window.activeTextEditor;
@@ -14,16 +15,12 @@ export function modifyYaml() {
         return;
     }
 
-    // Get cursor position and the word under cursor
-    const cursorPosition = editor.selection.active;
-    const wordRange = document.getWordRangeAtPosition(cursorPosition);
-    if (!wordRange) {
-        vscode.window.showErrorMessage("No word found at cursor position. Place cursor on a YAML key.");
-        return;
+    // Extract the key using the imported function
+    const srcode = extractYamlKey(editor);
+    if (!srcode) {
+        return; // Error message already shown in extractYamlKey
     }
 
-    // Get the word and remove any trailing colon
-    let srcode = document.getText(wordRange).replace(/:$/, ''); // Remove trailing colon if present
     let text = document.getText();
     let doc;
 
