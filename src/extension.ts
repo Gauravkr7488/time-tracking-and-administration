@@ -3,7 +3,6 @@ import { modifyYaml } from './hi';
 import { extractYamlKey } from './keyExtractor';
 import { YamlKeyExtractor } from './ymlReferenceExtractor';
 
-
 export function activate(context: vscode.ExtensionContext) {
     const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.insertHi', async () => {
         await extractYamlKey(context); // Ensure extraction completes before proceeding
@@ -11,10 +10,10 @@ export function activate(context: vscode.ExtensionContext) {
         // vscode.window.showInformationMessage(`Extracted Key: '${extractedKey}'`);
     });
     
-    
     const disposable = vscode.commands.registerCommand('time-tracking-and-administration.insertHi2', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
+            vscode.window.showErrorMessage("No active text editor.");
             return;
         }
         const document = editor.document;
@@ -22,12 +21,22 @@ export function activate(context: vscode.ExtensionContext) {
         const extractor = new YamlKeyExtractor(document, position);
         await extractor.extractYamlKey();
         let fullPath = extractor.fullPath();
+        if (!fullPath) {
+            vscode.window.showErrorMessage("No full path extracted.");
+            return;
+        }
         vscode.window.showInformationMessage(`'${fullPath}' copied to your clipboard`);
         let formattedText = `-->${fullPath}<:`;
         const extractedKey = context.globalState.get("extractedYamlKey") as string;  // Retrieve stored value
+        if (!extractedKey) {
+            vscode.window.showErrorMessage("No extracted key stored. Run 'insertHi' first.");
+            return;
+        }
         
-        modifyYaml(extractedKey ,formattedText);
+        // Pass context and await the async function
+        await modifyYaml(extractedKey, formattedText, context);
     });
+
     context.subscriptions.push(disposableA, disposable);
 }
 

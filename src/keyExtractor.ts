@@ -20,6 +20,9 @@ export async function extractYamlKey(context: vscode.ExtensionContext) {
     // Get the word and remove any trailing colon
     const extractedKey = document.getText(wordRange).replace(/:$/, '');
 
-    // Store in global state
+    // Store the extracted key and document URI in global state
     await context.globalState.update("extractedYamlKey", extractedKey);
+    await context.globalState.update("capturedDocumentUri", document.uri.toString());
+
+    vscode.window.showInformationMessage(`Extracted Key: '${extractedKey}' and document URI stored in global state`);
 }

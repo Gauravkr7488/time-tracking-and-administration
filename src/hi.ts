@@ -2,14 +2,19 @@ import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { extractYamlKey } from './keyExtractor'; // Adjust the path as needed
 
-export function modifyYaml(srcode: string, ymlLink: string) {
-    const editor = vscode.window.activeTextEditor;
-    if (!editor) {
-        vscode.window.showErrorMessage("No active text editor.");
+export async function modifyYaml(srcode: string, ymlLink: string, context: vscode.ExtensionContext) {
+    const capturedDocUri = context.globalState.get('capturedDocumentUri') as string;
+    if (!capturedDocUri) {
+        vscode.window.showErrorMessage("No document URI stored in global state. Run 'extractYamlKey' first.");
         return;
     }
 
-    const document = editor.document;
+    const document = vscode.workspace.textDocuments.find(doc => doc.uri.toString() === capturedDocUri);
+    if (!document) {
+        vscode.window.showErrorMessage("Stored document not found. It may have been closed.");
+        return;
+    }
+
     if (document.languageId !== "yaml") {
         vscode.window.showErrorMessage("This command only works with YAML files.");
         return;
@@ -66,11 +71,13 @@ export function modifyYaml(srcode: string, ymlLink: string) {
     // Debug the final YAML
     console.log('Final YAML:', updatedYaml);
 
-    editor.edit((editBuilder) => {
-        const fullRange = new vscode.Range(
-            document.positionAt(0),
-            document.positionAt(text.length)
-        );
-        editBuilder.replace(fullRange, updatedYaml);
-    });
+    // Apply the edit using a workspace edit
+    const edit = new vscode.WorkspaceEdit();
+    const fullRange = new vscode.Range(
+        document.positionAt(0),
+        document.positionAt(text.length)
+    );
+    edit.replace(document.uri, fullRange, updatedYaml);
+
+    await vscode.workspace.applyEdit(edit);
 }
