@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { extractYamlKey } from './keyExtractor'; // Adjust the path as needed
 
-export function modifyYaml(srcode : string, ymlLink : string) {
+export function modifyYaml(srcode: string, ymlLink: string) {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
         vscode.window.showErrorMessage("No active text editor.");
@@ -32,7 +32,7 @@ export function modifyYaml(srcode : string, ymlLink : string) {
     }
 
     // Find "was" inside the srcode node
-    let wasNode = srNode.get("was", true) || srNode.get("Was", true); // Check both "was" and "Was"
+    let wasNode = srNode.get("was", true) || srNode.get("Was", true);
     if (!wasNode) {
         vscode.window.showErrorMessage(`Invalid YAML structure. "${srcode}.was" not found.`);
         return;
@@ -44,11 +44,27 @@ export function modifyYaml(srcode : string, ymlLink : string) {
         return;
     }
 
-    // Append "hi" to the sequence
-    wasNode.add(ymlLink);
+    // Add ymlLink as a scalar
+    const scalar = new yaml.Scalar(ymlLink);
+    scalar.format = 'PLAIN'; // Attempt plain scalar
+    wasNode.add(scalar);
 
     // Convert back to YAML
-    const updatedYaml = String(doc);
+    let updatedYaml = doc.toString({
+        defaultStringType: 'PLAIN',
+        simpleKeys: true
+    });
+
+    // Post-process to remove quotes around ymlLink
+    const quotedYmlLink = `"${ymlLink}"`;
+    if (updatedYaml.includes(quotedYmlLink)) {
+        updatedYaml = updatedYaml.replace(quotedYmlLink, ymlLink);
+    } else {
+        console.log('Quotes not found in output:', updatedYaml);
+    }
+
+    // Debug the final YAML
+    console.log('Final YAML:', updatedYaml);
 
     editor.edit((editBuilder) => {
         const fullRange = new vscode.Range(
