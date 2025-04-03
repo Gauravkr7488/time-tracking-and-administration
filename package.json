@@ -15,11 +15,23 @@
     "commands": [
       {
         "command": "time-tracking-and-administration.insertHi",
-        "title": "insertHi"
+        "title": "Insert Hi"
       },
       {
         "command": "time-tracking-and-administration.insertHi2",
-        "title": "insertHi2"
+        "title": "Insert Hi2"
+      },
+      {
+        "command": "time-tracking-and-administration.startTimer",
+        "title": "Start Timer"
+      },
+      {
+        "command": "time-tracking-and-administration.pauseTimer",
+        "title": "Pause Timer"
+      },
+      {
+        "command": "time-tracking-and-administration.stopTimer",
+        "title": "Stop Timer"
       }
     ]
   },

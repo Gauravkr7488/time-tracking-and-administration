@@ -2,15 +2,21 @@ import * as vscode from 'vscode';
 import { modifyYaml } from './hi';
 import { extractYamlKey } from './keyExtractor';
 import { YamlKeyExtractor } from './ymlReferenceExtractor';
+import { Timer } from './timer'; // Adjust the path as needed
 
 export function activate(context: vscode.ExtensionContext) {
+    // Create a single Timer instance
+    const timer = new Timer(context);
+
+    // Existing insertHi command
     const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.insertHi', async () => {
         await extractYamlKey(context); // Ensure extraction completes before proceeding
         const extractedKey = context.globalState.get("extractedYamlKey"); // Retrieve stored value
         // vscode.window.showInformationMessage(`Extracted Key: '${extractedKey}'`);
     });
     
-    const disposable = vscode.commands.registerCommand('time-tracking-and-administration.insertHi2', async () => {
+    // Existing insertHi2 command
+    const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.insertHi2', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
             vscode.window.showErrorMessage("No active text editor.");
@@ -37,7 +43,23 @@ export function activate(context: vscode.ExtensionContext) {
         await modifyYaml(extractedKey, formattedText, context);
     });
 
-    context.subscriptions.push(disposableA, disposable);
+    // New startTimer command
+    const disposableC = vscode.commands.registerCommand('time-tracking-and-administration.startTimer', () => {
+        timer.startTimer();
+    });
+
+    // New pauseTimer command
+    const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseTimer', () => {
+        timer.pauseTimer();
+    });
+
+    // New stopTimer command
+    const disposableE = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', () => {
+        timer.stopTimer();
+    });
+
+    // Register all commands
+    context.subscriptions.push(disposableA, disposableB, disposableC, disposableD, disposableE);
 }
 
 export function deactivate() {}
