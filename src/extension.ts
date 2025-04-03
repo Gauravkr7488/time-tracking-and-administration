@@ -18,9 +18,7 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showErrorMessage("No active text editor.");
             return;
         }
-        const document = editor.document;
-        const position = editor.selection.active;
-        const extractor = new YamlKeyExtractor(document, position);
+        const extractor = new YamlKeyExtractor();
         await extractor.extractYamlKey();
         let fullPath = extractor.fullPath();
         if (!fullPath) {

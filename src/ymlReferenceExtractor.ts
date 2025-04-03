@@ -1,39 +1,41 @@
 import * as vscode from 'vscode';
 
 export class YamlKeyExtractor {
-    private document: vscode.TextDocument;
-    private position: vscode.Position;
     private extractedSymbols: Array<string>;
 
-    constructor(document: vscode.TextDocument, position: vscode.Position) {
-        this.document = document;
-        this.position = position;
+    constructor() {
         this.extractedSymbols = [];
     }
 
     async extractYamlKey() {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage("No active text editor.");
+            return;
+        }
+        const document = editor.document;
+        const position = editor.selection.active;
+
         let symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
             'vscode.executeDocumentSymbolProvider',
-            this.document.uri
+            document.uri
         );
         if (symbols === undefined) {
             return;
         }
 
-        this.cursorSymbols(symbols);
+        this.cursorSymbols(symbols, position);
     }
 
     fullPath(): string {
-        // Fetch separator and ignored words from settings
         const config = vscode.workspace.getConfiguration('F2ToolInterface');
         const separator = config.get<string>('pathSeparator', '.');
         const ignoreWords: string[] = config.get<string[]>('ignoreWords', []);
 
-
         console.log('Separator:', separator);
         console.log('Ignore Words:', ignoreWords);
         console.log('Extracted Symbols:', this.extractedSymbols);
-        // Filter out ignored words from extracted YAML keys
+
         let filteredSymbols = this.extractedSymbols.map(symbol => {
             ignoreWords.forEach(word => {
                 symbol = symbol.replace(new RegExp(`\\b${word}\\b`, 'g'), '').trim();
@@ -44,9 +46,9 @@ export class YamlKeyExtractor {
         return filteredSymbols.join(separator);
     }
 
-    private cursorSymbols(symbols: vscode.DocumentSymbol[]) {
+    private cursorSymbols(symbols: vscode.DocumentSymbol[], position: vscode.Position) {
         for (const symbol of symbols) {
-            if (!symbol.range.contains(this.position)) {
+            if (!symbol.range.contains(position)) {
                 continue;
             }
 
@@ -58,11 +60,17 @@ export class YamlKeyExtractor {
                 return;
             }
 
-            this.cursorSymbols(symbol.children);
+            this.cursorSymbols(symbol.children, position);
         }
     }
 
     private shouldAddSymbol(symbol: vscode.DocumentSymbol): boolean {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            return false; // Silently fail if no editor; could show message if preferred
+        }
+        const document = editor.document;
+
         const config = vscode.workspace.getConfiguration('yamlPathExtractor');
         const ignoreFilenameRoot = config.get<boolean>('ignoreFilenameRoot', false);
 
@@ -70,7 +78,7 @@ export class YamlKeyExtractor {
             return true;
         }
 
-        let fileName = this.document.fileName;
+        let fileName = document.fileName;
         fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
         return (
             this.extractedSymbols.length > 0 ||
