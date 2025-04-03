@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 export class YamlKeyExtractor {
     private extractedSymbols: Array<string>;
@@ -28,10 +29,20 @@ export class YamlKeyExtractor {
     }
 
     fullPath(): string {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            return '';
+        }
+        const document = editor.document;
+
+        // Extract file name without extension using path.basename
+        const fileName = path.basename(document.fileName, path.extname(document.fileName));
+
         const config = vscode.workspace.getConfiguration('F2ToolInterface');
         const separator = config.get<string>('pathSeparator', '.');
         const ignoreWords: string[] = config.get<string[]>('ignoreWords', []);
 
+        console.log('File Name:', fileName);
         console.log('Separator:', separator);
         console.log('Ignore Words:', ignoreWords);
         console.log('Extracted Symbols:', this.extractedSymbols);
@@ -43,7 +54,8 @@ export class YamlKeyExtractor {
             return symbol;
         }).filter(symbol => symbol !== '');
 
-        return filteredSymbols.join(separator);
+        const pathFromRoot = filteredSymbols.join(separator);
+        return `${fileName}/${pathFromRoot}`;
     }
 
     private cursorSymbols(symbols: vscode.DocumentSymbol[], position: vscode.Position) {
@@ -67,7 +79,7 @@ export class YamlKeyExtractor {
     private shouldAddSymbol(symbol: vscode.DocumentSymbol): boolean {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            return false; // Silently fail if no editor; could show message if preferred
+            return false;
         }
         const document = editor.document;
 
@@ -78,11 +90,10 @@ export class YamlKeyExtractor {
             return true;
         }
 
-        let fileName = document.fileName;
-        fileName = fileName.substring(fileName.lastIndexOf('/') + 1);
+        const fileName = path.basename(document.fileName, path.extname(document.fileName));
         return (
             this.extractedSymbols.length > 0 ||
-            symbol.name !== fileName.substring(0, fileName.lastIndexOf('.'))
+            symbol.name !== fileName
         );
     }
 }
