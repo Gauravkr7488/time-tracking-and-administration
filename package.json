@@ -14,8 +14,8 @@
   "contributes": {
     "commands": [
       {
-        "command": "time-tracking-and-administration.insertHi",
-        "title": "Insert Hi"
+        "command": "time-tracking-and-administration.specifyStandupReport",
+        "title": "Specify Standup Report"
       },
       {
         "command": "time-tracking-and-administration.insertHi2",

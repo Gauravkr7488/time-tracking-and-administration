@@ -1,15 +1,15 @@
 import * as vscode from 'vscode';
 import { modifyYaml } from './hi';
-import { Utils } from './utils'; // Adjust the path as needed
+import { Utils } from './utils'; 
 import { YamlKeyExtractor } from './ymlReferenceExtractor';
 import { Timer } from './timer';
 
 export function activate(context: vscode.ExtensionContext) {
     const timer = new Timer(context);
-    const utils = new Utils(context); // Create Utils instance
+    const utils = new Utils(context); 
 
-    const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.insertHi', async () => {
-        await utils.extractYamlKey(); // Call method on Utils instance
+    const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
+        await utils.extractYamlKey(); // This will extracts the SR Id
     });
     
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.insertHi2', async () => {
