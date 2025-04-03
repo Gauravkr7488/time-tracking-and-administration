@@ -1,21 +1,17 @@
 import * as vscode from 'vscode';
 import { modifyYaml } from './hi';
-import { extractYamlKey } from './keyExtractor';
+import { Utils } from './utils'; // Adjust the path as needed
 import { YamlKeyExtractor } from './ymlReferenceExtractor';
-import { Timer } from './timer'; // Adjust the path as needed
+import { Timer } from './timer';
 
 export function activate(context: vscode.ExtensionContext) {
-    // Create a single Timer instance
     const timer = new Timer(context);
+    const utils = new Utils(context); // Create Utils instance
 
-    // Existing insertHi command
     const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.insertHi', async () => {
-        await extractYamlKey(context); // Ensure extraction completes before proceeding
-        const extractedKey = context.globalState.get("extractedYamlKey"); // Retrieve stored value
-        // vscode.window.showInformationMessage(`Extracted Key: '${extractedKey}'`);
+        await utils.extractYamlKey(); // Call method on Utils instance
     });
     
-    // Existing insertHi2 command
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.insertHi2', async () => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
@@ -33,32 +29,27 @@ export function activate(context: vscode.ExtensionContext) {
         }
         vscode.window.showInformationMessage(`'${fullPath}' copied to your clipboard`);
         let formattedText = `-->${fullPath}<:`;
-        const extractedKey = context.globalState.get("extractedYamlKey") as string;  // Retrieve stored value
+        const extractedKey = context.globalState.get("extractedYamlKey") as string;
         if (!extractedKey) {
             vscode.window.showErrorMessage("No extracted key stored. Run 'insertHi' first.");
             return;
         }
         
-        // Pass context and await the async function
         await modifyYaml(extractedKey, formattedText, context);
     });
 
-    // New startTimer command
     const disposableC = vscode.commands.registerCommand('time-tracking-and-administration.startTimer', () => {
         timer.startTimer();
     });
 
-    // New pauseTimer command
     const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseTimer', () => {
         timer.pauseResumeTimer();
     });
 
-    // New stopTimer command
     const disposableE = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', () => {
         timer.stopTimer();
     });
 
-    // Register all commands
     context.subscriptions.push(disposableA, disposableB, disposableC, disposableD, disposableE);
 }
 

@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { extractYamlKey } from './keyExtractor'; // Adjust the path as needed
 
 export async function modifyYaml(srcode: string, ymlLink: string, context: vscode.ExtensionContext) {
     const capturedDocUri = context.globalState.get('capturedDocumentUri') as string;
