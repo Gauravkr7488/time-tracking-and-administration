@@ -30,29 +30,31 @@ export class Timer {
         vscode.window.showInformationMessage('Timer started.');
     }
 
-    public pauseTimer(): void {
+    public pauseResumeTimer(): void {
         const startTime = this.context.globalState.get(Timer.START_TIME_KEY) as number | undefined;
-        if (!startTime) {
-            vscode.window.showErrorMessage('No timer running. Start the timer first.');
-            return;
-        }
-
         const isPaused = this.context.globalState.get(Timer.IS_PAUSED_KEY) as boolean;
-        if (isPaused) {
-            vscode.window.showErrorMessage('Timer is already paused.');
+
+        if (!startTime && !isPaused) {
+            vscode.window.showErrorMessage('No timer running or paused. Start the timer first.');
             return;
         }
 
-        // Calculate elapsed time since start and add to accumulated time
-        const currentTime = Date.now();
-        const elapsed = currentTime - startTime;
-        const accumulatedTime = (this.context.globalState.get(Timer.ACCUMULATED_TIME_KEY) as number || 0) + elapsed;
+        if (startTime && !isPaused) {
+            // Pause the timer
+            const currentTime = Date.now();
+            const elapsed = currentTime - startTime;
+            const accumulatedTime = (this.context.globalState.get(Timer.ACCUMULATED_TIME_KEY) as number || 0) + elapsed;
 
-        // Pause the timer
-        this.context.globalState.update(Timer.START_TIME_KEY, undefined); // Clear start time
-        this.context.globalState.update(Timer.ACCUMULATED_TIME_KEY, accumulatedTime);
-        this.context.globalState.update(Timer.IS_PAUSED_KEY, true);
-        vscode.window.showInformationMessage('Timer paused.');
+            this.context.globalState.update(Timer.START_TIME_KEY, undefined);
+            this.context.globalState.update(Timer.ACCUMULATED_TIME_KEY, accumulatedTime);
+            this.context.globalState.update(Timer.IS_PAUSED_KEY, true);
+            vscode.window.showInformationMessage('Timer paused.');
+        } else if (isPaused) {
+            // Resume the timer
+            this.context.globalState.update(Timer.START_TIME_KEY, Date.now());
+            this.context.globalState.update(Timer.IS_PAUSED_KEY, false);
+            vscode.window.showInformationMessage('Timer resumed.');
+        }
     }
 
     public stopTimer(): void {

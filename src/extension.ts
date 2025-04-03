@@ -50,7 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     // New pauseTimer command
     const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseTimer', () => {
-        timer.pauseTimer();
+        timer.pauseResumeTimer();
     });
 
     // New stopTimer command
