@@ -7,16 +7,18 @@ import { Timer } from './timer';
 export function activate(context: vscode.ExtensionContext) {
     const timer = new Timer(context);
     const utils = new Utils(context); 
-    const extractor = new YamlKeyExtractor(); // no context needed here for now as no global state was used
-    
+    const extractor = new YamlKeyExtractor();
+
+    // Store yamlModifier to make it accessible across commands
+    let yamlModifier: YamlModifier | undefined;
+
     const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
-        await utils.extractYamlKey(); // This will extracts the SR Id
+        await utils.extractYamlKey(); // Extracts the SR Id
         vscode.window.showInformationMessage("Please select a task");
-        
     });
-    
+
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
-        await extractor.extractYamlKey(); // This creates the ymlLink
+        await extractor.extractYamlKey(); // Creates the ymlLink
         
         let formattedText = extractor.createYmlReference();
         
@@ -25,24 +27,28 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showErrorMessage("Run 'Specify Standup Report' first.");
             return;
         }
-        
-        
-        const yamlModifier = new YamlModifier(extractedKey, formattedText, context);
-
-        await yamlModifier.modify(); // This modifies the doc
-        await yamlModifier.addTimerString(timer.startTimer()); 
+        timer.startTimer();
+        yamlModifier = new YamlModifier(extractedKey, formattedText, context);
+        await yamlModifier.modify(); // Modifies the doc
+        // await yamlModifier.addTimerString(timer.startTimer()); // Adds start time to YAML
     });
 
     const disposableC = vscode.commands.registerCommand('time-tracking-and-administration.startTimer', () => {
-        timer.startTimer();
+        const result = timer.startTimer();
+        vscode.window.showInformationMessage(result); // Show start time or error
+        return result;
     });
 
     const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseTimer', () => {
-        timer.pauseResumeTimer();
+        timer.pauseResumeTimer(); // Currently returns void
     });
 
-    const disposableE = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', () => {
-        timer.stopTimer();
+    const disposableE = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
+        if (!yamlModifier) {
+            vscode.window.showErrorMessage("Run 'Task Selection' first to initialize the YAML modifier.");
+            return;
+        }
+        await yamlModifier.addTimerString(timer.stopTimer()); // Adds stop time (e.g., "[10.50m]") to YAML
     });
 
     context.subscriptions.push(disposableA, disposableB, disposableC, disposableD, disposableE);

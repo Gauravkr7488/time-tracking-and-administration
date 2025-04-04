@@ -66,14 +66,14 @@ export class Timer {
         }
     }
 
-    public stopTimer(): void {
+    public stopTimer(): string {
         const startTime = this.context.globalState.get(Timer.START_TIME_KEY) as number | undefined;
         const accumulatedTime = this.context.globalState.get(Timer.ACCUMULATED_TIME_KEY) as number || 0;
         const isPaused = this.context.globalState.get(Timer.IS_PAUSED_KEY) as boolean;
 
         if (!startTime && !isPaused) {
             vscode.window.showErrorMessage('No timer running or paused. Start the timer first.');
-            return;
+            return '[Error: No timer running or paused. Start the timer first.]';
         }
 
         // Calculate total duration
@@ -84,16 +84,21 @@ export class Timer {
             totalDurationMs += endTime - startTime;
         }
 
-        // Convert to seconds and minutes
-        const durationSeconds = (totalDurationMs / 1000).toFixed(2);
+        // Convert to minutes
         const durationMinutes = (totalDurationMs / 1000 / 60).toFixed(2);
 
+        // Format the return string
+        const result = `[${durationMinutes}m]`;
+
         // Show duration and reset
+        const durationSeconds = (totalDurationMs / 1000).toFixed(2);
         vscode.window.showInformationMessage(
             `Timer stopped. Duration: ${durationSeconds} seconds (${durationMinutes} minutes)`
         );
         this.context.globalState.update(Timer.START_TIME_KEY, undefined);
         this.context.globalState.update(Timer.ACCUMULATED_TIME_KEY, 0);
         this.context.globalState.update(Timer.IS_PAUSED_KEY, false);
+
+        return result;
     }
 }
