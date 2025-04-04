@@ -16,7 +16,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
     
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
-        await extractor.extractYamlKey();
+        await extractor.extractYamlKey(); // This creates the ymlLink
         
         let formattedText = extractor.createYmlReference();
         
@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
         
         const yamlModifier = new YamlModifier(extractedKey, formattedText, context);
-        await yamlModifier.modify(); 
+        await yamlModifier.modify(); // This modifies the doc
     });
 
     const disposableC = vscode.commands.registerCommand('time-tracking-and-administration.startTimer', () => {
