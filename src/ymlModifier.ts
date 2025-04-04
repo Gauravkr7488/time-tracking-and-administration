@@ -97,7 +97,7 @@ export class YamlModifier {
         }
 
         const scalar = new yaml.Scalar(this.ymlLink);
-        scalar.format = 'PLAIN';
+        scalar.format = 'PLAIN'; // This is for removing quotes but it does not work
         wasNode.add(scalar);
         return true;
     }
@@ -109,10 +109,11 @@ export class YamlModifier {
 
         let updatedYaml = this.doc.toString({
             defaultStringType: 'PLAIN',
-            simpleKeys: true
+            simpleKeys: true,
+            lineWidth: 0 // this is to make sure line dont wrap
         });
 
-        updatedYaml = this.removeQuotesFromYmlLink(updatedYaml); // Call new method
+        updatedYaml = this.removeQuotesFromYmlLink(updatedYaml);
 
         console.log('Final YAML:', updatedYaml);
 
@@ -126,7 +127,7 @@ export class YamlModifier {
         await vscode.workspace.applyEdit(edit);
     }
 
-    private removeQuotesFromYmlLink(updatedYaml: string): string {
+    private removeQuotesFromYmlLink(updatedYaml: string): string { // scalar is not working so I used this to remove the quotes
         const quotedYmlLink = `"${this.ymlLink}"`;
         if (updatedYaml.includes(quotedYmlLink)) {
             updatedYaml = updatedYaml.replace(quotedYmlLink, this.ymlLink);
