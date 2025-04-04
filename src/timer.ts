@@ -10,24 +10,33 @@ export class Timer {
         this.context = context;
     }
 
-    public startTimer(): void {
+    public startTimer(): string {
         const isPaused = this.context.globalState.get(Timer.IS_PAUSED_KEY) as boolean;
         if (isPaused) {
             vscode.window.showErrorMessage('Timer is paused. Resume or stop it first.');
-            return;
+            return '[Error: Timer is paused. Resume or stop it first.]';
         }
 
         const startTime = this.context.globalState.get(Timer.START_TIME_KEY) as number | undefined;
         if (startTime) {
             vscode.window.showErrorMessage('Timer is already running.');
-            return;
+            return '[Error: Timer is already running.]';
         }
 
         // Start the timer
-        this.context.globalState.update(Timer.START_TIME_KEY, Date.now());
+        const now = Date.now();
+        this.context.globalState.update(Timer.START_TIME_KEY, now);
         this.context.globalState.update(Timer.ACCUMULATED_TIME_KEY, 0); // Reset accumulated time
         this.context.globalState.update(Timer.IS_PAUSED_KEY, false);
+
+        // Format the start time
+        const startDate = new Date(now);
+        const formattedTime = startDate.toLocaleTimeString(); // e.g., "12:34:56 PM"
+        const result = `[started task at ${formattedTime}]`;
+
+        // Show message and return string
         vscode.window.showInformationMessage('Timer started.');
+        return result;
     }
 
     public pauseResumeTimer(): void {

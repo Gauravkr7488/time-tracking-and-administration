@@ -7,6 +7,7 @@ export class YamlModifier {
     private context: vscode.ExtensionContext;
     private document?: vscode.TextDocument;
     private doc?: yaml.Document;
+    private fullLink?: string; 
 
     constructor(srcode: string, ymlLink: string, context: vscode.ExtensionContext) {
         this.srcode = srcode;
@@ -96,21 +97,57 @@ export class YamlModifier {
             return false;
         }
 
-        // Check for an empty item (null, empty string, or standalone dash)
         const emptyItemIndex = wasNode.items.findIndex(item => 
             item === null || 
             (item instanceof yaml.Scalar && (item.value === '' || item.value === null))
         );
 
         if (emptyItemIndex !== -1) {
-            // Replace the first empty item with the new link
             wasNode.items[emptyItemIndex] = new yaml.Scalar(this.ymlLink);
         } else {
-            // No empty item found, append the new link
             const scalar = new yaml.Scalar(this.ymlLink);
             wasNode.add(scalar);
         }
 
+        return true;
+    }
+
+    public async addTimerString(timerString: string): Promise<boolean> {
+        if (!this.doc) {
+            vscode.window.showErrorMessage("YAML document not parsed. Run modify first.");
+            return false;
+        }
+   
+        const srNode = this.doc.get(this.srcode, true);
+        if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
+            vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}" not found or not an object.`);
+            return false;
+        }
+   
+        let wasNode = srNode.get("was", true) || srNode.get("Was", true);
+        if (!wasNode) {
+            vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}.was" not found.`);
+            return false;
+        }
+   
+        if (!(wasNode instanceof yaml.YAMLSeq)) {
+            vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}.was" is not a list.`);
+            return false;
+        }
+   
+        const linkIndex = wasNode.items.findIndex(item => 
+            item instanceof yaml.Scalar && item.value === this.ymlLink
+        );
+   
+        if (linkIndex === -1) {
+            vscode.window.showErrorMessage(`Could not find "${this.ymlLink}" in "was" list to add timer string.`);
+            return false;
+        }
+   
+        this.fullLink = `${this.ymlLink} ${timerString}`; // Store fullLink
+        wasNode.items[linkIndex] = new yaml.Scalar(this.fullLink);
+   
+        await this.applyEdit();
         return true;
     }
 
@@ -122,7 +159,7 @@ export class YamlModifier {
         let updatedYaml = this.doc.toString({
             defaultStringType: 'PLAIN',
             simpleKeys: true,
-            lineWidth: 0 // this is to make sure line dont wrap
+            lineWidth: 0 // Prevent wrapping
         });
 
         updatedYaml = this.removeQuotesFromYmlLink(updatedYaml);
@@ -143,9 +180,16 @@ export class YamlModifier {
         const quotedYmlLink = `"${this.ymlLink}"`;
         if (updatedYaml.includes(quotedYmlLink)) {
             updatedYaml = updatedYaml.replace(quotedYmlLink, this.ymlLink);
-        } else {
-            console.log('Quotes not found in output:', updatedYaml);
         }
+   
+        if (this.fullLink) {
+            const quotedFullLink = `"${this.fullLink}"`;
+            if (updatedYaml.includes(quotedFullLink)) {
+                updatedYaml = updatedYaml.replace(quotedFullLink, this.fullLink);
+            }
+        }
+   
+        console.log('Processed YAML (quotes removed):', updatedYaml);
         return updatedYaml;
     }
 }

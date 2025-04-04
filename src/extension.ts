@@ -26,8 +26,11 @@ export function activate(context: vscode.ExtensionContext) {
             return;
         }
         
+        
         const yamlModifier = new YamlModifier(extractedKey, formattedText, context);
+
         await yamlModifier.modify(); // This modifies the doc
+        await yamlModifier.addTimerString(timer.startTimer()); 
     });
 
     const disposableC = vscode.commands.registerCommand('time-tracking-and-administration.startTimer', () => {
