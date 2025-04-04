@@ -58,6 +58,16 @@ export class YamlKeyExtractor {
         return `${fileName}/${pathFromRoot}`;
     }
 
+    public createYmlReference(): string{
+        let fullPath = this.fullPath(); // Call private fullPath method
+        if (!fullPath) {
+            vscode.window.showErrorMessage("No full path extracted.");
+        }
+        vscode.window.showInformationMessage(`'${fullPath}' copied to your clipboard`);
+        let formattedText = `-->${fullPath}<:`;
+        return formattedText;
+    }
+
     private cursorSymbols(symbols: vscode.DocumentSymbol[], position: vscode.Position) {
         for (const symbol of symbols) {
             if (!symbol.range.contains(position)) {

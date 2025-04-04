@@ -7,26 +7,17 @@ import { Timer } from './timer';
 export function activate(context: vscode.ExtensionContext) {
     const timer = new Timer(context);
     const utils = new Utils(context); 
+    const extractor = new YamlKeyExtractor(); // no context needed here for now as no global state was used
 
     const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
         await utils.extractYamlKey(); // This will extracts the SR Id
     });
     
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.insertHi2', async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage("No active text editor.");
-            return;
-        }
-        const extractor = new YamlKeyExtractor();
         await extractor.extractYamlKey();
-        let fullPath = extractor.fullPath();
-        if (!fullPath) {
-            vscode.window.showErrorMessage("No full path extracted.");
-            return;
-        }
-        vscode.window.showInformationMessage(`'${fullPath}' copied to your clipboard`);
-        let formattedText = `-->${fullPath}<:`;
+
+        let formattedText = extractor.createYmlReference();
+
         const extractedKey = context.globalState.get("extractedYamlKey") as string;
         if (!extractedKey) {
             vscode.window.showErrorMessage("No extracted key stored. Run 'insertHi' first.");
