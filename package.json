@@ -18,8 +18,8 @@
         "title": "Specify Standup Report"
       },
       {
-        "command": "time-tracking-and-administration.insertHi2",
-        "title": "Insert Hi2"
+        "command": "time-tracking-and-administration.taskSelection",
+        "title": "Select task"
       },
       {
         "command": "time-tracking-and-administration.startTimer",

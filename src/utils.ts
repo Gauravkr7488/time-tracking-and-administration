@@ -28,9 +28,6 @@ export class Utils {
 
         await this.context.globalState.update("extractedYamlKey", extractedKey);
         await this.context.globalState.update("capturedDocumentUri", document.uri.toString()); // This stores the document uri which will help other function find this doc
-
-        vscode.window.showInformationMessage("Please select a task");
-
         // for debugging
         // vscode.window.showInformationMessage(`Extracted Key: '${extractedKey}' and document URI stored in global state`); 
     }

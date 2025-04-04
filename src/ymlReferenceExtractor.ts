@@ -63,7 +63,7 @@ export class YamlKeyExtractor {
         if (!fullPath) {
             vscode.window.showErrorMessage("No full path extracted.");
         }
-        vscode.window.showInformationMessage(`'${fullPath}' copied to your clipboard`);
+        vscode.window.showInformationMessage(`'${fullPath}' Selected`);
         let formattedText = `-->${fullPath}<:`;
         return formattedText;
     }

@@ -11,16 +11,18 @@ export function activate(context: vscode.ExtensionContext) {
 
     const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
         await utils.extractYamlKey(); // This will extracts the SR Id
+        vscode.window.showInformationMessage("Please select a task");
+
     });
     
-    const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.insertHi2', async () => {
+    const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
         await extractor.extractYamlKey();
 
         let formattedText = extractor.createYmlReference();
 
         const extractedKey = context.globalState.get("extractedYamlKey") as string;
         if (!extractedKey) {
-            vscode.window.showErrorMessage("No extracted key stored. Run 'insertHi' first.");
+            vscode.window.showErrorMessage("No extracted key stored. Run 'Specify Standup Report' first.");
             return;
         }
         
