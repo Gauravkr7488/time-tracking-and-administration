@@ -96,9 +96,21 @@ export class YamlModifier {
             return false;
         }
 
-        const scalar = new yaml.Scalar(this.ymlLink);
-        scalar.format = 'PLAIN'; // This is for removing quotes but it does not work
-        wasNode.add(scalar);
+        // Check for an empty item (null, empty string, or standalone dash)
+        const emptyItemIndex = wasNode.items.findIndex(item => 
+            item === null || 
+            (item instanceof yaml.Scalar && (item.value === '' || item.value === null))
+        );
+
+        if (emptyItemIndex !== -1) {
+            // Replace the first empty item with the new link
+            wasNode.items[emptyItemIndex] = new yaml.Scalar(this.ymlLink);
+        } else {
+            // No empty item found, append the new link
+            const scalar = new yaml.Scalar(this.ymlLink);
+            wasNode.add(scalar);
+        }
+
         return true;
     }
 
