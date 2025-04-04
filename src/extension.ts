@@ -22,11 +22,11 @@ export function activate(context: vscode.ExtensionContext) {
 
         const extractedKey = context.globalState.get("extractedYamlKey") as string;
         if (!extractedKey) {
-            vscode.window.showErrorMessage("No extracted key stored. Run 'Specify Standup Report' first.");
+            vscode.window.showErrorMessage("Run 'Specify Standup Report' first.");
             return;
         }
         
-        await modifyYaml(extractedKey, formattedText, context);
+        await modifyYaml(extractedKey, formattedText, context); 
     });
 
     const disposableC = vscode.commands.registerCommand('time-tracking-and-administration.startTimer', () => {
