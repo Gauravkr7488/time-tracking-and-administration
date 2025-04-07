@@ -30,13 +30,9 @@ export function activate(context: vscode.ExtensionContext) {
             }
             vscode.window.showInformationMessage(`Using existing link: ${formattedText}`);
         } else {
-            // If not in a link, run the normal logic to create a new link
             await extractor.extractYamlKey(); // Creates the ymlLink
             formattedText = extractor.createYmlReference();
         }
-        // await extractor.extractYamlKey(); // Creates the ymlLink
-        
-        // formattedText = extractor.createYmlReference(); // this is the link
         
         const extractedKey = context.globalState.get("extractedYamlKey") as string; // This is the saved srcode
         if (!extractedKey) {

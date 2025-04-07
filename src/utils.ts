@@ -44,8 +44,8 @@ export class Utils {
 
         const line = document.lineAt(position.line);
         const lineText = line.text;
-        vscode.window.showInformationMessage(`Line text: "${lineText}"`);
-        vscode.window.showInformationMessage(`Cursor position: Line ${position.line}, Character ${position.character}`);
+        // vscode.window.showInformationMessage(`Line text: "${lineText}"`);
+        // vscode.window.showInformationMessage(`Cursor position: Line ${position.line}, Character ${position.character}`);
 
         const linkPattern = /-->.*<\:/g;
         let match;
@@ -54,10 +54,10 @@ export class Utils {
             const startChar = match.index;
             const endChar = startChar + match[0].length;
 
-            vscode.window.showInformationMessage(`Found match: "${match[0]}" at ${startChar}-${endChar}`);
+            // vscode.window.showInformationMessage(`Found match: "${match[0]}" at ${startChar}-${endChar}`);
 
             if (position.character >= startChar && position.character <= endChar) {
-                vscode.window.showInformationMessage(`Cursor is within link: "${match[0]}"`);
+                // vscode.window.showInformationMessage(`Cursor is within link: "${match[0]}"`);
                 this.context.globalState.update('detectedYamlLink', match[0]);
                 return true;
             }
