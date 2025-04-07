@@ -117,36 +117,46 @@ export class YamlModifier {
             vscode.window.showErrorMessage("YAML document not parsed. Run modify first.");
             return false;
         }
-   
+       
         const srNode = this.doc.get(this.srcode, true);
         if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
             vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}" not found or not an object.`);
             return false;
         }
-   
+       
         let wasNode = srNode.get("was", true) || srNode.get("Was", true);
         if (!wasNode) {
             vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}.was" not found.`);
             return false;
         }
-   
+       
         if (!(wasNode instanceof yaml.YAMLSeq)) {
             vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}.was" is not a list.`);
             return false;
         }
-   
+       
         const linkIndex = wasNode.items.findIndex(item => 
             item instanceof yaml.Scalar && item.value === this.ymlLink
         );
-   
+       
         if (linkIndex === -1) {
             vscode.window.showErrorMessage(`Could not find "${this.ymlLink}" in "was" list to add timer string.`);
             return false;
         }
-   
-        this.fullLink = `${this.ymlLink} ${timerString}`; // Store fullLink
-        wasNode.items[linkIndex] = new yaml.Scalar(this.fullLink);
-   
+        
+        // Create a nested structure
+        const nestedMap = new yaml.YAMLMap();
+        const nestedSeq = new yaml.YAMLSeq();
+        
+        // Add the timer string as an item in the nested sequence
+        nestedSeq.add(new yaml.Scalar(`[${timerString}]`));
+        
+        // Set the link as key with the nested sequence as value
+        nestedMap.set(this.ymlLink, nestedSeq);
+        
+        // Replace the scalar item with our new map
+        wasNode.items[linkIndex] = nestedMap;
+       
         await this.applyEdit();
         return true;
     }
