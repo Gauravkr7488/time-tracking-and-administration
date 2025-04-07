@@ -191,14 +191,23 @@ export class YamlModifier {
         if (updatedYaml.includes(quotedYmlLink)) {
             updatedYaml = updatedYaml.replace(quotedYmlLink, this.ymlLink);
         }
-   
+       
         if (this.fullLink) {
             const quotedFullLink = `"${this.fullLink}"`;
             if (updatedYaml.includes(quotedFullLink)) {
                 updatedYaml = updatedYaml.replace(quotedFullLink, this.fullLink);
             }
         }
-   
+        
+        // Remove quotes from timer values
+        // Match patterns like: - "[[0.08m]]" or - "[[any text]]"
+        const timerRegex = /- "(\[\[.*?\]\])"/g;
+        updatedYaml = updatedYaml.replace(timerRegex, '- $1');
+        
+        // Remove any extra brackets if needed (turns [[0.08m]] into [0.08m])
+        const doubleBracketRegex = /\[\[(.*?)\]\]/g;
+        updatedYaml = updatedYaml.replace(doubleBracketRegex, '[$1]');
+       
         console.log('Processed YAML (quotes removed):', updatedYaml);
         return updatedYaml;
     }
