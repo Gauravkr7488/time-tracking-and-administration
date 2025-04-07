@@ -113,8 +113,22 @@ export class YamlModifier {
     }
 
     public async addTimerString(timerString: string): Promise<boolean> {
+        // Make sure we have a document and parse it if needed
         if (!this.doc) {
-            vscode.window.showErrorMessage("YAML document not parsed. Run modify first.");
+            if (!this.findDocument()) {
+                return false;
+            }
+            if (!this.validateYaml()) {
+                return false;
+            }
+            if (!this.parseYaml()) {
+                return false;
+            }
+        }
+        
+        // At this point, this.doc should be defined
+        if (!this.doc) {
+            vscode.window.showErrorMessage("Failed to parse YAML document.");
             return false;
         }
    
@@ -135,16 +149,24 @@ export class YamlModifier {
             return false;
         }
    
-        const linkIndex = wasNode.items.findIndex(item => 
-            item instanceof yaml.Scalar && item.value === this.ymlLink
-        );
+        // Find the YAML link in the "was" list
+        const linkIndex = wasNode.items.findIndex(item => {
+            if (!(item instanceof yaml.Scalar)) {
+                return false;
+            }
+            
+            // Check if the item starts with our ymlLink (to handle cases where it already has a timer)
+            const itemValue = String(item.value);
+            return itemValue === this.ymlLink || itemValue.startsWith(`${this.ymlLink} `);
+        });
    
         if (linkIndex === -1) {
-            vscode.window.showErrorMessage(`Could not find "${this.ymlLink}" in "was" list to add timer string.`);
+            vscode.window.showErrorMessage(`Could not find an entry starting with "${this.ymlLink}" in "was" list.`);
             return false;
         }
    
-        this.fullLink = `${this.ymlLink} ${timerString}`; // Store fullLink
+        // Update the link with the new timer string
+        this.fullLink = `${this.ymlLink} ${timerString}`;
         wasNode.items[linkIndex] = new yaml.Scalar(this.fullLink);
    
         await this.applyEdit();

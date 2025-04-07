@@ -42,6 +42,7 @@ export function activate(context: vscode.ExtensionContext) {
         timer.startTimer();
         yamlModifier = new YamlModifier(extractedKey, formattedText, context);
         await yamlModifier.modify(); // Modifies the doc
+        await yamlModifier.addTimerString("[hi]"); // Adds start time to YAML
         // await yamlModifier.addTimerString(timer.startTimer()); // Adds start time to YAML
     });
 
