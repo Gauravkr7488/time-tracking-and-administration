@@ -18,11 +18,27 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
-        await extractor.extractYamlKey(); // Creates the ymlLink
+        const isALink = await utils.isThisALink();
+        let formattedText: string;
+
+        if (isALink) {
+            // If cursor is in a link, use the link from global state
+            formattedText = context.globalState.get('detectedYamlLink') as string || '';
+            if (!formattedText) {
+                vscode.window.showErrorMessage("No link found in global state.");
+                return;
+            }
+            vscode.window.showInformationMessage(`Using existing link: ${formattedText}`);
+        } else {
+            // If not in a link, run the normal logic to create a new link
+            await extractor.extractYamlKey(); // Creates the ymlLink
+            formattedText = extractor.createYmlReference();
+        }
+        // await extractor.extractYamlKey(); // Creates the ymlLink
         
-        let formattedText = extractor.createYmlReference();
+        // formattedText = extractor.createYmlReference(); // this is the link
         
-        const extractedKey = context.globalState.get("extractedYamlKey") as string;
+        const extractedKey = context.globalState.get("extractedYamlKey") as string; // This is the saved srcode
         if (!extractedKey) {
             vscode.window.showErrorMessage("Run 'Specify Standup Report' first.");
             return;

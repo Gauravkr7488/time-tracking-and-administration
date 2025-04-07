@@ -31,4 +31,39 @@ export class Utils {
         // for debugging
         // vscode.window.showInformationMessage(`Extracted Key: '${extractedKey}' and document URI stored in global state`); 
     }
+
+    public async isThisALink(): Promise<boolean> {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage("No active text editor.");
+            return false;
+        }
+
+        const document = editor.document;
+        const position = editor.selection.active;
+
+        const line = document.lineAt(position.line);
+        const lineText = line.text;
+        vscode.window.showInformationMessage(`Line text: "${lineText}"`);
+        vscode.window.showInformationMessage(`Cursor position: Line ${position.line}, Character ${position.character}`);
+
+        const linkPattern = /-->.*<\:/g;
+        let match;
+
+        while ((match = linkPattern.exec(lineText)) !== null) {
+            const startChar = match.index;
+            const endChar = startChar + match[0].length;
+
+            vscode.window.showInformationMessage(`Found match: "${match[0]}" at ${startChar}-${endChar}`);
+
+            if (position.character >= startChar && position.character <= endChar) {
+                vscode.window.showInformationMessage(`Cursor is within link: "${match[0]}"`);
+                this.context.globalState.update('detectedYamlLink', match[0]);
+                return true;
+            }
+        }
+
+        vscode.window.showInformationMessage('No link found containing the cursor.');
+        return false;
+    }
 }
