@@ -71,7 +71,8 @@ export function activate(context: vscode.ExtensionContext) {
 
     const disposableE = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
         if (!yamlModifier) {
-            vscode.window.showErrorMessage("Run 'Task Selection' first to initialize the YAML modifier.");
+            vscode.window.showInformationMessage("Run 'Task Selection' first to initialize the YAML modifier.");
+            timer.stopTimer();
             return;
         }
         timer.stopTimer();
