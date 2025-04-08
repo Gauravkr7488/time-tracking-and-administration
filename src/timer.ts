@@ -100,7 +100,9 @@ export class Timer {
         }
 
         // Convert to minutes
-        const durationMinutes = parseFloat((totalDurationMs / 1000 / 60).toFixed(2));
+        // const durationMinutes = parseFloat((totalDurationMs / 1000 / 60).toFixed(2));
+        const durationMinutes = Math.round(totalDurationMs / 1000 / 60);
+
 
         // Save duration in minutes to global state
         this.context.globalState.update(Timer.DURATION_MINUTES_KEY, durationMinutes);

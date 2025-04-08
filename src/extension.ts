@@ -78,7 +78,7 @@ export function activate(context: vscode.ExtensionContext) {
         const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
         const durationMinutes = context.globalState.get('timerDurationMinutes') as string;
 
-        await yamlModifier.addTimerString(`[${durationMinutes}, "", ${startTimeISO}]`);
+        await yamlModifier.addTimerString(`[${durationMinutes}m, "", ${startTimeISO}]`);
         // Adds stop time (e.g., "[10.50m]") to YAML
     });
 
