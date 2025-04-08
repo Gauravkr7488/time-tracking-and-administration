@@ -60,13 +60,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseTimer', async () => {
         timer.pauseResumeTimer(); // Currently returns void
-        if (yamlModifier) {
-            const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
-
-            await yamlModifier.addTimerString(`[paused, "", ${startTimeISO}]`);
-        } else {
-            vscode.window.showErrorMessage("Run 'Task Selection' first to initialize the YAML modifier.");
-        }
     });
 
     const disposableE = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
