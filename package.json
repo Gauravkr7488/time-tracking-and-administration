@@ -26,8 +26,8 @@
         "title": "Start Timer"
       },
       {
-        "command": "time-tracking-and-administration.pauseTimer",
-        "title": "Pause Timer"
+        "command": "time-tracking-and-administration.pauseResumeTimer",
+        "title": "Pause/Resume Timer"
       },
       {
         "command": "time-tracking-and-administration.stopTimer",

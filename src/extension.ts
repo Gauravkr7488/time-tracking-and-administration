@@ -58,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
         return result;
     });
 
-    const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseTimer', async () => {
+    const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseResumeTimer', async () => {
         timer.pauseResumeTimer(); // Currently returns void
     });
 
