@@ -210,6 +210,13 @@ export class YamlModifier {
                 updatedYaml = updatedYaml.replace(quotedFullLink, this.fullLink);
             }
         }
+
+        if (this.fullLink) {
+            const quotedFullLink = `'${this.fullLink}'`;
+            if (updatedYaml.includes(quotedFullLink)) {
+                updatedYaml = updatedYaml.replace(quotedFullLink, this.fullLink);
+            }
+        }
    
         console.log('Processed YAML (quotes removed):', updatedYaml);
         return updatedYaml;
