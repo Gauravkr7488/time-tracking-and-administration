@@ -1,13 +1,18 @@
 import * as vscode from 'vscode';
 import { YamlModifier } from './ymlModifier';
-import { Utils } from './utils'; 
+import { Utils } from './utils';
 import { YamlKeyExtractor } from './ymlReferenceExtractor';
 import { Timer } from './timer';
 
 export function activate(context: vscode.ExtensionContext) {
     const timer = new Timer(context);
-    const utils = new Utils(context); 
+    const utils = new Utils(context);
     const extractor = new YamlKeyExtractor();
+
+    // save the global states here in variables
+    // const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
+    // const pauseResumeStatus = context.globalState.get('timerPauseResumeStatus') as string;
+    // const durationMinutes = context.globalState.get('timerDurationMinutes') as string;
 
     // Store yamlModifier to make it accessible across commands
     let yamlModifier: YamlModifier | undefined;
@@ -20,7 +25,6 @@ export function activate(context: vscode.ExtensionContext) {
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
         const isALink = await utils.isThisALink();
         let formattedText: string;
-
         if (isALink) {
             // If cursor is in a link, use the link from global state
             formattedText = context.globalState.get('detectedYamlLink') as string || '';
@@ -33,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
             await extractor.extractYamlKey(); // Creates the ymlLink
             formattedText = extractor.createYmlReference();
         }
-        
+
         const extractedKey = context.globalState.get("extractedYamlKey") as string; // This is the saved srcode
         if (!extractedKey) {
             vscode.window.showErrorMessage("Run 'Specify Standup Report' first.");
@@ -42,7 +46,9 @@ export function activate(context: vscode.ExtensionContext) {
         timer.startTimer();
         yamlModifier = new YamlModifier(extractedKey, formattedText, context);
         await yamlModifier.modify(); // Modifies the doc
-        await yamlModifier.addTimerString("[hi]"); // Adds start time to YAML
+        const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
+
+        await yamlModifier.addTimerString(`[0m, "", ${startTimeISO}]`);
         // await yamlModifier.addTimerString(timer.startTimer()); // Adds start time to YAML
     });
 
@@ -52,8 +58,15 @@ export function activate(context: vscode.ExtensionContext) {
         return result;
     });
 
-    const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseTimer', () => {
+    const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseTimer', async () => {
         timer.pauseResumeTimer(); // Currently returns void
+        if (yamlModifier) {
+            const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
+
+            await yamlModifier.addTimerString(`[paused, "", ${startTimeISO}]`);
+        } else {
+            vscode.window.showErrorMessage("Run 'Task Selection' first to initialize the YAML modifier.");
+        }
     });
 
     const disposableE = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
@@ -61,10 +74,15 @@ export function activate(context: vscode.ExtensionContext) {
             vscode.window.showErrorMessage("Run 'Task Selection' first to initialize the YAML modifier.");
             return;
         }
-        await yamlModifier.addTimerString(timer.stopTimer()); // Adds stop time (e.g., "[10.50m]") to YAML
+        timer.stopTimer();
+        const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
+        const durationMinutes = context.globalState.get('timerDurationMinutes') as string;
+
+        await yamlModifier.addTimerString(`[${durationMinutes}, "", ${startTimeISO}]`);
+        // Adds stop time (e.g., "[10.50m]") to YAML
     });
 
     context.subscriptions.push(disposableA, disposableB, disposableC, disposableD, disposableE);
 }
 
-export function deactivate() {}
+export function deactivate() { }

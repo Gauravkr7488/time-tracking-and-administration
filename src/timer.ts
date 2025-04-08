@@ -5,6 +5,9 @@ export class Timer {
     private static readonly START_TIME_KEY = 'timerStartTime';
     private static readonly ACCUMULATED_TIME_KEY = 'timerAccumulatedTime';
     private static readonly IS_PAUSED_KEY = 'timerIsPaused';
+    private static readonly START_TIME_ISO_KEY = 'timerStartTimeISO';
+    private static readonly PAUSE_RESUME_STATUS_KEY = 'timerPauseResumeStatus';
+    private static readonly DURATION_MINUTES_KEY = 'timerDurationMinutes';
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -29,10 +32,14 @@ export class Timer {
         this.context.globalState.update(Timer.ACCUMULATED_TIME_KEY, 0); // Reset accumulated time
         this.context.globalState.update(Timer.IS_PAUSED_KEY, false);
 
-        // Format the start time
+        // Save start time in ISO format (yyyymmddhhmmss)
         const startDate = new Date(now);
-        const formattedTime = startDate.toLocaleTimeString(); // e.g., "12:34:56 PM"
-        const result = `[started task at ${formattedTime}]`;
+        const isoFormat = this.formatDateToCustomISO(startDate);
+        this.context.globalState.update(Timer.START_TIME_ISO_KEY, isoFormat);
+
+        // Format the start time for display
+        const formattedTime = startDate.toLocaleTimeString();
+        const result = `started task at ${formattedTime}`;
 
         // Show message and return string
         vscode.window.showInformationMessage('Timer started.');
@@ -57,11 +64,19 @@ export class Timer {
             this.context.globalState.update(Timer.START_TIME_KEY, undefined);
             this.context.globalState.update(Timer.ACCUMULATED_TIME_KEY, accumulatedTime);
             this.context.globalState.update(Timer.IS_PAUSED_KEY, true);
+            
+            // Save pause status
+            this.context.globalState.update(Timer.PAUSE_RESUME_STATUS_KEY, 'paused');
+            
             vscode.window.showInformationMessage('Timer paused.');
         } else if (isPaused) {
             // Resume the timer
             this.context.globalState.update(Timer.START_TIME_KEY, Date.now());
             this.context.globalState.update(Timer.IS_PAUSED_KEY, false);
+            
+            // Save resume status
+            this.context.globalState.update(Timer.PAUSE_RESUME_STATUS_KEY, 'resumed');
+            
             vscode.window.showInformationMessage('Timer resumed.');
         }
     }
@@ -85,7 +100,10 @@ export class Timer {
         }
 
         // Convert to minutes
-        const durationMinutes = (totalDurationMs / 1000 / 60).toFixed(2);
+        const durationMinutes = parseFloat((totalDurationMs / 1000 / 60).toFixed(2));
+
+        // Save duration in minutes to global state
+        this.context.globalState.update(Timer.DURATION_MINUTES_KEY, durationMinutes);
 
         // Format the return string
         const result = `[${durationMinutes}m]`;
@@ -100,5 +118,17 @@ export class Timer {
         this.context.globalState.update(Timer.IS_PAUSED_KEY, false);
 
         return result;
+    }
+
+    // Helper method to format date to yyyymmddhhmmss
+    private formatDateToCustomISO(date: Date): string {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const seconds = String(date.getSeconds()).padStart(2, '0');
+        
+        return `${year}${month}${day} T ${hours}${minutes}${seconds}`;
     }
 }
