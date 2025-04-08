@@ -48,7 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
         await yamlModifier.modify(); // Modifies the doc
         const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
 
-        await yamlModifier.addTimerString(`[0m, "", ${startTimeISO}]`);
+        await yamlModifier.addTimerString(`[ 0m, "", ${startTimeISO} ]`);
         // await yamlModifier.addTimerString(timer.startTimer()); // Adds start time to YAML
     });
 
@@ -72,7 +72,7 @@ export function activate(context: vscode.ExtensionContext) {
         const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
         const durationMinutes = context.globalState.get('timerDurationMinutes') as string;
 
-        await yamlModifier.addTimerString(`[${durationMinutes}m, "", ${startTimeISO}]`);
+        await yamlModifier.addTimerString(`[ ${durationMinutes}m, "", ${startTimeISO} ]`);
         // Adds stop time (e.g., "[10.50m]") to YAML
     });
 
