@@ -1,12 +1,12 @@
 import * as vscode from 'vscode';
 import { YamlModifier } from './ymlModifier';
-import { Utils } from './utils';
+import { SimpleStringTools } from './utils';
 import { YamlKeyExtractor } from './ymlReferenceExtractor';
 import { Timer } from './timer';
 
 export function activate(context: vscode.ExtensionContext) {
     const timer = new Timer(context);
-    const utils = new Utils(context);
+    const utils = new SimpleStringTools(context);
     const extractor = new YamlKeyExtractor();
 
 

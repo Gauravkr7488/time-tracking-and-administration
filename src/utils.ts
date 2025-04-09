@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 
-export class Utils {
+export class SimpleStringTools {
     private context: vscode.ExtensionContext;
 
     constructor(context: vscode.ExtensionContext) {
