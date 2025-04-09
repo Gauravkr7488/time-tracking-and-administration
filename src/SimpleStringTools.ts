@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+
 export class SimpleStringTools {
     private context: vscode.ExtensionContext;
 
@@ -28,13 +29,12 @@ export class SimpleStringTools {
             return;
         }
 
-        const extractedKey = document.getText(wordRange).replace(/:$/, ''); // The replace part is for removal of colon using regex
+        const extractedKey = document.getText(wordRange).replace(/:$/, ''); 
 
 
         await this.context.globalState.update("extractedYamlKey", extractedKey);
-        await this.context.globalState.update("capturedDocumentUri", document.uri.toString()); // This stores the document uri which will help other function find this doc
-        // for debugging
-        // vscode.window.showInformationMessage(`Extracted Key: '${extractedKey}' and document URI stored in global state`); 
+        await this.context.globalState.update("capturedDocumentUri", document.uri.toString()); 
+ 
     }
 
     public async isThisALink(): Promise<boolean> {
@@ -46,9 +46,7 @@ export class SimpleStringTools {
 
         const line = document.lineAt(position.line);
         const lineText = line.text;
-        // vscode.window.showInformationMessage(`Line text: "${lineText}"`);
-        // vscode.window.showInformationMessage(`Cursor position: Line ${position.line}, Character ${position.character}`);
-
+ 
         const linkPattern = /-->.*<\:/g;
         let match;
 
@@ -56,10 +54,8 @@ export class SimpleStringTools {
             const startChar = match.index;
             const endChar = startChar + match[0].length;
 
-            // vscode.window.showInformationMessage(`Found match: "${match[0]}" at ${startChar}-${endChar}`);
 
             if (position.character >= startChar && position.character <= endChar) {
-                // vscode.window.showInformationMessage(`Cursor is within link: "${match[0]}"`);
                 this.context.globalState.update('detectedYamlLink', match[0]);
                 return true;
             }
