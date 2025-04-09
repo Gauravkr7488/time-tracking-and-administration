@@ -7,6 +7,15 @@ export class SimpleStringTools {
         this.context = context;
     }
 
+    private getActiveEditor(): vscode.TextEditor | undefined{
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage("No active text editor.");
+            return;
+        }
+        return editor;
+    }
+
     public async extractYamlKey(): Promise<void> {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
