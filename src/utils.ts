@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-
+// TODO change the name of the file
 export class SimpleStringTools {
     private context: vscode.ExtensionContext;
 
@@ -17,11 +17,8 @@ export class SimpleStringTools {
     }
 
     public async extractYamlKey(): Promise<void> {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage("No active text editor.");
-            return;
-        }
+        const editor = this.getActiveEditor();
+        if (!editor) return;
 
         const document = editor.document;
         const cursorPosition = editor.selection.active;
@@ -42,11 +39,8 @@ export class SimpleStringTools {
     }
 
     public async isThisALink(): Promise<boolean> {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage("No active text editor.");
-            return false;
-        }
+        const editor = this.getActiveEditor();
+        if (!editor) return false;
 
         const document = editor.document;
         const position = editor.selection.active;
