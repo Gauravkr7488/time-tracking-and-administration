@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { YamlModifier } from './ymlModifier';
-import { SimpleStringTools } from './utils';
+import { SimpleStringTools } from './SimpleStringTools';
 import { YamlKeyExtractor } from './ymlReferenceExtractor';
 import { Timer } from './timer';
 

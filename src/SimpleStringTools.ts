@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-// TODO change the name of the file
 export class SimpleStringTools {
     private context: vscode.ExtensionContext;
 
