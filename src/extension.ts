@@ -9,10 +9,6 @@ export function activate(context: vscode.ExtensionContext) {
     const utils = new Utils(context);
     const extractor = new YamlKeyExtractor();
 
-    // save the global states here in variables
-    // const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
-    // const pauseResumeStatus = context.globalState.get('timerPauseResumeStatus') as string;
-    // const durationMinutes = context.globalState.get('timerDurationMinutes') as string;
 
     // Store yamlModifier to make it accessible across commands
     let yamlModifier: YamlModifier | undefined;
