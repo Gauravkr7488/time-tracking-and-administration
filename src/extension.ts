@@ -14,21 +14,27 @@ export function activate(context: vscode.ExtensionContext) {
     let yamlModifier: YamlModifier | undefined;
 
     const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
+
         await utils.extractYamlKey(); // Extracts the SR Id
         vscode.window.showInformationMessage("Please select a task");
+        
     });
 
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
+
         const selectedTaskIsAYamlLink = await utils.isThisALink();
         let yamlLink: string;
+
         if (selectedTaskIsAYamlLink) {
 
             yamlLink = context.globalState.get('detectedYamlLink') as string || '';
             if (!yamlLink) return;
 
         } else {
+
             await extractor.extractYamlKey(); // Creates the ymlLink
             yamlLink = extractor.createYmlReference();
+
         }
 
         const srCode = context.globalState.get("extractedYamlKey") as string; // This is the saved srcode
