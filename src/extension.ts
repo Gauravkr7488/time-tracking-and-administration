@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         } else {
 
-            await extractor.extractYamlKeys(); // Creates the ymlLink
+            await extractor.extractAllYamlKeys(); // Creates the ymlLink
             yamlLink = extractor.createYmlReference();
 
         }
