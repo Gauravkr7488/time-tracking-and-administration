@@ -45,13 +45,9 @@ export class YamlKeyExtractor {
     }
 
     async extractYamlKey() {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage("No active text editor.");
-            return;
-        }
-        const document = editor.document;
-        const cursorPosition = editor.selection.active;
+        const context = this.getDocumentAndCursorPosition();
+        if (!context) return;
+        const { document, cursorPosition } = context;
 
         let symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
             'vscode.executeDocumentSymbolProvider',
@@ -65,11 +61,9 @@ export class YamlKeyExtractor {
     }
 
     fullPath(): string {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            return '';
-        }
-        const document = editor.document;
+        const context = this.getDocumentAndCursorPosition();
+        if (!context) return '';
+        const { document } = context;
 
         const fileName = path.basename(document.fileName, path.extname(document.fileName));
 
@@ -118,11 +112,9 @@ export class YamlKeyExtractor {
     }
 
     private shouldAddSymbol(symbol: vscode.DocumentSymbol): boolean {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            return false;
-        }
-        const document = editor.document;
+        const context = this.getDocumentAndCursorPosition();
+        if (!context) return false;
+        const { document } = context;
 
         const config = vscode.workspace.getConfiguration('yamlPathExtractor');
         const ignoreFilenameRoot = config.get<boolean>('ignoreFilenameRoot', false);
