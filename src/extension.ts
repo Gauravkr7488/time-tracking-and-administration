@@ -20,27 +20,27 @@ export function activate(context: vscode.ExtensionContext) {
 
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
         const selectedTaskIsAYamlLink = await utils.isThisALink();
-        let formattedText: string;
+        let yamlLink: string;
         if (selectedTaskIsAYamlLink) {
             // If cursor is in a link, use the link from global state
-            formattedText = context.globalState.get('detectedYamlLink') as string || '';
-            if (!formattedText) {
+            yamlLink = context.globalState.get('detectedYamlLink') as string || '';
+            if (!yamlLink) {
                 vscode.window.showErrorMessage("No link found in global state.");
                 return;
             }
-            vscode.window.showInformationMessage(`Using existing link: ${formattedText}`);
+            vscode.window.showInformationMessage(`Using existing link: ${yamlLink}`);
         } else {
             await extractor.extractYamlKey(); // Creates the ymlLink
-            formattedText = extractor.createYmlReference();
+            yamlLink = extractor.createYmlReference();
         }
 
-        const extractedKey = context.globalState.get("extractedYamlKey") as string; // This is the saved srcode
-        if (!extractedKey) {
+        const srCode = context.globalState.get("extractedYamlKey") as string; // This is the saved srcode
+        if (!srCode) {
             vscode.window.showErrorMessage("Run 'Specify Standup Report' first.");
             return;
         }
         timer.startTimer();
-        yamlModifier = new YamlModifier(extractedKey, formattedText, context);
+        yamlModifier = new YamlModifier(srCode, yamlLink, context);
         await yamlModifier.modify(); // Modifies the doc
         const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
 
