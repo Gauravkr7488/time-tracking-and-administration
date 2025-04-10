@@ -62,10 +62,10 @@ export class SimpleStringTools {
         await this.context.globalState.update(CONSTANTS.STATE_KEYS.CAPTURED_DOCUMENT_URI, document.uri.toString());
     }
 
-    public async isThisALink(): Promise<boolean> {
+    public async isSelectedTaskALink(): Promise<string> {
 
         const context = this.getDocumentAndCursorPosition();
-        if (!context) return false;
+        if (!context) return '';
         const { document, cursorPosition } = context;
 
         const line = document.lineAt(cursorPosition.line);
@@ -79,12 +79,13 @@ export class SimpleStringTools {
             const endChar = startChar + match[0].length;
 
             if (cursorPosition.character >= startChar && cursorPosition.character <= endChar) {
-                this.context.globalState.update(CONSTANTS.STATE_KEYS.DETECTED_YAML_LINK, match[0]);
-                return true;
+                // this.context.globalState.update(CONSTANTS.STATE_KEYS.DETECTED_YAML_LINK, match[0]);
+                const link = match[0].toString();
+                return link;
             }
         }
 
         vscode.window.showInformationMessage(CONSTANTS.MESSAGES.NO_LINK_FOUND);
-        return false;
+        return '';
     }
 }
