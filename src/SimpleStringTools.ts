@@ -33,23 +33,23 @@ export class SimpleStringTools {
         return editor;
     }
 
-    private getDocumentAndCursorPosition(): { document: vscode.TextDocument, position: vscode.Position } | undefined {
+    private getDocumentAndCursorPosition(): { document: vscode.TextDocument, cursorPosition: vscode.Position } | undefined {
         const editor = this.getActiveEditor();
         if (!editor) return;
       
         return {
           document: editor.document,
-          position: editor.selection.active
+          cursorPosition: editor.selection.active
         };
       }
       
 
     public async extractYamlKey(): Promise<void> {
-        const editor = this.getActiveEditor();
-        if (!editor) return;
 
-        const document = editor.document;
-        const cursorPosition = editor.selection.active;
+        const context = this.getDocumentAndCursorPosition();
+        if (!context) return;
+        const { document, cursorPosition} = context; // This is called destructuring
+
         const wordRange = document.getWordRangeAtPosition(cursorPosition);
         
         if (!wordRange) {
@@ -63,12 +63,13 @@ export class SimpleStringTools {
     }
 
     public async isThisALink(): Promise<boolean> {
-        const editor = this.getActiveEditor();
-        if (!editor) return false;
+        
+        const context = this.getDocumentAndCursorPosition();
+        if (!context) return false;
+        const { document, cursorPosition} = context;
 
-        const document = editor.document;
-        const position = editor.selection.active;
-        const line = document.lineAt(position.line);
+ 
+        const line = document.lineAt(cursorPosition.line);
         const lineText = line.text;
 
         const linkPattern = CONSTANTS.REGEX_PATTERNS.LINK;
@@ -78,7 +79,7 @@ export class SimpleStringTools {
             const startChar = match.index;
             const endChar = startChar + match[0].length;
 
-            if (position.character >= startChar && position.character <= endChar) {
+            if (cursorPosition.character >= startChar && cursorPosition.character <= endChar) {
                 this.context.globalState.update(CONSTANTS.STATE_KEYS.DETECTED_YAML_LINK, match[0]);
                 return true;
             }
