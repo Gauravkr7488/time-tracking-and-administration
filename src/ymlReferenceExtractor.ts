@@ -1,11 +1,47 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
+const CONSTANTS = {
+    MESSAGES: {
+        NO_ACTIVE_EDITOR: "No active text editor.",
+        NO_WORD_AT_CURSOR: "No word found at cursor position. Place cursor on a YAML key.",
+        NO_LINK_FOUND: "No link found containing the cursor."
+    },
+    STATE_KEYS: {
+        EXTRACTED_YAML_KEY: "extractedYamlKey",
+        CAPTURED_DOCUMENT_URI: "capturedDocumentUri",
+        DETECTED_YAML_LINK: "detectedYamlLink"
+    },
+    REGEX_PATTERNS: {
+        LINK: /-->.*<\:/g,
+        COLON: /:$/
+    }
+};
+
 export class YamlKeyExtractor {
     private extractedSymbols: Array<string>;
 
     constructor() {
         this.extractedSymbols = [];
+    }
+
+    private getActiveEditor(): vscode.TextEditor | undefined {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor) {
+            vscode.window.showErrorMessage(CONSTANTS.MESSAGES.NO_ACTIVE_EDITOR);
+            return;
+        }
+        return editor;
+    }
+
+    private getDocumentAndCursorPosition(): { document: vscode.TextDocument, cursorPosition: vscode.Position } | undefined {
+        const editor = this.getActiveEditor();
+        if (!editor) return;
+
+        return {
+            document: editor.document,
+            cursorPosition: editor.selection.active
+        };
     }
 
     async extractYamlKey() {
@@ -52,7 +88,7 @@ export class YamlKeyExtractor {
         return `${fileName}/${pathFromRoot}`;
     }
 
-    public createYmlReference(): string{
+    public createYmlReference(): string {
         let fullPath = this.fullPath(); // Call private fullPath method
         if (!fullPath) {
             vscode.window.showErrorMessage("No full path extracted.");
