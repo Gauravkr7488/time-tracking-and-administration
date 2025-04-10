@@ -22,13 +22,10 @@ export function activate(context: vscode.ExtensionContext) {
         const selectedTaskIsAYamlLink = await utils.isThisALink();
         let yamlLink: string;
         if (selectedTaskIsAYamlLink) {
-            // If cursor is in a link, use the link from global state
+
             yamlLink = context.globalState.get('detectedYamlLink') as string || '';
-            if (!yamlLink) {
-                vscode.window.showErrorMessage("No link found in global state.");
-                return;
-            }
-            vscode.window.showInformationMessage(`Using existing link: ${yamlLink}`);
+            if (!yamlLink) return;
+
         } else {
             await extractor.extractYamlKey(); // Creates the ymlLink
             yamlLink = extractor.createYmlReference();
