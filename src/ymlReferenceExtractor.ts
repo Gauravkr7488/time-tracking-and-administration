@@ -35,17 +35,11 @@ export class YamlKeyExtractor {
         }
         const document = editor.document;
 
-        // Extract file name without extension using path.basename
         const fileName = path.basename(document.fileName, path.extname(document.fileName));
 
         const config = vscode.workspace.getConfiguration('F2ToolInterface'); // The config is coming from F2ToolInterface which is a different extension for making yml links.
         const separator = config.get<string>('pathSeparator', '.');
         const ignoreWords: string[] = config.get<string[]>('ignoreWords', []);
-
-        // console.log('File Name:', fileName);
-        // console.log('Separator:', separator);
-        // console.log('Ignore Words:', ignoreWords);
-        // console.log('Extracted Symbols:', this.extractedSymbols);
 
         let filteredSymbols = this.extractedSymbols.map(symbol => {
             ignoreWords.forEach(word => {
