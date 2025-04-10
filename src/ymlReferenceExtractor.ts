@@ -44,7 +44,7 @@ export class YamlKeyExtractor {
         };
     }
 
-    async extractYamlKey() {
+    public async extractYamlKey() {
         const context = this.getDocumentAndCursorPosition();
         if (!context) return;
         const { document, cursorPosition } = context;
@@ -53,9 +53,8 @@ export class YamlKeyExtractor {
             'vscode.executeDocumentSymbolProvider',
             document.uri
         );
-        if (symbols === undefined) {
-            return;
-        }
+        
+        if (symbols === undefined) return;
 
         this.cursorSymbols(symbols, cursorPosition);
     }
