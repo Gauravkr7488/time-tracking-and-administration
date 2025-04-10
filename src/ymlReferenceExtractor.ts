@@ -15,6 +15,9 @@ const CONSTANTS = {
     REGEX_PATTERNS: {
         LINK: /-->.*<\:/g,
         COLON: /:$/
+    },
+    CONFIG:{
+        EXTENSION_FOR_MAKING_LINKS: "F2ToolInterface"
     }
 };
 
@@ -66,7 +69,7 @@ export class YamlKeyExtractor {
 
         const fileName = path.basename(document.fileName, path.extname(document.fileName));
 
-        const config = vscode.workspace.getConfiguration('F2ToolInterface'); // The config is coming from F2ToolInterface which is a different extension for making yml links.
+        const config = vscode.workspace.getConfiguration(CONSTANTS.CONFIG.EXTENSION_FOR_MAKING_LINKS);
         const separator = config.get<string>('pathSeparator', '.');
         const ignoreWords: string[] = config.get<string[]>('ignoreWords', []);
 
@@ -82,14 +85,14 @@ export class YamlKeyExtractor {
     }
 
     public createYmlReference(): string {
-        let fullPath = this.fullPath(); // Call private fullPath method
-        if (!fullPath) {
-            vscode.window.showErrorMessage("No full path extracted.");
-        }
+        let fullPath = this.fullPath();
+        if (!fullPath) return '';
+
         vscode.window.showInformationMessage(`'${fullPath}' Selected`);
-        let formattedText = `-->${fullPath}<:`;
+
+        let yamlLink = `-->${fullPath}<:`;
         this.extractedSymbols = []; // Reset symbols after generating the link
-        return formattedText;
+        return yamlLink;
     }
 
     private extractYamlKeysToCursor(symbols: vscode.DocumentSymbol[], cursorPosition: vscode.Position) {
