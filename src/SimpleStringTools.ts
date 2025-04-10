@@ -33,6 +33,17 @@ export class SimpleStringTools {
         return editor;
     }
 
+    private getDocumentAndCursorPosition(): { document: vscode.TextDocument, position: vscode.Position } | undefined {
+        const editor = this.getActiveEditor();
+        if (!editor) return;
+      
+        return {
+          document: editor.document,
+          position: editor.selection.active
+        };
+      }
+      
+
     public async extractYamlKey(): Promise<void> {
         const editor = this.getActiveEditor();
         if (!editor) return;
