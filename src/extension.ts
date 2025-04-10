@@ -22,21 +22,11 @@ export function activate(context: vscode.ExtensionContext) {
 
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
 
-        const selectedTaskIsAYamlLink = await utils.isThisALink();
-        let yamlLink: string;
+        let yamlLink =  await utils.isSelectedTaskALink();
 
-        if (selectedTaskIsAYamlLink) {
+        if(!yamlLink) yamlLink = await extractor.createYamlLink();
 
-            yamlLink = context.globalState.get('detectedYamlLink') as string || '';
-            if (!yamlLink) return;
-
-        } else {
-
-            yamlLink = await extractor.createYamlLink();
-
-        }
-
-        const srCode = context.globalState.get("extractedYamlKey") as string; // This is the saved srcode
+        const srCode = context.globalState.get("extractedYamlKey") as string; 
         if (!srCode) {
             vscode.window.showErrorMessage("Run 'Specify Standup Report' first.");
             return;
@@ -47,7 +37,6 @@ export function activate(context: vscode.ExtensionContext) {
         const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
 
         await yamlModifier.addTimerString(`[ 0m, "", ${startTimeISO} ]`);
-        // await yamlModifier.addTimerString(timer.startTimer()); // Adds start time to YAML
     });
 
     const disposableC = vscode.commands.registerCommand('time-tracking-and-administration.startTimer', () => {
