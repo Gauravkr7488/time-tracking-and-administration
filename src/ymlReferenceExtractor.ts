@@ -47,7 +47,7 @@ export class YamlKeyExtractor {
         };
     }
 
-    public async extractAllYamlKeys() {
+    private async extractAllYamlKeys() {
         const context = this.getDocumentAndCursorPosition();
         if (!context) return;
         const { document, cursorPosition } = context;
@@ -62,7 +62,7 @@ export class YamlKeyExtractor {
         this.extractYamlKeysToCursor(symbols, cursorPosition);
     }
 
-    fullPath(): string {
+    private fullPath(): string {
         const context = this.getDocumentAndCursorPosition();
         if (!context) return '';
         const { document } = context;
@@ -84,14 +84,15 @@ export class YamlKeyExtractor {
         return `${fileName}/${pathFromRoot}`;
     }
 
-    public createYmlReference(): string {
+    public async createYamlLink() {
+       await this.extractAllYamlKeys();
         let fullPath = this.fullPath();
         if (!fullPath) return '';
 
         vscode.window.showInformationMessage(`'${fullPath}' Selected`);
 
         let yamlLink = `-->${fullPath}<:`;
-        this.extractedSymbols = []; // Reset symbols after generating the link
+        this.extractedSymbols = []; 
         return yamlLink;
     }
 
