@@ -44,7 +44,7 @@ export class YamlKeyExtractor {
         };
     }
 
-    public async extractYamlKey() {
+    public async extractYamlKeys() {
         const context = this.getDocumentAndCursorPosition();
         if (!context) return;
         const { document, cursorPosition } = context;
@@ -53,7 +53,7 @@ export class YamlKeyExtractor {
             'vscode.executeDocumentSymbolProvider',
             document.uri
         );
-        
+
         if (symbols === undefined) return;
 
         this.cursorSymbols(symbols, cursorPosition);
@@ -94,38 +94,13 @@ export class YamlKeyExtractor {
 
     private cursorSymbols(symbols: vscode.DocumentSymbol[], cursorPosition: vscode.Position) {
         for (const symbol of symbols) {
-            if (!symbol.range.contains(cursorPosition)) {
-                continue;
-            }
+            if (!symbol.range.contains(cursorPosition)) continue;
 
-            if (this.shouldAddSymbol(symbol)) {
-                this.extractedSymbols.push(symbol.name);
-            }
+            this.extractedSymbols.push(symbol.name);
 
-            if (!symbol.children) {
-                return;
-            }
+            if (!symbol.children) return;
 
             this.cursorSymbols(symbol.children, cursorPosition);
         }
-    }
-
-    private shouldAddSymbol(symbol: vscode.DocumentSymbol): boolean {
-        const context = this.getDocumentAndCursorPosition();
-        if (!context) return false;
-        const { document } = context;
-
-        const config = vscode.workspace.getConfiguration('yamlPathExtractor');
-        const ignoreFilenameRoot = config.get<boolean>('ignoreFilenameRoot', false);
-
-        if (!ignoreFilenameRoot) {
-            return true;
-        }
-
-        const fileName = path.basename(document.fileName, path.extname(document.fileName));
-        return (
-            this.extractedSymbols.length > 0 ||
-            symbol.name !== fileName
-        );
     }
 }
