@@ -19,9 +19,9 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
-        const isALink = await utils.isThisALink();
+        const selectedTaskIsAYamlLink = await utils.isThisALink();
         let formattedText: string;
-        if (isALink) {
+        if (selectedTaskIsAYamlLink) {
             // If cursor is in a link, use the link from global state
             formattedText = context.globalState.get('detectedYamlLink') as string || '';
             if (!formattedText) {
