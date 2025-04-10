@@ -51,7 +51,7 @@ export class YamlKeyExtractor {
             return;
         }
         const document = editor.document;
-        const position = editor.selection.active;
+        const cursorPosition = editor.selection.active;
 
         let symbols = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
             'vscode.executeDocumentSymbolProvider',
@@ -61,7 +61,7 @@ export class YamlKeyExtractor {
             return;
         }
 
-        this.cursorSymbols(symbols, position);
+        this.cursorSymbols(symbols, cursorPosition);
     }
 
     fullPath(): string {
@@ -99,9 +99,9 @@ export class YamlKeyExtractor {
         return formattedText;
     }
 
-    private cursorSymbols(symbols: vscode.DocumentSymbol[], position: vscode.Position) {
+    private cursorSymbols(symbols: vscode.DocumentSymbol[], cursorPosition: vscode.Position) {
         for (const symbol of symbols) {
-            if (!symbol.range.contains(position)) {
+            if (!symbol.range.contains(cursorPosition)) {
                 continue;
             }
 
@@ -113,7 +113,7 @@ export class YamlKeyExtractor {
                 return;
             }
 
-            this.cursorSymbols(symbol.children, position);
+            this.cursorSymbols(symbol.children, cursorPosition);
         }
     }
 
