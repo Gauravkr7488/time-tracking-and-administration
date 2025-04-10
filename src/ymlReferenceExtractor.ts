@@ -56,7 +56,7 @@ export class YamlKeyExtractor {
 
         if (symbols === undefined) return;
 
-        this.cursorSymbols(symbols, cursorPosition);
+        this.extractYamlPathAtCursor(symbols, cursorPosition);
     }
 
     fullPath(): string {
@@ -92,7 +92,7 @@ export class YamlKeyExtractor {
         return formattedText;
     }
 
-    private cursorSymbols(symbols: vscode.DocumentSymbol[], cursorPosition: vscode.Position) {
+    private extractYamlPathAtCursor(symbols: vscode.DocumentSymbol[], cursorPosition: vscode.Position) {
         for (const symbol of symbols) {
             if (!symbol.range.contains(cursorPosition)) continue;
 
@@ -100,7 +100,7 @@ export class YamlKeyExtractor {
 
             if (!symbol.children) return;
 
-            this.cursorSymbols(symbol.children, cursorPosition);
+            this.extractYamlPathAtCursor(symbol.children, cursorPosition);
         }
     }
 }
