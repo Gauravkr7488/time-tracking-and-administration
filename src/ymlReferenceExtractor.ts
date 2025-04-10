@@ -44,7 +44,7 @@ export class YamlKeyExtractor {
         };
     }
 
-    public async extractYamlKeys() {
+    public async extractAllYamlKeys() {
         const context = this.getDocumentAndCursorPosition();
         if (!context) return;
         const { document, cursorPosition } = context;
@@ -56,7 +56,7 @@ export class YamlKeyExtractor {
 
         if (symbols === undefined) return;
 
-        this.extractYamlPathAtCursor(symbols, cursorPosition);
+        this.extractYamlKeysToCursor(symbols, cursorPosition);
     }
 
     fullPath(): string {
@@ -92,7 +92,7 @@ export class YamlKeyExtractor {
         return formattedText;
     }
 
-    private extractYamlPathAtCursor(symbols: vscode.DocumentSymbol[], cursorPosition: vscode.Position) {
+    private extractYamlKeysToCursor(symbols: vscode.DocumentSymbol[], cursorPosition: vscode.Position) {
         for (const symbol of symbols) {
             if (!symbol.range.contains(cursorPosition)) continue;
 
@@ -100,7 +100,7 @@ export class YamlKeyExtractor {
 
             if (!symbol.children) return;
 
-            this.extractYamlPathAtCursor(symbol.children, cursorPosition);
+            this.extractYamlKeysToCursor(symbol.children, cursorPosition);
         }
     }
 }
