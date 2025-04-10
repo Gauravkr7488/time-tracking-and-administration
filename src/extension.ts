@@ -17,7 +17,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         await utils.extractYamlKey(); // Extracts the SR Id
         vscode.window.showInformationMessage("Please select a task");
-        
+
     });
 
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         } else {
 
-            await extractor.extractYamlKey(); // Creates the ymlLink
+            await extractor.extractYamlKeys(); // Creates the ymlLink
             yamlLink = extractor.createYmlReference();
 
         }
