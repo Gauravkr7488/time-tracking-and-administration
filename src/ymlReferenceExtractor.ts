@@ -4,17 +4,6 @@ import * as path from 'path';
 const CONSTANTS = {
     MESSAGES: {
         NO_ACTIVE_EDITOR: "No active text editor.",
-        NO_WORD_AT_CURSOR: "No word found at cursor position. Place cursor on a YAML key.",
-        NO_LINK_FOUND: "No link found containing the cursor."
-    },
-    STATE_KEYS: {
-        EXTRACTED_YAML_KEY: "extractedYamlKey",
-        CAPTURED_DOCUMENT_URI: "capturedDocumentUri",
-        DETECTED_YAML_LINK: "detectedYamlLink"
-    },
-    REGEX_PATTERNS: {
-        LINK: /-->.*<\:/g,
-        COLON: /:$/
     },
     CONFIG:{
         EXTENSION_FOR_MAKING_LINKS: "F2ToolInterface"
