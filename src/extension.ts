@@ -33,10 +33,10 @@ export function activate(context: vscode.ExtensionContext) {
         }
         timer.startTimer();
         yamlModifier = new YamlModifier(srCode, yamlLink, context);
-        await yamlModifier.modify(); // Modifies the doc
         const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
+        await yamlModifier.modify(`[ 0m, "", ${startTimeISO} ]`); // Modifies the doc
 
-        await yamlModifier.addTimerString(`[ 0m, "", ${startTimeISO} ]`);
+        // await yamlModifier.addTimerString(`[ 0m, "", ${startTimeISO} ]`);
     });
 
     const disposableC = vscode.commands.registerCommand('time-tracking-and-administration.startTimer', () => {

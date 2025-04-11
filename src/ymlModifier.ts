@@ -15,7 +15,7 @@ export class YamlModifier {
         this.context = context;
     }
 
-    public async modify(): Promise<void> {
+    public async modify(timeLogString: string): Promise<void> {
         if (!this.validateStoredUri()) {
             return;
         }
@@ -31,7 +31,10 @@ export class YamlModifier {
         if (!this.modifyNode()) {
             return;
         }
-        await this.applyEdit();
+        if (!this.addTimerString(timeLogString)) {
+            return;
+        }
+        // await this.applyEdit();
     }
 
     private validateStoredUri(): boolean {
