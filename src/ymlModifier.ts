@@ -16,9 +16,6 @@ export class YamlModifier {
     }
 
     public async insertNewTask(timeLogString: string): Promise<void> {
-        // if (!this.validateStoredUri()) {
-        //     return;
-        // }
         if (!this.findDocument()) {
             return;
         }
@@ -31,13 +28,7 @@ export class YamlModifier {
         if (!this.addTimerString(timeLogString)) {
             return;
         }
-        // await this.applyEdit();
     }
-
-    // private validateStoredUri(): boolean {
-    //     const capturedDocUri = this.context.globalState.get('capturedDocumentUri') as string;
-    //     return true;
-    // }
 
     private findDocument(): boolean {
         const capturedDocUri = this.context.globalState.get('capturedDocumentUri') as string;
@@ -118,11 +109,6 @@ export class YamlModifier {
             return false;
         }
 
-        // if (!this.yamlDocument) {
-        //     vscode.window.showErrorMessage("Failed to parse YAML document.");
-        //     return false;
-        // }
-
         const srNode = this.yamlDocument.get(this.srcode, true);
         if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
             vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}" not found or not an object.`);
@@ -140,13 +126,12 @@ export class YamlModifier {
             return false;
         }
 
-        // Find the YAML link in the "was" list
+        // Find the YAML link in the "Was" list
         const linkIndex = wasNode.items.findIndex(item => {
             if (!(item instanceof yaml.Scalar)) {
                 return false;
             }
 
-            // Check if the item starts with our ymlLink (to handle cases where it already has a timer)
             const itemValue = String(item.value);
             return itemValue === this.ymlLink || itemValue.startsWith(`${this.ymlLink} `);
         });
@@ -156,7 +141,6 @@ export class YamlModifier {
             return false;
         }
 
-        // Update the link with the new timer string
         this.fullLink = `${this.ymlLink} ${timerString}`;
         wasNode.items[linkIndex] = new yaml.Scalar(this.fullLink);
 
@@ -177,7 +161,7 @@ export class YamlModifier {
 
         updatedYaml = this.removeQuotesFromYmlLink(updatedYaml);
 
-        console.log('Final YAML:', updatedYaml);
+        // console.log('Final YAML:', updatedYaml);
 
         const edit = new vscode.WorkspaceEdit();
         const fullRange = new vscode.Range(
