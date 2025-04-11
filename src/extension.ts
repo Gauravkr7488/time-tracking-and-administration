@@ -58,8 +58,9 @@ export function activate(context: vscode.ExtensionContext) {
         timer.stopTimer();
         const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
         const durationMinutes = context.globalState.get('timerDurationMinutes') as string;
+        const timeLogString = `[ ${durationMinutes}m, "", ${startTimeISO} ]`;
 
-        await yamlModifier.addTimerString(`[ ${durationMinutes}m, "", ${startTimeISO} ]`);
+        await yamlModifier.addTimerString(timeLogString);
     });
 
     context.subscriptions.push(disposableA, disposableB, disposableC, disposableD, disposableE);
