@@ -16,9 +16,9 @@ export class YamlModifier {
     }
 
     public async insertNewTask(timeLogString: string): Promise<void> {
-        if (!this.validateStoredUri()) {
-            return;
-        }
+        // if (!this.validateStoredUri()) {
+        //     return;
+        // }
         if (!this.findDocument()) {
             return;
         }
@@ -34,17 +34,17 @@ export class YamlModifier {
         // await this.applyEdit();
     }
 
-    private validateStoredUri(): boolean {
+    // private validateStoredUri(): boolean {
+    //     const capturedDocUri = this.context.globalState.get('capturedDocumentUri') as string;
+    //     return true;
+    // }
+    
+    private findDocument(): boolean {
         const capturedDocUri = this.context.globalState.get('capturedDocumentUri') as string;
         if (!capturedDocUri) {
             vscode.window.showErrorMessage("No document URI stored in global state. Run 'extractYamlKey' first.");
             return false;
         }
-        return true;
-    }
-
-    private findDocument(): boolean {
-        const capturedDocUri = this.context.globalState.get('capturedDocumentUri') as string;
         this.document = vscode.workspace.textDocuments.find(doc => doc.uri.toString() === capturedDocUri);
         if (!this.document) {
             vscode.window.showErrorMessage("Stored document not found. It may have been closed.");
