@@ -15,7 +15,7 @@ export class YamlModifier {
         this.context = context;
     }
 
-    public async modify(timeLogString: string): Promise<void> {
+    public async insertNewTask(timeLogString: string): Promise<void> {
         if (!this.validateStoredUri()) {
             return;
         }

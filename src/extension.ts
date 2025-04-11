@@ -34,9 +34,9 @@ export function activate(context: vscode.ExtensionContext) {
         timer.startTimer();
         yamlModifier = new YamlModifier(srCode, yamlLink, context);
         const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
-        await yamlModifier.modify(`[ 0m, "", ${startTimeISO} ]`); // Modifies the doc
+        const timeLogString = `[ 0m, "", ${startTimeISO} ]`;
+        await yamlModifier.insertNewTask(timeLogString); 
 
-        // await yamlModifier.addTimerString(`[ 0m, "", ${startTimeISO} ]`);
     });
 
     const disposableC = vscode.commands.registerCommand('time-tracking-and-administration.startTimer', () => {
@@ -60,7 +60,6 @@ export function activate(context: vscode.ExtensionContext) {
         const durationMinutes = context.globalState.get('timerDurationMinutes') as string;
 
         await yamlModifier.addTimerString(`[ ${durationMinutes}m, "", ${startTimeISO} ]`);
-        // Adds stop time (e.g., "[10.50m]") to YAML
     });
 
     context.subscriptions.push(disposableA, disposableB, disposableC, disposableD, disposableE);
