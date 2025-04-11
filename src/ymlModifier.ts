@@ -6,7 +6,7 @@ export class YamlModifier {
     private ymlLink: string;
     private context: vscode.ExtensionContext;
     private document?: vscode.TextDocument;
-    private doc?: yaml.Document;
+    private yamlDocument?: yaml.Document;
     private fullLink?: string;
 
     constructor(srcode: string, ymlLink: string, context: vscode.ExtensionContext) {
@@ -38,21 +38,21 @@ export class YamlModifier {
     //     const capturedDocUri = this.context.globalState.get('capturedDocumentUri') as string;
     //     return true;
     // }
-    
+
     private findDocument(): boolean {
         const capturedDocUri = this.context.globalState.get('capturedDocumentUri') as string;
         if (!capturedDocUri) {
             vscode.window.showErrorMessage("No document URI stored in global state. Run 'extractYamlKey' first.");
             return false;
         }
-        this.document = vscode.workspace.textDocuments.find(doc => doc.uri.toString() === capturedDocUri);
+        this.document = vscode.workspace.textDocuments.find(yamlDocument => yamlDocument.uri.toString() === capturedDocUri);
         if (!this.document) {
             vscode.window.showErrorMessage("Stored document not found. It may have been closed.");
             return false;
         }
         return true;
     }
-    
+
     private parseYaml(): boolean {
         if (!this.document || this.document.languageId !== "yaml") {
             vscode.window.showErrorMessage("This command only works with YAML files.");
@@ -60,7 +60,7 @@ export class YamlModifier {
         }
         const text = this.document.getText();
         try {
-            this.doc = yaml.parseDocument(text);
+            this.yamlDocument = yaml.parseDocument(text);
             return true;
         } catch (error) {
             vscode.window.showErrorMessage("Failed to parse YAML");
@@ -69,11 +69,12 @@ export class YamlModifier {
     }
 
     private modifyNode(): boolean {
-        if (!this.doc) {
+        if (!this.yamlDocument) {
+            vscode.window.showErrorMessage("Failed to parse YAML document.");
             return false;
         }
 
-        const srNode = this.doc.get(this.srcode, true);
+        const srNode = this.yamlDocument.get(this.srcode, true);
         if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
             vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}" not found or not an object.`);
             return false;
@@ -106,21 +107,23 @@ export class YamlModifier {
     }
 
     public async addTimerString(timerString: string): Promise<boolean> {
-        if (!this.doc) {
+        if (!this.yamlDocument) {
             if (!this.findDocument()) {
                 return false;
             }
             if (!this.parseYaml()) {
                 return false;
             }
-        }
-
-        if (!this.doc) {
             vscode.window.showErrorMessage("Failed to parse YAML document.");
             return false;
         }
 
-        const srNode = this.doc.get(this.srcode, true);
+        // if (!this.yamlDocument) {
+        //     vscode.window.showErrorMessage("Failed to parse YAML document.");
+        //     return false;
+        // }
+
+        const srNode = this.yamlDocument.get(this.srcode, true);
         if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
             vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}" not found or not an object.`);
             return false;
@@ -162,11 +165,11 @@ export class YamlModifier {
     }
 
     private async applyEdit(): Promise<void> {
-        if (!this.document || !this.doc) {
+        if (!this.document || !this.yamlDocument) {
             return;
         }
 
-        let updatedYaml = this.doc.toString({
+        let updatedYaml = this.yamlDocument.toString({
             defaultStringType: 'PLAIN',
             simpleKeys: true,
             lineWidth: 0 // Prevent wrapping
@@ -188,7 +191,7 @@ export class YamlModifier {
 
     public async isYmlLinkInSr(): Promise<boolean> {
         // Make sure we have a document and parse it if needed
-        if (!this.doc) {
+        if (!this.yamlDocument) {
             if (!this.findDocument()) {
                 return false;
             }
@@ -197,13 +200,13 @@ export class YamlModifier {
             }
         }
 
-        // At this point, this.doc should be defined
-        if (!this.doc) {
+        // At this point, this.yamlDocument should be defined
+        if (!this.yamlDocument) {
             vscode.window.showErrorMessage("Failed to parse YAML document.");
             return false;
         }
 
-        const srNode = this.doc.get(this.srcode, true);
+        const srNode = this.yamlDocument.get(this.srcode, true);
         if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
             vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}" not found or not an object.`);
             return false;
@@ -240,7 +243,7 @@ export class YamlModifier {
 
     public async addDurationToTimer(additionalMinutes: number): Promise<boolean> {
         // Make sure we have a document and parse it if needed
-        if (!this.doc) {
+        if (!this.yamlDocument) {
             if (!this.findDocument()) {
                 return false;
             }
@@ -249,13 +252,13 @@ export class YamlModifier {
             }
         }
 
-        // At this point, this.doc should be defined
-        if (!this.doc) {
+        // At this point, this.yamlDocument should be defined
+        if (!this.yamlDocument) {
             vscode.window.showErrorMessage("Failed to parse YAML document.");
             return false;
         }
 
-        const srNode = this.doc.get(this.srcode, true);
+        const srNode = this.yamlDocument.get(this.srcode, true);
         if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
             vscode.window.showErrorMessage(`Invalid YAML structure. "${this.srcode}" not found or not an object.`);
             return false;
