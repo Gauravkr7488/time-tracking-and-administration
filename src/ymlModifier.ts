@@ -22,9 +22,6 @@ export class YamlModifier {
         if (!this.findDocument()) {
             return;
         }
-        if (!this.validateYaml()) {
-            return;
-        }
         if (!this.parseYaml()) {
             return;
         }
@@ -55,17 +52,10 @@ export class YamlModifier {
         }
         return true;
     }
-
-    private validateYaml(): boolean {
+    
+    private parseYaml(): boolean {
         if (!this.document || this.document.languageId !== "yaml") {
             vscode.window.showErrorMessage("This command only works with YAML files.");
-            return false;
-        }
-        return true;
-    }
-
-    private parseYaml(): boolean {
-        if (!this.document) {
             return false;
         }
         const text = this.document.getText();
@@ -116,12 +106,8 @@ export class YamlModifier {
     }
 
     public async addTimerString(timerString: string): Promise<boolean> {
-        // Make sure we have a document and parse it if needed
         if (!this.doc) {
             if (!this.findDocument()) {
-                return false;
-            }
-            if (!this.validateYaml()) {
                 return false;
             }
             if (!this.parseYaml()) {
@@ -129,7 +115,6 @@ export class YamlModifier {
             }
         }
 
-        // At this point, this.doc should be defined
         if (!this.doc) {
             vscode.window.showErrorMessage("Failed to parse YAML document.");
             return false;
@@ -207,9 +192,6 @@ export class YamlModifier {
             if (!this.findDocument()) {
                 return false;
             }
-            if (!this.validateYaml()) {
-                return false;
-            }
             if (!this.parseYaml()) {
                 return false;
             }
@@ -260,9 +242,6 @@ export class YamlModifier {
         // Make sure we have a document and parse it if needed
         if (!this.doc) {
             if (!this.findDocument()) {
-                return false;
-            }
-            if (!this.validateYaml()) {
                 return false;
             }
             if (!this.parseYaml()) {
