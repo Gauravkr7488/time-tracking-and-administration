@@ -85,7 +85,7 @@ export class SimpleStringTools {
             }
         }
 
-        vscode.window.showInformationMessage(CONSTANTS.MESSAGES.NO_LINK_FOUND);
+        // vscode.window.showInformationMessage(CONSTANTS.MESSAGES.NO_LINK_FOUND);
         return '';
     }
 }
