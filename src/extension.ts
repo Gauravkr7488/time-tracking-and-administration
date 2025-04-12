@@ -22,20 +22,28 @@ export function activate(context: vscode.ExtensionContext) {
 
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
 
-        let yamlLink =  await utils.isSelectedTaskALink();
+        let refLink = await extractor.createYamlLink();
 
-        if(!yamlLink) yamlLink = await extractor.createYamlLink();
+        let yamlLink = await utils.isSelectedTaskALink();
 
-        const srCode = context.globalState.get("extractedYamlKey") as string; 
+        if (!yamlLink) yamlLink = await extractor.createYamlLink();
+
+        const srCode = context.globalState.get("extractedYamlKey") as string;
         if (!srCode) {
             vscode.window.showErrorMessage("Run 'Specify Standup Report' first.");
             return;
         }
         timer.startTimer();
         yamlModifier = new YamlModifier(srCode, yamlLink, context);
-        const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
-        const timeLogString = `[ 0m, "", ${startTimeISO} ]`;
-        await yamlModifier.insertNewTask(timeLogString); 
+        if (refLink.includes(srCode)) {
+            vscode.window.showInformationMessage("this is in the sr");
+            await context.globalState.update('refLinkContainsSrCode', true);
+        } else {
+            const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
+            const timeLogString = `[ 0m, "", ${startTimeISO} ]`;
+            await yamlModifier.insertNewTask(timeLogString);
+            await context.globalState.update('refLinkContainsSrCode', false);
+        }
 
     });
 
@@ -47,6 +55,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseResumeTimer', async () => {
         timer.pauseResumeTimer(); // Currently returns void
+
     });
 
     const disposableE = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
@@ -57,10 +66,16 @@ export function activate(context: vscode.ExtensionContext) {
         }
         timer.stopTimer();
         const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
-        const durationMinutes = context.globalState.get('timerDurationMinutes') as string;
+        const durationMinutes = context.globalState.get('timerDurationMinutes') as number;
         const timeLogString = `[ ${durationMinutes}m, "", ${startTimeISO} ]`;
 
-        await yamlModifier.addTimerString(timeLogString);
+        const refLink = context.globalState.get("refLinkContainsSrCode");
+        if (refLink){
+            // vscode.window.showInformationMessage("that timer thing should work");
+            // await yamlModifier.addDurationToTimer(durationMinutes);
+        }else{
+            await yamlModifier.addTimerString(timeLogString);
+        }
     });
 
     context.subscriptions.push(disposableA, disposableB, disposableC, disposableD, disposableE);
