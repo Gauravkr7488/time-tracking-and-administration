@@ -9,8 +9,6 @@ export function activate(context: vscode.ExtensionContext) {
     const utils = new SimpleStringTools(context);
     const extractor = new YamlKeyExtractor();
 
-
-    // Store yamlModifier to make it accessible across commands
     let yamlModifier: YamlModifier | undefined;
 
     const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
@@ -22,7 +20,7 @@ export function activate(context: vscode.ExtensionContext) {
 
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
 
-        let refLink = await extractor.createYamlLink();
+        let refLink = await extractor.createYamlLink(); // Creates a yml link to check if it contains the srcode to dtect if it is in the sr
 
         let yamlLink = await utils.isSelectedTaskALink();
 
@@ -54,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseResumeTimer', async () => {
-        timer.pauseResumeTimer(); // Currently returns void
+        timer.pauseResumeTimer();
 
     });
 
@@ -71,8 +69,7 @@ export function activate(context: vscode.ExtensionContext) {
 
         const refLink = context.globalState.get("refLinkContainsSrCode");
         if (refLink){
-            // vscode.window.showInformationMessage("that timer thing should work");
-            // await yamlModifier.addDurationToTimer(durationMinutes);
+            // a method to add duration to old time log needs to be added here
         }else{
             await yamlModifier.addTimerString(timeLogString);
         }

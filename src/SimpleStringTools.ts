@@ -79,13 +79,11 @@ export class SimpleStringTools {
             const endChar = startChar + match[0].length;
 
             if (cursorPosition.character >= startChar && cursorPosition.character <= endChar) {
-                // this.context.globalState.update(CONSTANTS.STATE_KEYS.DETECTED_YAML_LINK, match[0]);
                 const link = match[0].toString();
                 return link;
             }
         }
 
-        // vscode.window.showInformationMessage(CONSTANTS.MESSAGES.NO_LINK_FOUND);
         return '';
     }
 }
