@@ -56,7 +56,7 @@ export class YamlKeyExtractor {
         if (!context) return '';
         const { document } = context;
 
-        const fileName = path.basename(document.fileName, path.extname(document.fileName));
+        // const fileName = path.basename(document.fileName, path.extname(document.fileName)); // we dont need this Right now
 
         const config = vscode.workspace.getConfiguration(CONSTANTS.CONFIG.EXTENSION_FOR_MAKING_LINKS);
         const separator = config.get<string>('pathSeparator', '.');
@@ -70,7 +70,7 @@ export class YamlKeyExtractor {
         }).filter(symbol => symbol !== '');
 
         const pathFromRoot = filteredSymbols.join(separator);
-        return `${fileName}/${pathFromRoot}`;
+        return `${pathFromRoot}`;
     }
 
     public async createYamlLink() {
