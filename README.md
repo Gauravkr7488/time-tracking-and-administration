@@ -18,10 +18,9 @@
 - When the task is selected form the same sr then stopping the timer dosen't update the worklog
 - Whenever there is special characters like single or double quotes a slash gets added to ecape them
 
+### 1.0.1
 
-### 1.0.0
-
-Initial release of time-tracking-and-administration
+Bug Fix : now the filename dosent come before the link
 
 
 ## For more information
