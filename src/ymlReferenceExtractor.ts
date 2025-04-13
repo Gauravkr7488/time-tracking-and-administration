@@ -78,7 +78,7 @@ export class YamlKeyExtractor {
         let fullPath = this.fullPath();
         if (!fullPath) return '';
 
-        vscode.window.showInformationMessage(`'${fullPath}' Selected`);
+        // vscode.window.showInformationMessage(`'${fullPath}' Selected`);
 
         let yamlLink = `-->${fullPath}<:`;
         this.extractedSymbols = []; 

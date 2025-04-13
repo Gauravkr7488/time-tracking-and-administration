@@ -34,7 +34,6 @@ export function activate(context: vscode.ExtensionContext) {
         timer.startTimer();
         yamlModifier = new YamlModifier(srCode, yamlLink, context);
         if (refLink.includes(srCode)) {
-            vscode.window.showInformationMessage("this is in the sr");
             await context.globalState.update('refLinkContainsSrCode', true);
         } else {
             const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
