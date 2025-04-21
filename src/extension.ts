@@ -4,7 +4,11 @@ import { SimpleStringTools } from './SimpleStringTools';
 import { YamlKeyExtractor } from './ymlReferenceExtractor';
 import { Timer } from './timer';
 
+import { TaskCommands } from './TaskOperations';
+
 export function activate(context: vscode.ExtensionContext) {
+    const taskCommand = new TaskCommands();
+
     const timer = new Timer(context);
     const utils = new SimpleStringTools(context);
     const extractor = new YamlKeyExtractor();
@@ -13,9 +17,10 @@ export function activate(context: vscode.ExtensionContext) {
 
     const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
 
-        await utils.extractYamlKey(); // Extracts the SR Id
-        vscode.window.showInformationMessage("Please select a task");
+        // await utils.extractYamlKey(); // Extracts the SR Id
+        // vscode.window.showInformationMessage("Please select a task");
 
+        taskCommand.specifyStandupReport();
     });
 
     const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
