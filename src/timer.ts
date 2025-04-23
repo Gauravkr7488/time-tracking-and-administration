@@ -109,7 +109,7 @@ export class Timer {
         this.context.globalState.update(Timer.DURATION_MINUTES_KEY, durationMinutes);
 
         // Format the return string
-        const result = `[${durationMinutes}m]`;
+        const result = `${durationMinutes}m`;
 
         // Show duration and reset
         const durationSeconds = (totalDurationMs / 1000).toFixed(2);
