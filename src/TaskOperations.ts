@@ -18,15 +18,12 @@ export class TaskCommands {
     private srCode: string = '';
     private srDocUri?: vscode.Uri;
     private yamleditors = new YamlEditors();
+
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
         this.timerCommand = new TimerCommands(this.context);
         this.timer = new Timer(this.context);
     }
-
-    // constructor(private context: vscode.ExtensionContext) {
-    //     this.timerCommand = new TimerCommands(this.context);
-    // }
 
     specifyStandupReport(): void {
         const srDoc = this.validateAndGet.getActiveDoc();
@@ -55,5 +52,14 @@ export class TaskCommands {
         const srEntry = this.yamlLink + this.timerCommand.createWorkLog();
         if(!this.srDocUri) return;
         this.yamleditors.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
+        this.message.info("Task started");
     }
+
+    pauseOrResumeTask(){
+        this.timer.pauseResumeTimer();
+    }
+
+    stopTask(){}
+
+
 }

@@ -415,6 +415,7 @@ export class YamlEditors {
 
         await vscode.workspace.applyEdit(edit);
     }
+    
     async moveEntryToWasInSr(srEntry: string, srCode: string, srDocUri: vscode.Uri) {
         this.srDocUri = srDocUri;
         this.srCode = srCode;
