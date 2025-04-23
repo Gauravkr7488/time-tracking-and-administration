@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
+import { ValidateAndGet } from './Validator';
+import { Message } from './VsCodeUtils';
 
 export class YamlModifier {
     private srcode: string;
@@ -332,5 +334,97 @@ export class YamlModifier {
 
         // console.log('Processed YAML (quotes removed):', updatedYaml);
         return updatedYaml;
+    }
+}
+
+export class YamlEditors {
+
+    private validateAndGet = new ValidateAndGet();
+    private yamlDoc?: yaml.Document;
+    private message = new Message();
+    private srDoc?: vscode.TextDocument;
+    private srDocUri?: vscode.Uri;
+    private srCode?: string;
+    private async parseYaml() {
+        if (!this.srDocUri) return;
+        this.srDoc = await vscode.workspace.openTextDocument(this.srDocUri);
+        const doc = this.srDoc;
+        if (!doc) return;
+        if (!this.validateAndGet.isThisYamlDoc()) return;
+        const text = doc.getText();
+        try {
+            this.yamlDoc = yaml.parseDocument(text);
+            return;
+        } catch (error) {
+            this.message.err("Failed to parse YAML");
+            return;
+        }
+    }
+
+    private async getSrObj() {
+        if (!this.yamlDoc) return;
+        if (!this.srCode) return;
+        const srNode = this.yamlDoc.get(this.srCode);
+        if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
+            this.message.err("no srCode not found");
+            return;
+        }
+        return srNode;
+    }
+
+    private async getWasObj() {
+        const srNode = await this.getSrObj();
+        if (!srNode) return;
+        const wasNode = srNode.get("Was");
+        if (!wasNode || !(wasNode instanceof yaml.YAMLSeq)) {
+            this.message.err("no wasSection was found in the Sr");
+        }
+        return wasNode;
+    }
+
+    private insertEntryInNode(node: yaml.YAMLSeq, entry: string) {
+        const emptyItemIndex = node.items.findIndex(item =>
+            item === null ||
+            (item instanceof yaml.Scalar && (item.value === '' || item.value === null))
+        );
+
+        if (emptyItemIndex !== -1) {
+            node.items[emptyItemIndex] = new yaml.Scalar(entry);
+        } else {
+            const scalar = new yaml.Scalar(entry);
+            node.add(scalar);
+        }
+    }
+
+    private async applyEditToDoc() {
+        const edit = new vscode.WorkspaceEdit();
+        if (!this.srDoc) return;
+        if (!this.yamlDoc) return;
+
+        let updatedYaml = this.yamlDoc.toString({
+            defaultStringType: 'PLAIN',
+            simpleKeys: true,
+            lineWidth: 0 // Prevent wrapping
+        });
+
+        const fullRange = new vscode.Range(
+            this.srDoc.positionAt(0),
+            this.srDoc.positionAt(this.srDoc.getText().length)
+        );
+        edit.replace(this.srDoc.uri, fullRange, updatedYaml);
+
+        await vscode.workspace.applyEdit(edit);
+    }
+    async moveEntryToWasInSr(srEntry: string, srCode: string, srDocUri: vscode.Uri) {
+        this.srDocUri = srDocUri;
+        this.srCode = srCode;
+        await this.parseYaml();
+
+        const wasNode = await this.getWasObj();
+        if (!wasNode) return;
+
+        this.insertEntryInNode(wasNode, srEntry);
+        this.applyEditToDoc();
+        // add the entry to the was node
     }
 }

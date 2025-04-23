@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
+import { Message } from './VsCodeUtils';
 
 export class Timer {
     private context: vscode.ExtensionContext;
-    private static readonly START_TIME_KEY = 'timerStartTime';
-    private static readonly ACCUMULATED_TIME_KEY = 'timerAccumulatedTime';
-    private static readonly IS_PAUSED_KEY = 'timerIsPaused';
-    private static readonly START_TIME_ISO_KEY = 'timerStartTimeISO';
-    private static readonly PAUSE_RESUME_STATUS_KEY = 'timerPauseResumeStatus';
-    private static readonly DURATION_MINUTES_KEY = 'timerDurationMinutes';
+    static readonly START_TIME_KEY = 'timerStartTime';
+    static readonly ACCUMULATED_TIME_KEY = 'timerAccumulatedTime';
+    static readonly IS_PAUSED_KEY = 'timerIsPaused';
+    static readonly START_TIME_ISO_KEY = 'timerStartTimeISO';
+    static readonly PAUSE_RESUME_STATUS_KEY = 'timerPauseResumeStatus';
+    static readonly DURATION_MINUTES_KEY = 'timerDurationMinutes';
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -64,19 +65,19 @@ export class Timer {
             this.context.globalState.update(Timer.START_TIME_KEY, undefined);
             this.context.globalState.update(Timer.ACCUMULATED_TIME_KEY, accumulatedTime);
             this.context.globalState.update(Timer.IS_PAUSED_KEY, true);
-            
+
             // Save pause status
             this.context.globalState.update(Timer.PAUSE_RESUME_STATUS_KEY, 'paused');
-            
+
             vscode.window.showInformationMessage('Timer paused.');
         } else if (isPaused) {
             // Resume the timer
             this.context.globalState.update(Timer.START_TIME_KEY, Date.now());
             this.context.globalState.update(Timer.IS_PAUSED_KEY, false);
-            
+
             // Save resume status
             this.context.globalState.update(Timer.PAUSE_RESUME_STATUS_KEY, 'resumed');
-            
+
             vscode.window.showInformationMessage('Timer resumed.');
         }
     }
@@ -130,7 +131,52 @@ export class Timer {
         const hours = String(date.getHours()).padStart(2, '0');
         const minutes = String(date.getMinutes()).padStart(2, '0');
         const seconds = String(date.getSeconds()).padStart(2, '0');
-        
+
         return `${year}${month}${day} T ${hours}${minutes}${seconds}`;
+
     }
+
+}
+
+
+export class TimerMechanics {
+    context: vscode.ExtensionContext;
+    private message = new Message();
+
+    constructor(context: vscode.ExtensionContext) {
+        this.context = context;
+    }
+
+    isTimerPaused() {
+        const isPaused = this.context.globalState.get(Timer.IS_PAUSED_KEY) as boolean;
+        if (isPaused) {
+            this.message.err("Timer is paused");
+            return true;
+        }
+    }
+
+    isTimerRunning() {
+        const startTime = this.context.globalState.get(Timer.START_TIME_KEY) as number | undefined;
+        if (startTime) {
+            this.message.err("Timer ia already running");
+            return true;
+        }
+    }
+}
+
+
+export class TimerCommands extends TimerMechanics {
+    
+    isTaskRunnig(): boolean {
+        if (this.isTimerPaused()) return true;
+        if (this.isTimerRunning()) return true;
+        return false;
+    }
+    
+    createWorkLog(): string {
+        const startTimeISO = this.context.globalState.get('timerStartTimeISO') as string;
+        const timeLogString = `[ 0m, "", ${startTimeISO} ]`;
+        return timeLogString;
+    }
+
 }

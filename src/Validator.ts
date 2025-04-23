@@ -19,15 +19,16 @@ export class ValidateAndGet {
         return this.document;
     }
 
-    isThisYamlDoc() {
+    isThisYamlDoc(): boolean {
         this.getActiveDoc();
         if (!this.document || this.document.languageId !== "yaml") {
             vscode.window.showErrorMessage("This command only works with YAML files.");
-            return;
+            return false;
         }
+        return true
     }
 
-    getCursorPosition() {
+    getCursorPosition() { // place this into misc
         if (!this.editor) return;
         return this.editor.selection.active;
     }

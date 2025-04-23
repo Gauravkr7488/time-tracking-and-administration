@@ -7,7 +7,7 @@ import { Timer } from './timer';
 import { TaskCommands } from './TaskOperations';
 
 export function activate(context: vscode.ExtensionContext) {
-    const taskCommand = new TaskCommands();
+    const taskCommand = new TaskCommands(context);
 
     const timer = new Timer(context);
     const utils = new SimpleStringTools(context);
@@ -15,37 +15,40 @@ export function activate(context: vscode.ExtensionContext) {
 
     let yamlModifier: YamlModifier | undefined;
 
-    const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
+    const disposableForSr = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
 
         // await utils.extractYamlKey(); // Extracts the SR Id
         // vscode.window.showInformationMessage("Please select a task");
+        // TODO: remove the code above and its origin
 
         taskCommand.specifyStandupReport();
     });
 
-    const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
+    const disposableForTaskSelection = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
 
-        let refLink = await extractor.createYamlLink(); // Creates a yml link to check if it contains the srcode to dtect if it is in the sr
+        // let refLink = await extractor.createYamlLink(); // Creates a yml link to check if it contains the srcode to dtect if it is in the sr
 
-        let yamlLink = await utils.isSelectedTaskALink();
+        // let yamlLink = await utils.isSelectedTaskALink();
 
-        if (!yamlLink) yamlLink = await extractor.createYamlLink();
+        // if (!yamlLink) yamlLink = await extractor.createYamlLink();
 
-        const srCode = context.globalState.get("extractedYamlKey") as string;
-        if (!srCode) {
-            vscode.window.showErrorMessage("Run 'Specify Standup Report' first.");
-            return;
-        }
-        timer.startTimer();
-        yamlModifier = new YamlModifier(srCode, yamlLink, context);
-        if (refLink.includes(srCode)) {
-            await context.globalState.update('refLinkContainsSrCode', true);
-        } else {
-            const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
-            const timeLogString = `[ 0m, "", ${startTimeISO} ]`;
-            await yamlModifier.insertNewTask(timeLogString);
-            await context.globalState.update('refLinkContainsSrCode', false);
-        }
+        // const srCode = context.globalState.get("extractedYamlKey") as string;
+        // if (!srCode) {
+        //     vscode.window.showErrorMessage("Run 'Specify Standup Report' first.");
+        //     return;
+        // }
+        // timer.startTimer();
+        // yamlModifier = new YamlModifier(srCode, yamlLink, context);
+        // if (refLink.includes(srCode)) {
+        //     await context.globalState.update('refLinkContainsSrCode', true);
+        // } else {
+        //     const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
+        //     const timeLogString = `[ 0m, "", ${startTimeISO} ]`;
+        //     await yamlModifier.insertNewTask(timeLogString);
+        //     await context.globalState.update('refLinkContainsSrCode', false);
+        // }
+
+        taskCommand.selectTask();
 
     });
 
@@ -79,7 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(disposableA, disposableB, disposableC, disposableD, disposableE);
+    context.subscriptions.push(disposableForSr, disposableForTaskSelection, disposableC, disposableD, disposableE);
 }
 
 export function deactivate() { }
