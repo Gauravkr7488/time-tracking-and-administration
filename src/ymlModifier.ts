@@ -383,17 +383,16 @@ export class YamlEditors {
         return wasNode;
     }
 
-    private insertEntryInNode(node: yaml.YAMLSeq, entry: string) {
+    private insertEntryInNode(node: yaml.YAMLSeq, entry: yaml.YAMLMap<unknown, unknown>) {
         const emptyItemIndex = node.items.findIndex(item =>
             item === null ||
             (item instanceof yaml.Scalar && (item.value === '' || item.value === null))
         );
 
         if (emptyItemIndex !== -1) {
-            node.items[emptyItemIndex] = new yaml.Scalar(entry);
+            node.items[emptyItemIndex] = entry;
         } else {
-            const scalar = new yaml.Scalar(entry);
-            node.add(scalar);
+            node.add(entry);
         }
     }
 
@@ -417,7 +416,7 @@ export class YamlEditors {
         await vscode.workspace.applyEdit(edit);
     }
 
-    async moveEntryToWasInSr(srEntry: string, srCode: string, srDocUri: vscode.Uri) {
+    async moveEntryToWasInSr(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri) {
         this.srDocUri = srDocUri;
         this.srCode = srCode;
         await this.parseYaml();
@@ -458,14 +457,23 @@ export class YamlEditors {
         this.srCode = srCode;
         await this.parseYaml();
         let srEntryObj = await this.findSrEntry(srEntry);
-        // this.message.info(typeof srEntryObj);
         srEntryObj = await this.updateDuration(srEntryObj, duration);
-        // const wasNode = await this.getWasObj();
-        // if (!wasNode) return;
-        // this.insertEntryInNode(wasNode, srEntryObj);
-
-
         this.applyEditToDoc();
-        // enter the new time
+    }
+
+
+    createWorkLog(startTime: string){
+        const workLogSeq = new yaml.YAMLSeq();
+        workLogSeq.items = [ "0m", "", startTime ]
+        workLogSeq.flow = true;
+        return workLogSeq;
+    }
+
+    createSrEntry(yamlLink: string, startTime: string){
+        const workLog = this.createWorkLog(startTime);
+        const srEntryMap = new yaml.YAMLMap();
+
+        srEntryMap.set(yamlLink, workLog);
+        return srEntryMap;
     }
 }

@@ -170,10 +170,9 @@ export class TimerCommands extends TimerMechanics {
         return false;
     }
     
-    createWorkLog(): string {
+    giveStartTime(): string {
         const startTimeISO = this.context.globalState.get('timerStartTimeISO') as string;
-        const timeLogString = `[ 0m, "", ${startTimeISO} ]`;
-        return timeLogString;
+        return startTimeISO;
     }
 
 }
