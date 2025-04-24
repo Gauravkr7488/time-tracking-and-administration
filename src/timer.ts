@@ -157,10 +157,7 @@ export class TimerMechanics {
 
     isTimerRunning() {
         const startTime = this.context.globalState.get(Timer.START_TIME_KEY) as number | undefined;
-        if (startTime) {
-            this.message.err("Timer ia already running");
-            return true;
-        }
+        if (startTime) return true;
     }
 }
 

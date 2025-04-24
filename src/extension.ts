@@ -65,22 +65,24 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const disposableE = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
-        if (!yamlModifier) {
-            vscode.window.showInformationMessage("Run 'Task Selection' first to initialize the YAML modifier.");
-            timer.stopTimer();
-            return;
-        }
-        timer.stopTimer();
-        const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
-        const durationMinutes = context.globalState.get('timerDurationMinutes') as number;
-        const timeLogString = `[ ${durationMinutes}m, "", ${startTimeISO} ]`;
+        // if (!yamlModifier) {
+        //     vscode.window.showInformationMessage("Run 'Task Selection' first to initialize the YAML modifier.");
+        //     timer.stopTimer();
+        //     return;
+        // }
+        // timer.stopTimer();
+        // const startTimeISO = context.globalState.get('timerStartTimeISO') as string;
+        // const durationMinutes = context.globalState.get('timerDurationMinutes') as number;
+        // const timeLogString = `[ ${durationMinutes}m, "", ${startTimeISO} ]`;
 
-        const refLink = context.globalState.get("refLinkContainsSrCode");
-        if (refLink){
-            // a method to add duration to old time log needs to be added here
-        }else{
-            await yamlModifier.addTimerString(timeLogString);
-        }
+        // const refLink = context.globalState.get("refLinkContainsSrCode");
+        // if (refLink){
+        //     // a method to add duration to old time log needs to be added here
+        // }else{
+        //     await yamlModifier.addTimerString(timeLogString);
+        // }
+
+        taskCommand.stopTask();
     });
 
     context.subscriptions.push(disposableForSr, disposableForTaskSelection, disposableC, disposableD, disposableE);

@@ -18,6 +18,7 @@ export class TaskCommands {
     private srCode: string = '';
     private srDocUri?: vscode.Uri;
     private yamleditors = new YamlEditors();
+    private srEntry?: string;
 
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
@@ -44,22 +45,37 @@ export class TaskCommands {
             this.message.err("run specify Standup report first");
             return;
         }
-        if (this.timerCommand.isTaskRunnig()) return;
+        if (this.timerCommand.isTaskRunnig()){
+            this.message.err("Timer ia already running");
+            return;
+        } 
         if (!this.validateAndGet.isThisYamlDoc()) return; // change the name of the class
         this.yamlLink = this.textUtils.isThisYamlLink(); // uitls is a err
         if (!this.yamlLink) this.yamlLink = await this.yamlKeyExtractor.createYamlLink(); // 
         this.timer.startTimer(); // this needs refactoring since using old code
-        const srEntry = this.yamlLink + this.timerCommand.createWorkLog();
+        // const srEntry = this.yamlLink + ' ' + this.timerCommand.createWorkLog();
+        const srEntry = `${this.yamlLink} ${this.timerCommand.createWorkLog()}`;  // TODO: this is the origin of bug add like a proper yaml to fix this
+        // const srEntry = this.yamlLink + this.timerCommand.createWorkLog();
+        this.srEntry = srEntry;
         if(!this.srDocUri) return;
         this.yamleditors.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
         this.message.info("Task started");
     }
-
+    
     pauseOrResumeTask(){
         this.timer.pauseResumeTimer();
     }
+    
+    stopTask(){
+        if (!this.timerCommand.isTaskRunnig()) {
+            this.message.err("There is no active task");
+        }
+        const duration = this.timer.stopTimer();
+        if(!this.srEntry) return;
+        if(!this.srDocUri) return;
+        this.yamleditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration); // TODO complete this 
 
-    stopTask(){}
+    }
 
 
 }

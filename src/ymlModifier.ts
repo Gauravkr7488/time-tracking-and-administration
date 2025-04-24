@@ -345,6 +345,7 @@ export class YamlEditors {
     private srDoc?: vscode.TextDocument;
     private srDocUri?: vscode.Uri;
     private srCode?: string;
+
     private async parseYaml() {
         if (!this.srDocUri) return;
         this.srDoc = await vscode.workspace.openTextDocument(this.srDocUri);
@@ -415,7 +416,7 @@ export class YamlEditors {
 
         await vscode.workspace.applyEdit(edit);
     }
-    
+
     async moveEntryToWasInSr(srEntry: string, srCode: string, srDocUri: vscode.Uri) {
         this.srDocUri = srDocUri;
         this.srCode = srCode;
@@ -427,5 +428,44 @@ export class YamlEditors {
         this.insertEntryInNode(wasNode, srEntry);
         this.applyEditToDoc();
         // add the entry to the was node
+    }
+
+    async findSrEntry(srEntry: string) {
+        const wasNode = await this.getWasObj();
+        const srEntryIndex = wasNode.items.findIndex((item: any) => item.value === srEntry);
+        return srEntryIndex;
+    }
+
+    async updateDuration(srEntryIndex: any, duration: string) {
+        const wasNode = await this.getWasObj();
+        const srEntryObj = wasNode.items[srEntryIndex];
+        const srEntryValue = srEntryObj.value; 
+        const srEntryYamlObj = yaml.parse(srEntryValue);
+        const key = Object.keys(srEntryYamlObj)[0];
+        let logArray = srEntryYamlObj[key];
+        const newDuration = duration; // TODO cange this
+        logArray[0] = newDuration;
+        const logSeq = new yaml.YAMLSeq();
+        logSeq.items = logArray.map((i: any) => new yaml.Scalar(i));
+        logSeq.flow = true; // this is for the [] effect 
+        const newMap = new yaml.YAMLMap();
+        newMap.set(key, logSeq);
+        wasNode.items[srEntryIndex] = newMap;
+    }
+
+    async updateSrEntryDuration(srEntry: string, srCode: string, srDocUri: vscode.Uri, duration: string) {
+        this.srDocUri = srDocUri;
+        this.srCode = srCode;
+        await this.parseYaml();
+        let srEntryObj = await this.findSrEntry(srEntry);
+        // this.message.info(typeof srEntryObj);
+        srEntryObj = await this.updateDuration(srEntryObj, duration);
+        // const wasNode = await this.getWasObj();
+        // if (!wasNode) return;
+        // this.insertEntryInNode(wasNode, srEntryObj);
+
+
+        this.applyEditToDoc();
+        // enter the new time
     }
 }
