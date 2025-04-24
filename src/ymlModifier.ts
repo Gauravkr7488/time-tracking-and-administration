@@ -429,35 +429,25 @@ export class YamlEditors {
         // add the entry to the was node
     }
 
-    async findSrEntry(srEntry: string) {
+    async findSrEntry(srEntry: yaml.YAMLMap<unknown, unknown>) {
         const wasNode = await this.getWasObj();
-        const srEntryIndex = wasNode.items.findIndex((item: any) => item.value === srEntry);
+        const srEntryIndex = wasNode.items.findIndex((item: any) => item.items?.[0]?.key?.value === srEntry.items[0].key);
         return srEntryIndex;
     }
 
     async updateDuration(srEntryIndex: any, duration: string) {
         const wasNode = await this.getWasObj();
         const srEntryObj = wasNode.items[srEntryIndex];
-        const srEntryValue = srEntryObj.value; 
-        const srEntryYamlObj = yaml.parse(srEntryValue);
-        const key = Object.keys(srEntryYamlObj)[0];
-        let logArray = srEntryYamlObj[key];
-        const newDuration = duration; // TODO cange this
-        logArray[0] = newDuration;
-        const logSeq = new yaml.YAMLSeq();
-        logSeq.items = logArray.map((i: any) => new yaml.Scalar(i));
-        logSeq.flow = true; // this is for the [] effect 
-        const newMap = new yaml.YAMLMap();
-        newMap.set(key, logSeq);
-        wasNode.items[srEntryIndex] = newMap;
+        srEntryObj.items[0].value.items[0].value = duration;
+        wasNode.items[srEntryIndex] = srEntryObj;
     }
 
-    async updateSrEntryDuration(srEntry: string, srCode: string, srDocUri: vscode.Uri, duration: string) {
+    async updateSrEntryDuration(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri, duration: string) {
         this.srDocUri = srDocUri;
         this.srCode = srCode;
         await this.parseYaml();
         let srEntryObj = await this.findSrEntry(srEntry);
-        srEntryObj = await this.updateDuration(srEntryObj, duration);
+        await this.updateDuration(srEntryObj, duration);
         this.applyEditToDoc();
     }
 

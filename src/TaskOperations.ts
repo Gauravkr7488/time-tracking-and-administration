@@ -73,7 +73,7 @@ export class TaskCommands {
         const duration = this.timer.stopTimer();
         if (!this.srEntry) return;
         if (!this.srDocUri) return;
-        // this.yamleditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration); // TODO complete this 
+        this.yamleditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration); // TODO complete this 
 
     }
 
