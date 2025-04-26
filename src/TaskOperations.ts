@@ -52,29 +52,28 @@ export class TaskCommands {
         }
         if (!this.validateAndGet.isThisYamlDoc()) return; // change the name of the class
         this.yamlLink = this.textUtils.isThisYamlLink(); // uitls is a err
-        if (!this.yamlLink) this.yamlLink = await this.yamlKeyExtractor.createYamlLink(); // 
+        if (!this.yamlLink) this.yamlLink = await this.yamlKeyExtractor.createYamlLink();
         this.timer.startTimer(); // this needs refactoring since using old code
         const startTime = this.timerCommand.giveStartTime();
         this.srEntry = this.yamleditors.createSrEntry(this.yamlLink, startTime);
-        // this.srEntry = srEntry;
         if (!this.srDocUri) return;
         this.yamleditors.moveEntryToWasInSr(this.srEntry, this.srCode, this.srDocUri);
-        // this.message.info("Task started");
+        this.message.info("Task started");
     }
 
     pauseOrResumeTask() {
         this.timer.pauseResumeTimer();
     }
 
-    stopTask() {
+    async stopTask() {
         if (!this.timerCommand.isTaskRunnig()) {
             this.message.err("There is no active task");
         }
         const duration = this.timer.stopTimer();
         if (!this.srEntry) return;
         if (!this.srDocUri) return;
-        this.yamleditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration); // TODO complete this 
-
+        await this.yamleditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
+        await this.yamleditors.addWorkLogInTask(); // TODO
     }
 
 

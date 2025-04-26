@@ -82,10 +82,12 @@ export function activate(context: vscode.ExtensionContext) {
         //     await yamlModifier.addTimerString(timeLogString);
         // }
 
-        taskCommand.stopTask();
+        await taskCommand.stopTask();
     });
 
     context.subscriptions.push(disposableForSr, disposableForTaskSelection, disposableC, disposableD, disposableE);
 }
 
 export function deactivate() { }
+
+// we also need to move away from the dependency of the other extensions here it is f2p link genereator.

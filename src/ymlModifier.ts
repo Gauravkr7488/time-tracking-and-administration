@@ -342,14 +342,17 @@ export class YamlEditors {
     private validateAndGet = new ValidateAndGet();
     private yamlDoc?: yaml.Document;
     private message = new Message();
-    private srDoc?: vscode.TextDocument;
-    private srDocUri?: vscode.Uri;
+    private doc?: vscode.TextDocument;
+    private docUri?: vscode.Uri;
     private srCode?: string;
+    private srEntryObj: any;
+    private yamlLink: string = '';
+    private updatedWorkLog: any;
 
     private async parseYaml() {
-        if (!this.srDocUri) return;
-        this.srDoc = await vscode.workspace.openTextDocument(this.srDocUri);
-        const doc = this.srDoc;
+        if (!this.docUri) return;
+        this.doc = await vscode.workspace.openTextDocument(this.docUri);
+        const doc = this.doc;
         if (!doc) return;
         if (!this.validateAndGet.isThisYamlDoc()) return;
         const text = doc.getText();
@@ -383,10 +386,15 @@ export class YamlEditors {
         return wasNode;
     }
 
-    private insertEntryInNode(node: yaml.YAMLSeq, entry: yaml.YAMLMap<unknown, unknown>) {
+    private insertEntryInNode(node: yaml.YAMLSeq, entry: any) {
+        let a = node;
+        let b = entry;
         const emptyItemIndex = node.items.findIndex(item =>
-            item === null ||
-            (item instanceof yaml.Scalar && (item.value === '' || item.value === null))
+            item === null || 
+            (item instanceof yaml.Scalar && (item.value === '' || item.value === null)) ||
+            (item instanceof yaml.YAMLMap && item.items.length === 0) ||
+            (item instanceof yaml.YAMLSeq && item.items.length === 0)
+            
         );
 
         if (emptyItemIndex !== -1) {
@@ -398,7 +406,7 @@ export class YamlEditors {
 
     private async applyEditToDoc() {
         const edit = new vscode.WorkspaceEdit();
-        if (!this.srDoc) return;
+        if (!this.doc) return;
         if (!this.yamlDoc) return;
 
         let updatedYaml = this.yamlDoc.toString({
@@ -408,16 +416,16 @@ export class YamlEditors {
         });
 
         const fullRange = new vscode.Range(
-            this.srDoc.positionAt(0),
-            this.srDoc.positionAt(this.srDoc.getText().length)
+            this.doc.positionAt(0),
+            this.doc.positionAt(this.doc.getText().length)
         );
-        edit.replace(this.srDoc.uri, fullRange, updatedYaml);
+        edit.replace(this.doc.uri, fullRange, updatedYaml);
 
         await vscode.workspace.applyEdit(edit);
     }
 
     async moveEntryToWasInSr(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri) {
-        this.srDocUri = srDocUri;
+        this.docUri = srDocUri;
         this.srCode = srCode;
         await this.parseYaml();
 
@@ -440,10 +448,12 @@ export class YamlEditors {
         const srEntryObj = wasNode.items[srEntryIndex];
         srEntryObj.items[0].value.items[0].value = duration;
         wasNode.items[srEntryIndex] = srEntryObj;
+        this.srEntryObj = srEntryObj;
+        this.updatedWorkLog = srEntryObj.items[0].value;
     }
 
     async updateSrEntryDuration(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri, duration: string) {
-        this.srDocUri = srDocUri;
+        this.docUri = srDocUri;
         this.srCode = srCode;
         await this.parseYaml();
         let srEntryObj = await this.findSrEntry(srEntry);
@@ -452,18 +462,136 @@ export class YamlEditors {
     }
 
 
-    createWorkLog(startTime: string){
+    createWorkLog(startTime: string) {
         const workLogSeq = new yaml.YAMLSeq();
-        workLogSeq.items = [ "0m", "", startTime ]
+        workLogSeq.items = ["0m", "", startTime]
         workLogSeq.flow = true;
         return workLogSeq;
     }
 
-    createSrEntry(yamlLink: string, startTime: string){
+    createSrEntry(yamlLink: string, startTime: string) {
         const workLog = this.createWorkLog(startTime);
         const srEntryMap = new yaml.YAMLMap();
-
+        this.yamlLink = yamlLink;
         srEntryMap.set(yamlLink, workLog);
         return srEntryMap;
+    }
+
+    async getBackLogObj() {
+        const cleanYamlLink = this.yamlLink.slice(3, -1);
+        const docPath = cleanYamlLink.split("//");
+        const folderName = docPath[0];
+        const yamlStructure = docPath[1];
+        const yamlStructureKeys = yamlStructure.split(".");
+        const fileName = yamlStructureKeys[0];
+        const relativePath = `./${folderName}/${fileName}.yml`;
+        if (!vscode.workspace.workspaceFolders) return;
+        const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePath);
+        this.docUri = fileUri;
+        await this.parseYaml();
+        const cleanedYamlStructureOfTask = yamlStructureKeys.filter(str => str.trim() !== "");
+        cleanedYamlStructureOfTask.shift();
+        if (!this.yamlDoc) return;
+        const category = cleanedYamlStructureOfTask[0].toString();
+        const topLevelObj: any = this.yamlDoc.get(folderName + "//" + fileName);
+        const categoryObj = topLevelObj.items.find((item: any) => item.key.value == category);
+        if (!categoryObj) {
+            this.message.err("no categoryObj not found");
+            return;
+        }
+
+        for (let index = 1; index <= cleanedYamlStructureOfTask.length; index++) {
+            const element = cleanedYamlStructureOfTask[index];
+            let parentNode;
+            let childNode;
+            if (index == 1) {
+                parentNode = categoryObj;
+            } else {
+                parentNode = childNode;
+            }
+            if (!parentNode) return;
+            childNode = parentNode.items.find((item: any) => item.key.value == element);
+            if (!childNode) {
+                this.message.err(`no ${element} not found`);
+                return;
+            }
+            // return childNode;
+            let a = childNode.items.find((item: any) => item.key.value == "a");
+            if (a) return childNode;
+        }
+    }
+
+    async getTaskObj() {
+        const cleanYamlLink = this.yamlLink.slice(3, -1);
+        const yamlKeys = cleanYamlLink.split(".");
+        for (let index = 0; index < yamlKeys.length; index++) {
+            if (yamlKeys[index] == "") {
+                yamlKeys[index + 1] = "." + yamlKeys[index + 1];
+            }
+
+        }
+        const cleanYamlKeys = yamlKeys.filter(str => str.trim() !== "");
+        const fileAndFolderName = cleanYamlKeys[0];
+        const arrFileAndFolderName = fileAndFolderName.split("//");
+        let relativePath: string = ".";
+        for (let index = 0; index < arrFileAndFolderName.length; index++) {
+            relativePath = relativePath + "/" + arrFileAndFolderName[index];
+        }
+        relativePath = relativePath + ".yml";
+        if (!vscode.workspace.workspaceFolders) return;
+        const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePath);
+        this.docUri = fileUri;
+        await this.parseYaml();
+        // we need to navigate into the yamland then get the "WorkLog" for now
+        if (!this.yamlDoc) return;
+        const topLevelObj: any = this.yamlDoc.get(cleanYamlKeys[0]);
+        let parentObj = topLevelObj;
+
+        // for (let index = 1; index < cleanYamlKeys.length; index++) {
+        //     const childObj = parentObj.items.find((item: any) => await this.cleanStatusCodesFromKeys(item.key.value) == cleanYamlKeys[index]); // the fundamental issue is that the ptogress staus is being ignored in the link creation but thery are still the keys
+        //     parentObj = childObj;
+        //     let a = childObj;
+        //     // if(childObj.key.value == "WorkLog") return childObj;
+        // }
+
+        for (let index = 1; index < cleanYamlKeys.length; index++) {
+            for (const item of parentObj.items) {
+                const cleanedKey = await this.cleanStatusCodesFromKeys(item.key.value);
+                if (cleanedKey === cleanYamlKeys[index]) {
+                    parentObj = item.value; // Move deeper into the tree
+                    // let a = parentObj;
+                    if (index == cleanYamlKeys.length - 1) return parentObj;
+                    break;
+                }
+            }
+        }
+
+    }
+
+    async cleanStatusCodesFromKeys(key: string) {
+        const config = vscode.workspace.getConfiguration("F2ToolInterface");
+        const ignoredWords: string[] = config.get<string[]>('ignoreWords', []);
+        for (let index = 0; index < ignoredWords.length; index++) {
+            if (key.startsWith(ignoredWords[index])) {
+                let a = key.slice(ignoredWords[index].length).trimStart();
+                return a;
+            }
+        }
+        return key;
+    }
+
+    getWorkLogObj(taskObj: any) {
+        const workLogObj = taskObj.items.find((item: any) => item.key.value == "WorkLog");
+        return workLogObj.value;
+    }
+
+    async addWorkLogInTask() {
+        // navigate to the task 
+        // const backLogObj = await this.getBackLogObj();
+        const taskObj = await this.getTaskObj();
+        const workLogObj = await this.getWorkLogObj(taskObj);
+        this.insertEntryInNode(workLogObj, this.updatedWorkLog); // TODO the duration is coming under double quotes and the format is not correct we need to add name of the user. 
+        this.applyEditToDoc();
+        // update the worklog
     }
 }
