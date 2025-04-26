@@ -477,49 +477,49 @@ export class YamlEditors {
         return srEntryMap;
     }
 
-    async getBackLogObj() {
-        const cleanYamlLink = this.yamlLink.slice(3, -1);
-        const docPath = cleanYamlLink.split("//");
-        const folderName = docPath[0];
-        const yamlStructure = docPath[1];
-        const yamlStructureKeys = yamlStructure.split(".");
-        const fileName = yamlStructureKeys[0];
-        const relativePath = `./${folderName}/${fileName}.yml`;
-        if (!vscode.workspace.workspaceFolders) return;
-        const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePath);
-        this.docUri = fileUri;
-        await this.parseYaml();
-        const cleanedYamlStructureOfTask = yamlStructureKeys.filter(str => str.trim() !== "");
-        cleanedYamlStructureOfTask.shift();
-        if (!this.yamlDoc) return;
-        const category = cleanedYamlStructureOfTask[0].toString();
-        const topLevelObj: any = this.yamlDoc.get(folderName + "//" + fileName);
-        const categoryObj = topLevelObj.items.find((item: any) => item.key.value == category);
-        if (!categoryObj) {
-            this.message.err("no categoryObj not found");
-            return;
-        }
+    // async getBackLogObj() {
+    //     const cleanYamlLink = this.yamlLink.slice(3, -1);
+    //     const docPath = cleanYamlLink.split("//");
+    //     const folderName = docPath[0];
+    //     const yamlStructure = docPath[1];
+    //     const yamlStructureKeys = yamlStructure.split(".");
+    //     const fileName = yamlStructureKeys[0];
+    //     const relativePath = `./${folderName}/${fileName}.yml`;
+    //     if (!vscode.workspace.workspaceFolders) return;
+    //     const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePath);
+    //     this.docUri = fileUri;
+    //     await this.parseYaml();
+    //     const cleanedYamlStructureOfTask = yamlStructureKeys.filter(str => str.trim() !== "");
+    //     cleanedYamlStructureOfTask.shift();
+    //     if (!this.yamlDoc) return;
+    //     const category = cleanedYamlStructureOfTask[0].toString();
+    //     const topLevelObj: any = this.yamlDoc.get(folderName + "//" + fileName);
+    //     const categoryObj = topLevelObj.items.find((item: any) => item.key.value == category);
+    //     if (!categoryObj) {
+    //         this.message.err("no categoryObj not found");
+    //         return;
+    //     }
 
-        for (let index = 1; index <= cleanedYamlStructureOfTask.length; index++) {
-            const element = cleanedYamlStructureOfTask[index];
-            let parentNode;
-            let childNode;
-            if (index == 1) {
-                parentNode = categoryObj;
-            } else {
-                parentNode = childNode;
-            }
-            if (!parentNode) return;
-            childNode = parentNode.items.find((item: any) => item.key.value == element);
-            if (!childNode) {
-                this.message.err(`no ${element} not found`);
-                return;
-            }
-            // return childNode;
-            let a = childNode.items.find((item: any) => item.key.value == "a");
-            if (a) return childNode;
-        }
-    }
+    //     for (let index = 1; index <= cleanedYamlStructureOfTask.length; index++) {
+    //         const element = cleanedYamlStructureOfTask[index];
+    //         let parentNode;
+    //         let childNode;
+    //         if (index == 1) {
+    //             parentNode = categoryObj;
+    //         } else {
+    //             parentNode = childNode;
+    //         }
+    //         if (!parentNode) return;
+    //         childNode = parentNode.items.find((item: any) => item.key.value == element);
+    //         if (!childNode) {
+    //             this.message.err(`no ${element} not found`);
+    //             return;
+    //         }
+    //         // return childNode;
+    //         let a = childNode.items.find((item: any) => item.key.value == "a");
+    //         if (a) return childNode;
+    //     }
+    // }
 
     async getTaskObj() {
         const cleanYamlLink = this.yamlLink.slice(3, -1);
@@ -580,8 +580,27 @@ export class YamlEditors {
         return key;
     }
 
-    getWorkLogObj(taskObj: any) {
-        const workLogObj = taskObj.items.find((item: any) => item.key.value == "WorkLog");
+    createWorkLogObj() {
+
+        const workLogObj = new yaml.Pair(
+            new yaml.Scalar('WorkLog'),
+            new yaml.YAMLSeq()
+        );
+        const emptyItem = new yaml.Scalar(null);
+        (workLogObj.value as yaml.YAMLSeq).items.push(emptyItem);
+
+        return workLogObj;
+    }
+
+
+    async getWorkLogObj(taskObj: any) {
+        let workLogObj = taskObj.items.find((item: any) => item.key.value == "WorkLog");
+        let z = taskObj;
+        if (!workLogObj) {
+            workLogObj = this.createWorkLogObj();
+            taskObj.items.push(workLogObj);
+        }
+        let a = workLogObj;
         return workLogObj.value;
     }
 
@@ -591,10 +610,10 @@ export class YamlEditors {
         return userName;
     }
 
-    async addWorkLogInTask() {  // there is type dqyouts in the duration clean that TODO
+    async addWorkLogInTask() {  // there is type dqyouts in the duration clean that TODO and waht to do if the worklog is not a sequence ?
         const taskObj = await this.getTaskObj();
         const workLogObj = await this.getWorkLogObj(taskObj);
-        let name = this.getName()
+        let name = this.getName();
         name = new yaml.Scalar(name); // TODO craete a setting for this.
         this.updatedWorkLog.items.unshift(name);
         this.insertEntryInNode(workLogObj, this.updatedWorkLog); // TODO the duration is coming under double quotes and the format is not correct we need to add name of the user. 
