@@ -37,7 +37,17 @@
         "command": "time-tracking-and-administration.stopTimer",
         "title": "Stop Timer"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "Time Tracking and Administration",
+      "properties": {
+        "time-tracking-and-administration.userName": {
+          "type": "string",
+          "default": "YourUserName",
+          "description": "Your username"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

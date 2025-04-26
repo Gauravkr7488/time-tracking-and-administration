@@ -390,11 +390,11 @@ export class YamlEditors {
         let a = node;
         let b = entry;
         const emptyItemIndex = node.items.findIndex(item =>
-            item === null || 
+            item === null ||
             (item instanceof yaml.Scalar && (item.value === '' || item.value === null)) ||
             (item instanceof yaml.YAMLMap && item.items.length === 0) ||
             (item instanceof yaml.YAMLSeq && item.items.length === 0)
-            
+
         );
 
         if (emptyItemIndex !== -1) {
@@ -585,13 +585,19 @@ export class YamlEditors {
         return workLogObj.value;
     }
 
-    async addWorkLogInTask() {
-        // navigate to the task 
-        // const backLogObj = await this.getBackLogObj();
+    getName() {
+        const config = vscode.workspace.getConfiguration('time-tracking-and-administration');
+        const userName = config.get('userName');
+        return userName;
+    }
+
+    async addWorkLogInTask() {  // there is type dqyouts in the duration clean that TODO
         const taskObj = await this.getTaskObj();
         const workLogObj = await this.getWorkLogObj(taskObj);
+        let name = this.getName()
+        name = new yaml.Scalar(name); // TODO craete a setting for this.
+        this.updatedWorkLog.items.unshift(name);
         this.insertEntryInNode(workLogObj, this.updatedWorkLog); // TODO the duration is coming under double quotes and the format is not correct we need to add name of the user. 
         this.applyEditToDoc();
-        // update the worklog
     }
 }
