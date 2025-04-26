@@ -591,7 +591,12 @@ export class YamlEditors {
 
         return workLogObj;
     }
-
+    addNullValueInWorkLog(workLogObj: any){
+        const newSeq = new yaml.YAMLSeq();
+        newSeq.items.push(new yaml.Scalar(null));
+    
+        workLogObj.value = newSeq;
+    }
 
     async getWorkLogObj(taskObj: any) {
         let workLogObj = taskObj.items.find((item: any) => item.key.value == "WorkLog");
@@ -600,6 +605,7 @@ export class YamlEditors {
             workLogObj = this.createWorkLogObj();
             taskObj.items.push(workLogObj);
         }
+        if(!workLogObj.value.items) this.addNullValueInWorkLog(workLogObj);
         let a = workLogObj;
         return workLogObj.value;
     }
