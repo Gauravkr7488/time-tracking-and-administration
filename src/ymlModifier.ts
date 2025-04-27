@@ -599,8 +599,13 @@ export class YamlEditors {
     }
 
     async getWorkLogObj(taskObj: any) {
-        let workLogObj = taskObj.items.find((item: any) => item.key.value == "WorkLog");
+        if (!taskObj.items) {
+            this.message.err("This is not a proper task as it does not have any items inside it");
+            return
+        }
+       
         let z = taskObj;
+        let workLogObj = taskObj.items.find((item: any) => item.key.value == "WorkLog");
         if (!workLogObj) {
             workLogObj = this.createWorkLogObj();
             taskObj.items.push(workLogObj);
@@ -616,9 +621,10 @@ export class YamlEditors {
         return userName;
     }
 
-    async addWorkLogInTask() {  // there is type dqyouts in the duration clean that TODO and waht to do if the worklog is not a sequence ?
+    async addWorkLogInTask() {  // TODO what if the task is actually empty like without even a discription
         const taskObj = await this.getTaskObj();
         const workLogObj = await this.getWorkLogObj(taskObj);
+        if (!workLogObj) return;
         let name = this.getName();
         name = new yaml.Scalar(name); // TODO craete a setting for this.
         this.updatedWorkLog.items.unshift(name);
