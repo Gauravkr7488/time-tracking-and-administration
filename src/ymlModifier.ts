@@ -104,9 +104,20 @@ export class YamlEditors {
     }
 
     async findSrEntry(srEntry: yaml.YAMLMap<unknown, unknown>) {
+        // const wasNode = await this.getWasObj();
+        // const srEntryIndex = wasNode.items.findIndex((item: any) => item.items?.[0]?.key?.value === srEntry.items[0].key);
+        // return srEntryIndex;
+
         const wasNode = await this.getWasObj();
-        const srEntryIndex = wasNode.items.findIndex((item: any) => item.items?.[0]?.key?.value === srEntry.items[0].key);
-        return srEntryIndex;
+    
+        for (let i = wasNode.items.length - 1; i >= 0; i--) {
+            const item = wasNode.items[i];
+            if (item.items?.[0]?.key?.value === srEntry.items[0].key) {
+                return i; // Return the index of the last matching item
+            }
+        }
+        
+        return -1;
     }
 
     async updateDuration(srEntryIndex: any, duration: string) {
