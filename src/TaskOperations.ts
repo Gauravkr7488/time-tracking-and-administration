@@ -53,8 +53,8 @@ export class TaskCommands {
         if (!this.validateAndGet.isThisYamlDoc()) return; // change the name of the class
         this.yamlLink = this.textUtils.isThisYamlLink(); // uitls is a err
         if (!this.yamlLink) this.yamlLink = await this.yamlKeyExtractor.createYamlLink();
-        this.timer.startTimer(); // this needs refactoring since using old code
-        const startTime = this.timerCommand.giveStartTime();
+        await this.timer.startTimer(); // this needs refactoring since using old code
+        const startTime = await this.timerCommand.giveStartTime();
         this.srEntry = this.yamleditors.createSrEntry(this.yamlLink, startTime);
         if (!this.srDocUri) return;
         this.yamleditors.moveEntryToWasInSr(this.srEntry, this.srCode, this.srDocUri);

@@ -14,7 +14,7 @@ export class Timer {
         this.context = context;
     }
 
-    public startTimer(): string {
+     public async startTimer(): Promise<string> {
         const isPaused = this.context.globalState.get(Timer.IS_PAUSED_KEY) as boolean;
         if (isPaused) {
             vscode.window.showErrorMessage('Timer is paused. Resume or stop it first.');
@@ -170,7 +170,7 @@ export class TimerCommands extends TimerMechanics {
         return false;
     }
     
-    giveStartTime(): string {
+    async giveStartTime(): Promise<string> {
         const startTimeISO = this.context.globalState.get('timerStartTimeISO') as string;
         return startTimeISO;
     }
