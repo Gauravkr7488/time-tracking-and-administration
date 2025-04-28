@@ -30,7 +30,7 @@ export class TextUtils {
         if(!cursorPosition) return '';
         let line = doc.lineAt(cursorPosition.line);
         let lineText = line.text;
-        let linkPattern = /-->.*<\:/g;
+        let linkPattern = /-->.*</g;
         let match;
 
         while ((match = linkPattern.exec(lineText)) !== null) {  // .exec returns array

@@ -4,7 +4,7 @@ import { Message, TextUtils } from "./VsCodeUtils";
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { YamlKeyExtractor } from "./ymlReferenceExtractor";
-import { YamlEditors, YamlModifier } from "./ymlModifier";
+import { YamlEditors } from "./ymlModifier";
 
 
 export class TaskCommands {
@@ -68,6 +68,7 @@ export class TaskCommands {
     async stopTask() {
         if (!this.timerCommand.isTaskRunnig()) {
             this.message.err("There is no active task");
+            return;
         }
         const duration = this.timer.stopTimer();
         if (!this.srEntry) return;
@@ -75,6 +76,4 @@ export class TaskCommands {
         await this.yamleditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
         await this.yamleditors.addWorkLogInTask(); // TODO
     }
-
-
 }

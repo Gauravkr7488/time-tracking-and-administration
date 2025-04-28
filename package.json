@@ -23,11 +23,7 @@
       },
       {
         "command": "time-tracking-and-administration.taskSelection",
-        "title": "Select task"
-      },
-      {
-        "command": "time-tracking-and-administration.startTimer",
-        "title": "Start Timer"
+        "title": "Select Task"
       },
       {
         "command": "time-tracking-and-administration.pauseResumeTimer",
@@ -35,7 +31,7 @@
       },
       {
         "command": "time-tracking-and-administration.stopTimer",
-        "title": "Stop Timer"
+        "title": "Stop Task/Timer"
       }
     ],
     "configuration": {
