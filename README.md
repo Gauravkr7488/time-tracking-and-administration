@@ -4,6 +4,13 @@
 
 - Generates the was part when you specify a standup report and then select the task with time log
 
+## Commmands
+
+- Specify Standup report 
+- Start Task
+- Pause/Resume Task
+- Stop Task
+
 ## Requirements
 
 - F2ToolInterface
@@ -14,15 +21,15 @@
 
 ## Known Issues
 
-- The status string inside the WorkLog resets when the timer stops and updates the time
-- When the task is selected form the same sr then stopping the timer dosen't update the worklog
 - Whenever there is special characters like single or double quotes a slash gets added to ecape them
 
-### 1.0.1
+### 0.0.1
 
 Bug Fix : now the filename dosent come before the link
 
+### 1.0.0
 
+Added The feature for addition of workLog 
 ## For more information
 
 Contact me - Gaurav
