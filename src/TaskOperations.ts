@@ -74,6 +74,6 @@ export class TaskCommands {
         if (!this.srEntry) return;
         if (!this.srDocUri) return;
         await this.yamleditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
-        await this.yamleditors.addWorkLogInTask(); // TODO
+        await this.yamleditors.addWorkLogInTask();
     }
 }

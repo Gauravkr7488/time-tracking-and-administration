@@ -170,11 +170,25 @@ export class YamlEditors {
         for (let index = 0; index < arrFileAndFolderName.length; index++) {
             relativePath = relativePath + "/" + arrFileAndFolderName[index];
         }
-        relativePath = relativePath + ".yml";
-        if (!vscode.workspace.workspaceFolders) return;
-        const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePath);
-        this.docUri = fileUri;
-        await this.parseYaml();
+        try {
+
+            let relativePathOfFile = relativePath + ".yml";
+            if (!vscode.workspace.workspaceFolders) return;
+            const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePathOfFile);
+            this.docUri = fileUri;
+            await this.parseYaml();
+        }catch(err1: any){
+            try{
+                let relativePathOfFile = relativePath + ".yaml";
+                if (!vscode.workspace.workspaceFolders) return;
+                const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePathOfFile);
+                this.docUri = fileUri;
+                await this.parseYaml();
+
+            }catch(err2: any){
+                this.message.err(err1 + '' + err2);
+            }
+        }
         // we need to navigate into the yamland then get the "WorkLog" for now
         if (!this.yamlDoc) return;
         const topLevelObj: any = this.yamlDoc.get(cleanYamlKeys[0]);
