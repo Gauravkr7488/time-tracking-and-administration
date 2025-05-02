@@ -34,23 +34,47 @@ export class YamlEditors {
         if (!this.yamlDoc) return;
         if (!this.srCode) return;
         const srNode = this.yamlDoc.get(this.srCode);
+        const srCodeObj = new yaml.Scalar(this.srCode);
         if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
-            this.message.err("no srCode not found");
-            return;
+            this.yamlDoc.delete(this.srCode);
+            let srNode = this.createSrNode();
+            this.yamlDoc.set(srCodeObj, srNode);
+            return srNode;
         }
         return srNode;
+    }
+
+    createSrNode():  yaml.YAMLMap<unknown, unknown> {
+        const srMap = new yaml.YAMLMap();
+        const wasObj = this.createObjWithEmptySeq("Was");
+        const nextObj = this.createObjWithEmptySeq("Next");
+        srMap.add(wasObj);
+        srMap.add(nextObj);
+        return srMap;
+    }
+
+    private createObjWithEmptySeq(key: string) {
+        const node = new yaml.YAMLSeq();
+        const emptyItem = new yaml.Scalar(null);
+        node.items.push(emptyItem);
+        const wasObj = new yaml.Pair(
+            new yaml.Scalar(key), 
+            node
+        );
+        return wasObj;
     }
 
     private async getWasObj() {
         const srNode = await this.getSrObj();
         if (!srNode) return;
         let wasNode = srNode.get("Was");
-        if(!wasNode) wasNode = srNode.get("was");
+        if (!wasNode) wasNode = srNode.get("was");
         if (!wasNode || !(wasNode instanceof yaml.YAMLSeq)) {
             this.message.err("no wasSection was found in the Sr");
         }
         return wasNode;
     }
+
 
     private insertEntryInNode(node: yaml.YAMLSeq, entry: any) {
         const emptyItemIndex = node.items.findIndex(item =>
