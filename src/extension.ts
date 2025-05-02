@@ -1,4 +1,3 @@
-// we also need to move away from the dependency of the other extensions here it is f2p link genereator.
 import * as vscode from 'vscode';
 import { Timer } from './timer';
 import { TaskCommands } from './TaskOperations';
