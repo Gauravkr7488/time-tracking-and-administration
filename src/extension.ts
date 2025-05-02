@@ -1,10 +1,8 @@
 import * as vscode from 'vscode';
-import { Timer } from './timer';
 import { TaskCommands } from './TaskOperations';
 
 export function activate(context: vscode.ExtensionContext) {
     const taskCommand = new TaskCommands(context);
-    const timer = new Timer(context);
 
     const disposableForSr = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
         taskCommand.specifyStandupReport();
