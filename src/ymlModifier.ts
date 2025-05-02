@@ -108,7 +108,7 @@ export class YamlEditors {
                 return i; // Return the index of the last matching item
             }
         }
-        
+
         return -1;
     }
 
@@ -146,29 +146,68 @@ export class YamlEditors {
     }
 
     async getTaskObj() {
+        // let taskObj;
+        // let parentOftaskObj;
         const cleanF2YamlLink = this.removeLinkSymbolsFromLink();
         const yamlKeys = this.parseF2YamlLink(cleanF2YamlLink);
         const cleanYamlKeys = this.removeEmptyKeys(yamlKeys);
         await this.createFileURIandParseYaml(cleanYamlKeys);
-        
-        // we need to navigate into the yamland then get the "WorkLog" for now
-        if (!this.yamlDoc) return;
-        const topLevelObj: any = this.yamlDoc.get(cleanYamlKeys[0]);
-        let parentObj = topLevelObj;
+        let result = await this.findTaskObj(cleanYamlKeys);
+        if (!result) return;
+        let { taskObj, parentOfTaskObj } = result;
+        if (!taskObj.value.items) {
+            taskObj = this.replaceTheTaskObj(parentOfTaskObj, taskObj);
+        }
+        return taskObj;
 
+    }
+
+    async replaceTheTaskObj(parentOfTaskObj: any, taskObj: any) {
+        for (let index = 0; index < parentOfTaskObj.items.length; index++) {
+            let currentObj = parentOfTaskObj.items[index];
+            if (currentObj === taskObj) {
+                const taskObjName = taskObj.key.value;
+                const taskObjItem = this.createWorkLogObj();
+                const map = new yaml.YAMLMap();
+                map.add(taskObjItem)
+                const taskObjMap = new yaml.Pair(taskObjName, map);
+                parentOfTaskObj.items[index] = taskObjMap;
+                return taskObjMap;
+
+            }
+        }
+    }
+
+    private async findTaskObj(cleanYamlKeys: string[]) {
+        let parentOfTaskObj;
+        let taskObj;
+        if (!this.yamlDoc) return;
+        const fileAndFolderName = cleanYamlKeys[0];
+        const topLevelObj: any = this.yamlDoc.get(fileAndFolderName);
+        let parentObj = topLevelObj;
         for (let index = 1; index < cleanYamlKeys.length; index++) {
+            const currentKey = cleanYamlKeys[index];
             for (const item of parentObj.items) {
                 const cleanedKey = await this.cleanStatusCodesFromKeys(item.key.value);
-                if (cleanedKey === cleanYamlKeys[index]) {
-                    parentObj = item.value; // Move deeper into the tree
-                    // let a = parentObj;
-                    if (index == cleanYamlKeys.length - 1) return parentObj;
+                if (cleanedKey === currentKey) {
+                    if (index == cleanYamlKeys.length - 1) {
+                        taskObj = item;
+                        parentOfTaskObj = parentObj;
+                    }
+                    parentObj = this.moveDeeperIntoTree(parentObj, item);
+
                     break;
                 }
             }
         }
-
+        return { taskObj, parentOfTaskObj };
     }
+
+    private moveDeeperIntoTree(parentObj: any, item: any) {
+        parentObj = item.value;
+        return parentObj;
+    }
+
     private async createFileURIandParseYaml(cleanYamlKeys: any[]) {
         const fileAndFolderName = cleanYamlKeys[0];
         const arrFileAndFolderName = fileAndFolderName.split("//");
@@ -183,15 +222,15 @@ export class YamlEditors {
             const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePathOfFile);
             this.docUri = fileUri;
             await this.parseYaml();
-        }catch(err1: any){
-            try{
+        } catch (err1: any) {
+            try {
                 let relativePathOfFile = relativePath + ".yaml";
                 if (!vscode.workspace.workspaceFolders) return;
                 const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePathOfFile);
                 this.docUri = fileUri;
                 await this.parseYaml();
 
-            }catch(err2: any){
+            } catch (err2: any) {
                 this.message.err(err1 + '' + err2);
             }
         };
@@ -224,8 +263,8 @@ export class YamlEditors {
         const ignoredWords: string[] = config.get<string[]>('ignoreWords', []);
         for (let index = 0; index < ignoredWords.length; index++) {
             if (key.startsWith(ignoredWords[index])) {
-                let a = key.slice(ignoredWords[index].length).trimStart();
-                return a;
+                let cleanedKey = key.slice(ignoredWords[index].length).trimStart();
+                return cleanedKey;
             }
         }
         return key;
@@ -242,26 +281,26 @@ export class YamlEditors {
 
         return workLogObj;
     }
-    addNullValueInWorkLog(workLogObj: any){
+    addNullValueInWorkLog(workLogObj: any) {
         const newSeq = new yaml.YAMLSeq();
         newSeq.items.push(new yaml.Scalar(null));
-    
+
         workLogObj.value = newSeq;
     }
 
     async getWorkLogObj(taskObj: any) {
-        if (!taskObj.items) {
+        if (!taskObj.value.items) {
             this.message.err("This is not a proper task as it does not have any items inside it");
             return
         }
-       
+
         let z = taskObj;
-        let workLogObj = taskObj.items.find((item: any) => item.key.value == "WorkLog");
+        let workLogObj = taskObj.value.items.find((item: any) => item.key.value == "WorkLog");
         if (!workLogObj) {
             workLogObj = this.createWorkLogObj();
-            taskObj.items.push(workLogObj);
+            taskObj.value.items.push(workLogObj);
         }
-        if(!workLogObj.value.items) this.addNullValueInWorkLog(workLogObj);
+        if (!workLogObj.value.items) this.addNullValueInWorkLog(workLogObj);
         let a = workLogObj;
         return workLogObj.value;
     }
@@ -272,14 +311,14 @@ export class YamlEditors {
         return userName;
     }
 
-    async addWorkLogInTask() { 
+    async addWorkLogInTask() {
         const taskObj = await this.getTaskObj();
         const workLogObj = await this.getWorkLogObj(taskObj);
         if (!workLogObj) return;
         let name = this.getName();
-        name = new yaml.Scalar(name); 
+        name = new yaml.Scalar(name);
         this.updatedWorkLog.items.unshift(name);
-        this.insertEntryInNode(workLogObj, this.updatedWorkLog);  
+        this.insertEntryInNode(workLogObj, this.updatedWorkLog);
         this.applyEditToDoc();
     }
 }
