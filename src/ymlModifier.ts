@@ -44,7 +44,8 @@ export class YamlEditors {
     private async getWasObj() {
         const srNode = await this.getSrObj();
         if (!srNode) return;
-        const wasNode = srNode.get("Was");
+        let wasNode = srNode.get("Was");
+        if(!wasNode) wasNode = srNode.get("was");
         if (!wasNode || !(wasNode instanceof yaml.YAMLSeq)) {
             this.message.err("no wasSection was found in the Sr");
         }
