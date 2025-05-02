@@ -11,7 +11,6 @@ export class YamlEditors {
     private doc?: vscode.TextDocument;
     private docUri?: vscode.Uri;
     private srCode?: string;
-    // private srEntryObj: any;
     private yamlLink: string = '';
     private updatedWorkLog: any;
 
@@ -53,8 +52,6 @@ export class YamlEditors {
     }
 
     private insertEntryInNode(node: yaml.YAMLSeq, entry: any) {
-        let a = node;
-        let b = entry;
         const emptyItemIndex = node.items.findIndex(item =>
             item === null ||
             (item instanceof yaml.Scalar && (item.value === '' || item.value === null)) ||
@@ -103,13 +100,8 @@ export class YamlEditors {
         // add the entry to the was node
     }
 
-    async findSrEntry(srEntry: yaml.YAMLMap<unknown, unknown>) {
-        // const wasNode = await this.getWasObj();
-        // const srEntryIndex = wasNode.items.findIndex((item: any) => item.items?.[0]?.key?.value === srEntry.items[0].key);
-        // return srEntryIndex;
-
+    private async findSrEntry(srEntry: yaml.YAMLMap<unknown, unknown>) {
         const wasNode = await this.getWasObj();
-    
         for (let i = wasNode.items.length - 1; i >= 0; i--) {
             const item = wasNode.items[i];
             if (item.items?.[0]?.key?.value === srEntry.items[0].key) {
@@ -125,7 +117,6 @@ export class YamlEditors {
         const srEntryObj = wasNode.items[srEntryIndex];
         srEntryObj.items[0].value.items[0].value = duration;
         wasNode.items[srEntryIndex] = srEntryObj;
-        // this.srEntryObj = srEntryObj;
         this.updatedWorkLog = srEntryObj.items[0].value;
     }
 
