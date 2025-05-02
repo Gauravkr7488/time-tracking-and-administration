@@ -146,15 +146,30 @@ export class YamlEditors {
     }
 
     async getTaskObj() {
-        const cleanYamlLink = this.yamlLink.slice(3, -1);
-        const yamlKeys = cleanYamlLink.split(".");
-        for (let index = 0; index < yamlKeys.length; index++) {
-            if (yamlKeys[index] == "") {
-                yamlKeys[index + 1] = "." + yamlKeys[index + 1];
-            }
+        const cleanF2YamlLink = this.removeLinkSymbolsFromLink();
+        const yamlKeys = this.parseF2YamlLink(cleanF2YamlLink);
+        const cleanYamlKeys = this.removeEmptyKeys(yamlKeys);
+        await this.createFileURIandParseYaml(cleanYamlKeys);
+        
+        // we need to navigate into the yamland then get the "WorkLog" for now
+        if (!this.yamlDoc) return;
+        const topLevelObj: any = this.yamlDoc.get(cleanYamlKeys[0]);
+        let parentObj = topLevelObj;
 
+        for (let index = 1; index < cleanYamlKeys.length; index++) {
+            for (const item of parentObj.items) {
+                const cleanedKey = await this.cleanStatusCodesFromKeys(item.key.value);
+                if (cleanedKey === cleanYamlKeys[index]) {
+                    parentObj = item.value; // Move deeper into the tree
+                    // let a = parentObj;
+                    if (index == cleanYamlKeys.length - 1) return parentObj;
+                    break;
+                }
+            }
         }
-        const cleanYamlKeys = yamlKeys.filter(str => str.trim() !== "");
+
+    }
+    private async createFileURIandParseYaml(cleanYamlKeys: any[]) {
         const fileAndFolderName = cleanYamlKeys[0];
         const arrFileAndFolderName = fileAndFolderName.split("//");
         let relativePath: string = ".";
@@ -179,24 +194,29 @@ export class YamlEditors {
             }catch(err2: any){
                 this.message.err(err1 + '' + err2);
             }
-        }
-        // we need to navigate into the yamland then get the "WorkLog" for now
-        if (!this.yamlDoc) return;
-        const topLevelObj: any = this.yamlDoc.get(cleanYamlKeys[0]);
-        let parentObj = topLevelObj;
+        };
+    }
 
-        for (let index = 1; index < cleanYamlKeys.length; index++) {
-            for (const item of parentObj.items) {
-                const cleanedKey = await this.cleanStatusCodesFromKeys(item.key.value);
-                if (cleanedKey === cleanYamlKeys[index]) {
-                    parentObj = item.value; // Move deeper into the tree
-                    // let a = parentObj;
-                    if (index == cleanYamlKeys.length - 1) return parentObj;
-                    break;
-                }
+    private removeEmptyKeys(yamlKeys: string[]) {
+        return yamlKeys.filter(str => str.trim() !== "");
+    }
+
+    private parseF2YamlLink(cleanYamlLink: string) {
+        const yamlKeys = cleanYamlLink.split(".");
+        for (let index = 0; index < yamlKeys.length; index++) {
+            if (yamlKeys[index] == "") {
+                yamlKeys[index + 1] = "." + yamlKeys[index + 1];
             }
-        }
 
+        }
+        return yamlKeys;
+    }
+
+    private removeLinkSymbolsFromLink() {
+        const lengthOfFrontLinkSymbols = 3;
+        const lengthOfBackLinkSymbols = 1;
+        const cleanYamlLink = this.yamlLink.slice(lengthOfFrontLinkSymbols, -lengthOfBackLinkSymbols);
+        return cleanYamlLink;
     }
 
     async cleanStatusCodesFromKeys(key: string) {
