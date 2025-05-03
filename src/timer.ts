@@ -43,7 +43,7 @@ export class Timer {
         const result = `started task at ${formattedTime}`;
 
         // Show message and return string
-        vscode.window.showInformationMessage('Timer started.');
+        // vscode.window.showInformationMessage('Timer started.');
         return result;
     }
 

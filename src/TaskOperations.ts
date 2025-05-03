@@ -57,7 +57,7 @@ export class TaskCommands {
         this.srEntry = this.yamleditors.createSrEntry(this.yamlLink, startTime);
         if (!this.srDocUri) return;
         this.yamleditors.moveEntryToWasInSr(this.srEntry, this.srCode, this.srDocUri);
-        this.message.info("Task started");
+        this.message.info(`The timer has started on Task: ${this.yamlLink}`);
     }
 
     pauseOrResumeTask() {
