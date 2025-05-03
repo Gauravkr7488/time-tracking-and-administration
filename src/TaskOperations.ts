@@ -47,8 +47,7 @@ export class TaskCommands {
             return;
         }
         if (this.timerCommand.isTaskRunnig()) {
-            this.message.err("Timer ia already running");
-            return;
+            await this.stopTask();
         }
         if (!this.validateAndGet.isThisYamlDoc()) return; // change the name of the class
         this.yamlLink = this.textUtils.isThisYamlLink(); // uitls is a err
