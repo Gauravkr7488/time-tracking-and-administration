@@ -341,7 +341,8 @@ export class YamlEditors {
         return userName;
     }
 
-    async addWorkLogInTask() {
+    async addWorkLogInTask(workLog: any) {
+        this.updatedWorkLog = workLog;
         const taskObj = await this.getTaskObj();
         const workLogObj = await this.getWorkLogObj(taskObj);
         if (!workLogObj) return;
@@ -362,6 +363,25 @@ export class YamlEditors {
 
         let srINdex = await this.findSrEntry(srEntry);
         return srINdex;
+
+    }
+
+    async generateWorkLogs(srCode: string, srDocUri: vscode.Uri) {
+        this.docUri = srDocUri;
+        this.srCode = srCode;
+        await this.parseYaml();
+
+        const wasNode = await this.getWasObj();
+        if (!wasNode) return;
+        for (let index = 0; index < wasNode.items.length; index++) {
+            let currentYamlLink = wasNode.items[index].items[0].key.value;
+            let workLog = wasNode.items[index].items[0].value; // IMP
+            this.yamlLink = currentYamlLink;
+            await this.addWorkLogInTask(workLog);
+
+        }
+        return;
+
 
     }
 }

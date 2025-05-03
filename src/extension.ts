@@ -19,6 +19,10 @@ export function activate(context: vscode.ExtensionContext) {
     const disposableForStopTimer = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
         await taskCommand.stopTask();
     });
+    
+    const disposableForWorkLogGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateWorkLogs', async () => {
+        await taskCommand.generateWorkLogs();
+    });
 
     context.subscriptions.push(disposableForSr, disposableForTaskSelection, disposableForPauseResumeTimer, disposableForStopTimer);
 }

@@ -32,6 +32,10 @@
       {
         "command": "time-tracking-and-administration.stopTimer",
         "title": "Stop Task/Timer"
+      },
+      {
+        "command": "time-tracking-and-administration.generateWorkLogs",
+        "title": "Generate WorkLogs from SR"
       }
     ],
     "configuration": {
