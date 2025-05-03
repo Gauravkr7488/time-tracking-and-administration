@@ -37,7 +37,7 @@ export class TaskCommands {
             this.message.err("there is no srcode under the cursor");
             return;
         }
-        this.message.info(srCode);
+        this.message.info(`${srCode} is selected as the Standup Report. Please select a Task and issue the Start timer on Task command`);
         this.srCode = srCode;
     }
 
