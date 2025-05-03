@@ -82,7 +82,7 @@ export class Timer {
         }
     }
 
-    public stopTimer(): string {
+    public stopTimer() {
         const startTime = this.context.globalState.get(Timer.START_TIME_KEY) as number | undefined;
         const accumulatedTime = this.context.globalState.get(Timer.ACCUMULATED_TIME_KEY) as number || 0;
         const isPaused = this.context.globalState.get(Timer.IS_PAUSED_KEY) as boolean;
@@ -109,7 +109,7 @@ export class Timer {
         this.context.globalState.update(Timer.DURATION_MINUTES_KEY, durationMinutes);
 
         // Format the return string
-        const result = `${durationMinutes}m`;
+        const result = durationMinutes;
 
         // Show duration and reset
         const durationSeconds = (totalDurationMs / 1000).toFixed(2);

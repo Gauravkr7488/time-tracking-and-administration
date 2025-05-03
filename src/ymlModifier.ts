@@ -44,7 +44,7 @@ export class YamlEditors {
         return srNode;
     }
 
-    createSrNode():  yaml.YAMLMap<unknown, unknown> {
+    createSrNode(): yaml.YAMLMap<unknown, unknown> {
         const srMap = new yaml.YAMLMap();
         const wasObj = this.createObjWithEmptySeq("Was");
         const nextObj = this.createObjWithEmptySeq("Next");
@@ -58,7 +58,7 @@ export class YamlEditors {
         const emptyItem = new yaml.Scalar(null);
         node.items.push(emptyItem);
         const wasObj = new yaml.Pair(
-            new yaml.Scalar(key), 
+            new yaml.Scalar(key),
             node
         );
         return wasObj;
@@ -140,12 +140,17 @@ export class YamlEditors {
     async updateDuration(srEntryIndex: any, duration: string) {
         const wasNode = await this.getWasObj();
         const srEntryObj = wasNode.items[srEntryIndex];
-        srEntryObj.items[0].value.items[0].value = duration;
+        let oldDurationWithM = srEntryObj.items[0].value.items[0].value;
+        let oldDuation = oldDurationWithM.replace("m", "");
+        oldDuation = Number(oldDuation)
+        let timeElapsed = Number(duration)
+        const newDuration = oldDuation + timeElapsed;
+        srEntryObj.items[0].value.items[0].value = `${newDuration}m`;
         wasNode.items[srEntryIndex] = srEntryObj;
         this.updatedWorkLog = srEntryObj.items[0].value;
     }
 
-    async updateSrEntryDuration(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri, duration: string) {
+    async updateSrEntryDuration(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri, duration: any) {
         this.docUri = srDocUri;
         this.srCode = srCode;
         await this.parseYaml();
@@ -345,5 +350,18 @@ export class YamlEditors {
         this.updatedWorkLog.items.unshift(name);
         this.insertEntryInNode(workLogObj, this.updatedWorkLog);
         this.applyEditToDoc();
+    }
+
+    async checkIfTaskIsAlreadyInSr(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri) {
+        this.docUri = srDocUri;
+        this.srCode = srCode;
+        await this.parseYaml();
+
+        const wasNode = await this.getWasObj();
+        if (!wasNode) return;
+
+        let srINdex = await this.findSrEntry(srEntry);
+        return srINdex;
+
     }
 }

@@ -56,7 +56,13 @@ export class TaskCommands {
         const startTime = await this.timerCommand.giveStartTime();
         this.srEntry = this.yamleditors.createSrEntry(this.yamlLink, startTime);
         if (!this.srDocUri) return;
-        this.yamleditors.moveEntryToWasInSr(this.srEntry, this.srCode, this.srDocUri);
+
+        let srEntryIndex = await this.yamleditors.checkIfTaskIsAlreadyInSr(this.srEntry, this.srCode, this.srDocUri);
+        if (srEntryIndex == -1){
+
+            this.yamleditors.moveEntryToWasInSr(this.srEntry, this.srCode, this.srDocUri);
+        }
+
         this.message.info(`The timer has started on Task: ${this.yamlLink}`);
     }
 
