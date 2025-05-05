@@ -83,6 +83,9 @@ export class TaskCommands {
 
     async generateWorkLogs() {
         if(!this.srDocUri) return;
+        if (this.timerCommand.isTaskRunnig()) {
+            await this.stopTask();
+        }
         await this.yamleditors.generateWorkLogs(this.srCode, this.srDocUri);
     }
 }

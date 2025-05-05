@@ -24,7 +24,7 @@ export function activate(context: vscode.ExtensionContext) {
         await taskCommand.generateWorkLogs();
     });
 
-    context.subscriptions.push(disposableForSr, disposableForTaskSelection, disposableForPauseResumeTimer, disposableForStopTimer);
+    context.subscriptions.push(disposableForSr, disposableForTaskSelection, disposableForPauseResumeTimer, disposableForStopTimer, disposableForWorkLogGenerator);
 }
 
 export function deactivate() { }
