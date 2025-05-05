@@ -34,13 +34,20 @@ export class YamlEditors {
         if (!this.yamlDoc) return;
         if (!this.srCode) return;
         const srNode = this.yamlDoc.get(this.srCode);
-        const srCodeObj = new yaml.Scalar(this.srCode);
         if (!srNode || !(srNode instanceof yaml.YAMLMap)) {
-            this.yamlDoc.delete(this.srCode);
-            let srNode = this.createSrNode();
-            this.yamlDoc.set(srCodeObj, srNode);
+            let srNode = this.createSRObj();
             return srNode;
         }
+        return srNode;
+    }
+
+    private createSRObj() {
+        if (!this.yamlDoc) return;
+        if (!this.srCode) return;
+        const srCodeObj = new yaml.Scalar(this.srCode);
+        this.yamlDoc.delete(this.srCode);
+        let srNode = this.createSrNode();
+        this.yamlDoc.set(srCodeObj, srNode);
         return srNode;
     }
 
@@ -65,12 +72,14 @@ export class YamlEditors {
     }
 
     private async getWasObj() {
-        const srNode = await this.getSrObj();
+        let srNode = await this.getSrObj();
         if (!srNode) return;
         let wasNode = srNode.get("Was");
         if (!wasNode) wasNode = srNode.get("was");
         if (!wasNode || !(wasNode instanceof yaml.YAMLSeq)) {
-            this.message.err("no wasSection was found in the Sr");
+            srNode = this.createSRObj();
+            if (!srNode) return;
+            wasNode = srNode.get("Was");
         }
         return wasNode;
     }
