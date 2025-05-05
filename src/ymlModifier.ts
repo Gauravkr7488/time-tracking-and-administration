@@ -76,7 +76,7 @@ export class YamlEditors {
     }
 
 
-    private insertEntryInNode(node: yaml.YAMLSeq, entry: any) {
+    private async insertEntryInNode(node: yaml.YAMLSeq, entry: any) {
         const emptyItemIndex = node.items.findIndex(item =>
             item === null ||
             (item instanceof yaml.Scalar && (item.value === '' || item.value === null)) ||
@@ -120,7 +120,7 @@ export class YamlEditors {
         const wasNode = await this.getWasObj();
         if (!wasNode) return;
 
-        this.insertEntryInNode(wasNode, srEntry);
+        await this.insertEntryInNode(wasNode, srEntry);
         this.applyEditToDoc();
         // add the entry to the was node
     }
@@ -250,20 +250,22 @@ export class YamlEditors {
             let relativePathOfFile = relativePath + ".yml";
             if (!vscode.workspace.workspaceFolders) return;
             const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePathOfFile);
+            await vscode.workspace.fs.stat(fileUri);
             this.docUri = fileUri;
-            await this.parseYaml();
         } catch (err1: any) {
             try {
                 let relativePathOfFile = relativePath + ".yaml";
                 if (!vscode.workspace.workspaceFolders) return;
                 const fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePathOfFile);
+                await vscode.workspace.fs.stat(fileUri);
                 this.docUri = fileUri;
-                await this.parseYaml();
 
             } catch (err2: any) {
                 this.message.err(err1 + '' + err2);
             }
         };
+
+        await this.parseYaml();
     }
 
     private removeEmptyKeys(yamlKeys: string[]) {
@@ -349,7 +351,7 @@ export class YamlEditors {
         let name = this.getName();
         name = new yaml.Scalar(name);
         this.updatedWorkLog.items.unshift(name);
-        this.insertEntryInNode(workLogObj, this.updatedWorkLog);
+        await this.insertEntryInNode(workLogObj, this.updatedWorkLog);
         this.applyEditToDoc();
     }
 
