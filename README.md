@@ -38,6 +38,10 @@ BugFixed: TimeTracking functionality does not support empty Tasks
 BugFixed: Empty standup reports are not supported or ones with a lowercase "was"
 BugFixed: Starting the timer on a task which is already present in the SR creates a new entry
 BugFixed: Random thigns are happenig when genereate worklog is used on file ending with .yml
+### 1.0.5
+
+BugFixed: The Worklog generator is only generating first worlkog and is working very randomly sometimes.
+
 ## For more information
 
 Contact me - Gaurav
