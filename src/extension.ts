@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
-import { TaskCommands } from './TaskOperations';
+import { LinkCommands, TaskCommands } from './TaskOperations';
 
 export function activate(context: vscode.ExtensionContext) {
     const taskCommand = new TaskCommands(context);
+    const linkCommands = new LinkCommands();
 
     const disposableForSr = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
         taskCommand.specifyStandupReport();
@@ -24,7 +25,16 @@ export function activate(context: vscode.ExtensionContext) {
         await taskCommand.generateWorkLogs();
     });
 
-    context.subscriptions.push(disposableForSr, disposableForTaskSelection, disposableForPauseResumeTimer, disposableForStopTimer, disposableForWorkLogGenerator);
+    const disposableForF2yamlReferenceGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateF2yamlLink', async () => {
+        await linkCommands.generateOrCopyF2yamlLink();
+    });
+
+    const disposableForF2yamlReferenceGenerator2 = vscode.commands.registerCommand('time-tracking-and-administration.generateF2yamlReference', async () => {
+        await linkCommands.generateOrCopyF2yamlReference2();
+    });
+
+    
+    context.subscriptions.push(disposableForSr, disposableForTaskSelection, disposableForPauseResumeTimer, disposableForStopTimer, disposableForWorkLogGenerator, disposableForF2yamlReferenceGenerator, disposableForF2yamlReferenceGenerator2);
 }
 
 export function deactivate() { }

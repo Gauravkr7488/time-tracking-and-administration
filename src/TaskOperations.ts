@@ -20,13 +20,13 @@ export class TaskCommands {
     private srDocUri?: vscode.Uri;
     private yamleditors = new YamlEditors();
     private srEntry?: yaml.YAMLMap<unknown, unknown>;
-    
+
     constructor(context: vscode.ExtensionContext) {
         this.context = context;
         this.timerCommand = new TimerCommands(this.context);
         this.timer = new Timer(this.context);
     }
-    
+
     specifyStandupReport(): void {
         const srDoc = this.validateAndGet.getActiveDoc();
         if (!srDoc) return;
@@ -40,7 +40,7 @@ export class TaskCommands {
         this.message.info(`${srCode} is selected as the Standup Report. Please select a Task and issue the Start timer on Task command`);
         this.srCode = srCode;
     }
-    
+
     async selectTask(): Promise<void> {
         if (!this.srCode) {
             this.message.err("run specify Standup report first");
@@ -56,20 +56,20 @@ export class TaskCommands {
         const startTime = await this.timerCommand.giveStartTime();
         this.srEntry = this.yamleditors.createSrEntry(this.yamlLink, startTime);
         if (!this.srDocUri) return;
-        
+
         let srEntryIndex = await this.yamleditors.checkIfTaskIsAlreadyInSr(this.srEntry, this.srCode, this.srDocUri);
-        if (srEntryIndex == -1){
-            
+        if (srEntryIndex == -1) {
+
             this.yamleditors.moveEntryToWasInSr(this.srEntry, this.srCode, this.srDocUri);
         }
-        
+
         this.message.info(`The timer has started on Task: ${this.yamlLink}`);
     }
-    
+
     pauseOrResumeTask() {
         this.timer.pauseResumeTimer();
     }
-    
+
     async stopTask() {
         if (!this.timerCommand.isTaskRunnig()) {
             this.message.err("There is no active task");
@@ -82,10 +82,39 @@ export class TaskCommands {
     }
 
     async generateWorkLogs() {
-        if(!this.srDocUri) return;
+        if (!this.srDocUri) return;
         if (this.timerCommand.isTaskRunnig()) {
             await this.stopTask();
         }
         await this.yamleditors.generateWorkLogs(this.srCode, this.srDocUri);
     }
+
+
+}
+
+export class LinkCommands {
+    private yamlLink?: string;
+    private textUtils = new TextUtils();
+    private yamlKeyExtractor = new YamlKeyExtractor(); // TODO refactor this, not important 
+
+    async generateOrCopyF2yamlLink() {
+        this.yamlLink = this.textUtils.isThisYamlLink(); // uitls is a err
+        if (!this.yamlLink) this.yamlLink = await this.yamlKeyExtractor.createYamlLink();
+        vscode.window.showInformationMessage(`'${this.yamlLink}' copied to your clipboard`);
+        vscode.env.clipboard.writeText(this.yamlLink);
+    }
+
+    async generateOrCopyF2yamlReference2() {
+        this.yamlLink = this.textUtils.isThisYamlReference();
+        let cleanLink = this.yamlLink.slice(2, -2);
+
+        if (!this.yamlLink) {
+            this.yamlLink = await this.yamlKeyExtractor.createYamlLink();
+            cleanLink = this.yamlLink.slice(3, -1);
+        }
+        let f2YamlRef2 = `$@${cleanLink}@$`;
+        vscode.window.showInformationMessage(`'${f2YamlRef2}' copied to your clipboard`);
+        vscode.env.clipboard.writeText(f2YamlRef2);
+    }
+
 }

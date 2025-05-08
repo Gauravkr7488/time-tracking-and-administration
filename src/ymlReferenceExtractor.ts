@@ -6,7 +6,7 @@ const CONSTANTS = {
         NO_ACTIVE_EDITOR: "No active text editor.",
     },
     CONFIG:{
-        EXTENSION_FOR_MAKING_LINKS: "F2ToolInterface"
+        EXTENSION_FOR_MAKING_LINKS: "time-tracking-and-administration"
     }
 };
 

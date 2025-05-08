@@ -36,6 +36,14 @@
       {
         "command": "time-tracking-and-administration.generateWorkLogs",
         "title": "Generate WorkLogs from SR"
+      },
+      {
+        "command": "time-tracking-and-administration.generateF2yamlLink",
+        "title": "Generate or copy F2Yaml link"
+      },
+      {
+        "command": "time-tracking-and-administration.generateF2yamlReference",
+        "title": "Generate or copy F2Yaml References"
       }
     ],
     "configuration": {
@@ -45,6 +53,40 @@
           "type": "string",
           "default": "YourUserName",
           "description": "Your username"
+        },
+        "time-tracking-and-administration.ignoreWords": {
+          "type": "array",
+          "description": "Words to remove from the extracted YAML path.",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "EstimatedTODO",
+            "DraftingTODO",
+            "TODO",
+            "Estimated",
+            "OnGoing",
+            "OnHold",
+            "Cancelled",
+            "Paused",
+            "InProgress",
+            "Done",
+            "CurrentFocus",
+            "Blocked",
+            "Drafting",
+            "Draft",
+            "Reviewed",
+            "InDev",
+            "Developing",
+            "InQA",
+            "BugFixing",
+            "QAPassed"
+          ]
+        },
+        "time-tracking-and-administration.PathSeparator": {
+          "type": "string",
+          "description": "The separator to use in the extracted YAML path.",
+          "default": "."
         }
       }
     }
