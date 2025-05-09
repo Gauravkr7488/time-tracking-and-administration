@@ -20,21 +20,29 @@ export function activate(context: vscode.ExtensionContext) {
     const disposableForStopTimer = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
         await taskCommand.stopTask();
     });
-    
+
     const disposableForWorkLogGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateWorkLogs', async () => {
         await taskCommand.generateWorkLogs();
     });
 
-    const disposableForF2yamlReferenceGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateF2yamlLink', async () => {
+    const disposableForF2yamlLinkGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateF2yamlLink', async () => {
         await linkCommands.generateOrCopyF2yamlLink();
     });
 
-    const disposableForF2yamlReferenceGenerator2 = vscode.commands.registerCommand('time-tracking-and-administration.generateF2yamlReference', async () => {
+    const disposableForF2yamlReferenceGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateF2yamlReference', async () => {
         await linkCommands.generateOrCopyF2yamlReference2();
     });
 
-    
-    context.subscriptions.push(disposableForSr, disposableForTaskSelection, disposableForPauseResumeTimer, disposableForStopTimer, disposableForWorkLogGenerator, disposableForF2yamlReferenceGenerator, disposableForF2yamlReferenceGenerator2);
+
+    context.subscriptions.push(
+        disposableForSr,
+        disposableForTaskSelection, 
+        disposableForPauseResumeTimer, 
+        disposableForStopTimer, 
+        disposableForWorkLogGenerator, 
+        disposableForF2yamlLinkGenerator, 
+        disposableForF2yamlReferenceGenerator
+    );
 }
 
 export function deactivate() { }
