@@ -44,6 +44,10 @@
       {
         "command": "time-tracking-and-administration.generateF2yamlReference",
         "title": "Generate or copy F2Yaml References"
+      },
+      {
+        "command": "time-tracking-and-administration.followLink",
+        "title": "Follow the F2Yaml Link"
       }
     ],
     "configuration": {
