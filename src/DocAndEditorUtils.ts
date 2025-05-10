@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { Message } from './VsCodeUtils';
+import { Data } from './Data';
 
 
 export class ActiveDocAndEditorUtils {
@@ -8,7 +9,7 @@ export class ActiveDocAndEditorUtils {
     getActiveDoc() {
         const activeEditor = this.getActiveEditor();
         if (!activeEditor) {
-            this.message.err("No active text-editor");
+            this.message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TEXT_EDITOR);
             return;
         }
         const activeDocument = activeEditor.document;
@@ -18,7 +19,7 @@ export class ActiveDocAndEditorUtils {
     getActiveEditor() {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor) {
-            this.message.err("No active text-editor");
+            this.message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TEXT_EDITOR);
             return;
         }
         return activeEditor;
@@ -27,8 +28,8 @@ export class ActiveDocAndEditorUtils {
     isThisYamlDoc(): boolean {
         const activeDocument = this.getActiveDoc();
         if(!activeDocument) return false;
-        if (activeDocument.languageId !== "yaml") {
-            this.message.err("This command only works with YAML files.");
+        if (activeDocument.languageId !== Data.MISC.YAML) {
+            this.message.err(Data.MESSAGES.ERRORS.THIS_COMMAND_ONLY_WORKS_WITH_YAML_FILES);
             return false;
         }
         return true
