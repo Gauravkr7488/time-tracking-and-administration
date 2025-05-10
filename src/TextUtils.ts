@@ -1,18 +1,8 @@
-import * as vscode from 'vscode';
-import { ValidateAndGet } from './Validator';
-
-export class Message {
-    static info(message: any) {
-        vscode.window.showInformationMessage(message);
-    }
-    static err(message: any) {
-        vscode.window.showErrorMessage(message);
-    }
-}
+import { Message, ActiveDocAndEditorUtils } from './DocAndEditorUtils';
 
 let message = new Message();
 export class TextUtils {
-    private validateAndGet = new ValidateAndGet();
+    private validateAndGet = new ActiveDocAndEditorUtils();
     extractCurrentWord() {
         let doc = this.validateAndGet.getActiveDoc();
         let cursorPosition = this.validateAndGet.getCursorPosition();
