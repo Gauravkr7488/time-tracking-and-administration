@@ -4,12 +4,11 @@ import { Data } from './Data';
 
 
 export class ActiveDocAndEditorUtils {
-    private message = new Message();
 
     getActiveDoc() {
         const activeEditor = this.getActiveEditor();
         if (!activeEditor) {
-            this.message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TEXT_EDITOR);
+            Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TEXT_EDITOR);
             return;
         }
         const activeDocument = activeEditor.document;
@@ -19,7 +18,7 @@ export class ActiveDocAndEditorUtils {
     getActiveEditor() {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor) {
-            this.message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TEXT_EDITOR);
+            Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TEXT_EDITOR);
             return;
         }
         return activeEditor;
@@ -29,7 +28,7 @@ export class ActiveDocAndEditorUtils {
         const activeDocument = this.getActiveDoc();
         if(!activeDocument) return false;
         if (activeDocument.languageId !== Data.MISC.YAML) {
-            this.message.err(Data.MESSAGES.ERRORS.THIS_COMMAND_ONLY_WORKS_WITH_YAML_FILES);
+            Message.err(Data.MESSAGES.ERRORS.THIS_COMMAND_ONLY_WORKS_WITH_YAML_FILES);
             return false;
         }
         return true

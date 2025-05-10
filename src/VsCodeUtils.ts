@@ -2,10 +2,10 @@ import * as vscode from 'vscode';
 import { ValidateAndGet } from './Validator';
 
 export class Message {
-    info(message: string) {
+    static info(message: any) {
         vscode.window.showInformationMessage(message);
     }
-    err(message: string) {
+    static err(message: any) {
         vscode.window.showErrorMessage(message);
     }
 }
