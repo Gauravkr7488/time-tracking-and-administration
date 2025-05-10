@@ -117,4 +117,10 @@ export class LinkCommands {
         vscode.env.clipboard.writeText(f2YamlRef2);
     }
 
+
+    async followLink() {
+        this.yamlLink = this.textUtils.isThisYamlLink();
+        if (!this.yamlLink) this.yamlLink = this.textUtils.isThisYamlReference();
+        this.linkFollower.followLink(this.yamlLink);
+    }
 }
