@@ -1,5 +1,4 @@
 import * as vscode from 'vscode';
-import { Message } from './VsCodeUtils';
 import { Data } from './Data';
 
 
@@ -39,5 +38,14 @@ export class ActiveDocAndEditorUtils {
         if(!activeEditor) return;
         const cursorPosition = activeEditor.selection.active;
         return cursorPosition;
+    }
+}
+
+export class Message {
+    static info(message: any) {
+        vscode.window.showInformationMessage(message);
+    }
+    static err(message: any) {
+        vscode.window.showErrorMessage(message);
     }
 }
