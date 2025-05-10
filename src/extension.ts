@@ -33,6 +33,10 @@ export function activate(context: vscode.ExtensionContext) {
         await linkCommands.generateOrCopyF2yamlReference2();
     });
 
+    const disposableForLinkFollower = vscode.commands.registerCommand('time-tracking-and-administration.followLink', async () => {
+        await linkCommands.followLink();
+    });
+
 
     context.subscriptions.push(
         disposableForSr,
@@ -41,7 +45,8 @@ export function activate(context: vscode.ExtensionContext) {
         disposableForStopTimer, 
         disposableForWorkLogGenerator, 
         disposableForF2yamlLinkGenerator, 
-        disposableForF2yamlReferenceGenerator
+        disposableForF2yamlReferenceGenerator,
+        disposableForLinkFollower
     );
 }
 
