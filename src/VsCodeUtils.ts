@@ -2,9 +2,9 @@ import * as vscode from 'vscode';
 import { Data } from './Data';
 
 
-export class ActiveDocAndEditorUtils {
+export class ActiveDocAndEditor {
 
-    getActiveDoc() {
+    static getActiveDoc() {
         const activeEditor = this.getActiveEditor();
         if (!activeEditor) {
             Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TEXT_EDITOR);
@@ -14,7 +14,7 @@ export class ActiveDocAndEditorUtils {
         return activeDocument;
     }
 
-    getActiveEditor() {
+    static getActiveEditor() {
         const activeEditor = vscode.window.activeTextEditor;
         if (!activeEditor) {
             Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TEXT_EDITOR);
@@ -23,7 +23,7 @@ export class ActiveDocAndEditorUtils {
         return activeEditor;
     }
 
-    isThisYamlDoc(): boolean {
+    static isThisYamlDoc(): boolean {
         const activeDocument = this.getActiveDoc();
         if(!activeDocument) return false;
         if (activeDocument.languageId !== Data.MISC.YAML) {
@@ -33,7 +33,7 @@ export class ActiveDocAndEditorUtils {
         return true
     }
 
-    getCursorPosition() { 
+    static getCursorPosition() { 
         const activeEditor = this.getActiveEditor();
         if(!activeEditor) return;
         const cursorPosition = activeEditor.selection.active;
