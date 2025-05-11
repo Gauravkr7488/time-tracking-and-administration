@@ -1,129 +1,79 @@
-import * as vscode from 'vscode';
 import { Message } from './VsCodeUtils';
+import { Data } from './Data';
 
 export class Timer {
-    private context: vscode.ExtensionContext;
-    static readonly START_TIME_KEY = 'timerStartTime';
-    static readonly ACCUMULATED_TIME_KEY = 'timerAccumulatedTime';
-    static readonly IS_PAUSED_KEY = 'timerIsPaused';
-    static readonly START_TIME_ISO_KEY = 'timerStartTimeISO';
-    static readonly PAUSE_RESUME_STATUS_KEY = 'timerPauseResumeStatus';
-    static readonly DURATION_MINUTES_KEY = 'timerDurationMinutes';
 
-    constructor(context: vscode.ExtensionContext) {
-        this.context = context;
-    }
+    private startTime?: number;
+    private accumulatedTime: number = 0;
+    private isTimerPaused: boolean = false;
+    private startDateIsoFormat?: string;
 
-     public async startTimer(): Promise<string> {
-        const isPaused = this.context.globalState.get(Timer.IS_PAUSED_KEY) as boolean;
-        if (isPaused) {
-            vscode.window.showErrorMessage('Timer is paused. Resume or stop it first.');
-            return '[Error: Timer is paused. Resume or stop it first.]';
-        }
+    public async startTimer() {
+        const startTime = Date.now();
+        const accumulatedTime = 0;
+        const isTimerPaused = false;
 
-        const startTime = this.context.globalState.get(Timer.START_TIME_KEY) as number | undefined;
-        if (startTime) {
-            vscode.window.showErrorMessage('Timer is already running.');
-            return '[Error: Timer is already running.]';
-        }
+        const startDate = new Date(startTime);
+        const startDateIsoFormat = this.formatDateToCustomISO(startDate);
 
-        // Start the timer
-        const now = Date.now();
-        this.context.globalState.update(Timer.START_TIME_KEY, now);
-        this.context.globalState.update(Timer.ACCUMULATED_TIME_KEY, 0); // Reset accumulated time
-        this.context.globalState.update(Timer.IS_PAUSED_KEY, false);
+        this.startTime = startTime;
+        this.accumulatedTime = accumulatedTime;
+        this.isTimerPaused = isTimerPaused;
+        this.startDateIsoFormat = startDateIsoFormat;
 
-        // Save start time in ISO format (yyyymmddhhmmss)
-        const startDate = new Date(now);
-        const isoFormat = this.formatDateToCustomISO(startDate);
-        this.context.globalState.update(Timer.START_TIME_ISO_KEY, isoFormat);
-
-        // Format the start time for display
-        const formattedTime = startDate.toLocaleTimeString();
-        const result = `started task at ${formattedTime}`;
-
-        // Show message and return string
-        // vscode.window.showInformationMessage('Timer started.');
-        return result;
+        return;
     }
 
     public pauseResumeTimer(): void {
-        const startTime = this.context.globalState.get(Timer.START_TIME_KEY) as number | undefined;
-        const isPaused = this.context.globalState.get(Timer.IS_PAUSED_KEY) as boolean;
-
-        if (!startTime && !isPaused) {
-            vscode.window.showErrorMessage('No timer running or paused. Start the timer first.');
-            return;
+        const startTime = this.startTime;
+        const isTimerPaused = this.isTimerPaused;
+        if (!startTime) return;
+        if (!isTimerPaused) {
+            this.pauseTimer(startTime);
+        } else if (isTimerPaused) {
+            this.resumeTimer();
         }
+    }
 
-        if (startTime && !isPaused) {
-            // Pause the timer
-            const currentTime = Date.now();
-            const elapsed = currentTime - startTime;
-            const accumulatedTime = (this.context.globalState.get(Timer.ACCUMULATED_TIME_KEY) as number || 0) + elapsed;
+    private resumeTimer() {
+        this.startTime = Date.now();
+        this.isTimerPaused = false;
 
-            this.context.globalState.update(Timer.START_TIME_KEY, undefined);
-            this.context.globalState.update(Timer.ACCUMULATED_TIME_KEY, accumulatedTime);
-            this.context.globalState.update(Timer.IS_PAUSED_KEY, true);
+        Message.info(Data.MESSAGES.INFO.TIMER_RESUMED);
+    }
 
-            // Save pause status
-            this.context.globalState.update(Timer.PAUSE_RESUME_STATUS_KEY, 'paused');
+    private pauseTimer(startTime: number) {
+        const currentTime = Date.now();
+        const elapsed = currentTime - startTime;
+        const accumulatedTime = this.accumulatedTime + elapsed;
 
-            vscode.window.showInformationMessage('Timer paused.');
-        } else if (isPaused) {
-            // Resume the timer
-            this.context.globalState.update(Timer.START_TIME_KEY, Date.now());
-            this.context.globalState.update(Timer.IS_PAUSED_KEY, false);
+        this.startTime = undefined;
+        this.accumulatedTime = accumulatedTime;
+        this.isTimerPaused = true;
 
-            // Save resume status
-            this.context.globalState.update(Timer.PAUSE_RESUME_STATUS_KEY, 'resumed');
-
-            vscode.window.showInformationMessage('Timer resumed.');
-        }
+        Message.info(Data.MESSAGES.INFO.TIMER_PAUSED);
     }
 
     public stopTimer() {
-        const startTime = this.context.globalState.get(Timer.START_TIME_KEY) as number | undefined;
-        const accumulatedTime = this.context.globalState.get(Timer.ACCUMULATED_TIME_KEY) as number || 0;
-        const isPaused = this.context.globalState.get(Timer.IS_PAUSED_KEY) as boolean;
+        const startTime = this.startTime;
+        let totalDurationMs = this.accumulatedTime;
 
-        if (!startTime && !isPaused) {
-            vscode.window.showErrorMessage('No timer running or paused. Start the timer first.');
-            return '[Error: No timer running or paused. Start the timer first.]';
-        }
+        const endTime = Date.now();
 
-        // Calculate total duration
-        let totalDurationMs = accumulatedTime;
-        if (startTime) {
-            // If running, add the final segment
-            const endTime = Date.now();
-            totalDurationMs += endTime - startTime;
-        }
+        if (!startTime) return;
+        totalDurationMs += endTime - startTime;
 
-        // Convert to minutes
-        // const durationMinutes = parseFloat((totalDurationMs / 1000 / 60).toFixed(2));
         const durationMinutes = Math.round(totalDurationMs / 1000 / 60);
 
-
-        // Save duration in minutes to global state
-        this.context.globalState.update(Timer.DURATION_MINUTES_KEY, durationMinutes);
-
-        // Format the return string
-        const result = durationMinutes;
-
-        // Show duration and reset
         const durationSeconds = (totalDurationMs / 1000).toFixed(2);
-        vscode.window.showInformationMessage(
-            `Timer stopped. Duration: ${durationSeconds} seconds (${durationMinutes} minutes)`
-        );
-        this.context.globalState.update(Timer.START_TIME_KEY, undefined);
-        this.context.globalState.update(Timer.ACCUMULATED_TIME_KEY, 0);
-        this.context.globalState.update(Timer.IS_PAUSED_KEY, false);
+        Message.info(Data.MESSAGES.INFO.TIMER_STOPPED(durationMinutes));
 
-        return result;
+        this.startTime = undefined;
+        this.accumulatedTime = 0;
+
+        return durationMinutes;
     }
 
-    // Helper method to format date to yyyymmddhhmmss
     private formatDateToCustomISO(date: Date): string {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -136,43 +86,14 @@ export class Timer {
 
     }
 
-}
-
-
-export class TimerMechanics {
-    context: vscode.ExtensionContext;
-    private message = new Message();
-
-    constructor(context: vscode.ExtensionContext) {
-        this.context = context;
+    async giveStartTime() {
+        const startDateIsoFormat = this.startDateIsoFormat;
+        return startDateIsoFormat;
     }
 
-    isTimerPaused() {
-        const isPaused = this.context.globalState.get(Timer.IS_PAUSED_KEY) as boolean;
-        if (isPaused) {
-            this.message.err("Timer is paused");
-            return true;
-        }
-    }
-
-    isTimerRunning() {
-        const startTime = this.context.globalState.get(Timer.START_TIME_KEY) as number | undefined;
-        if (startTime) return true;
-    }
-}
-
-
-export class TimerCommands extends TimerMechanics {
-    
     isTaskRunnig(): boolean {
-        if (this.isTimerPaused()) return true;
-        if (this.isTimerRunning()) return true;
+        if (this.startTime) return true;
         return false;
-    }
-    
-    async giveStartTime(): Promise<string> {
-        const startTimeISO = this.context.globalState.get('timerStartTimeISO') as string;
-        return startTimeISO;
     }
 
 }
