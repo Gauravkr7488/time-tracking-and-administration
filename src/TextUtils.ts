@@ -4,11 +4,12 @@ import { ActiveDocAndEditor } from './VsCodeUtils';
 export class TextUtils {
     static extractCurrentWord() {
         let doc = ActiveDocAndEditor.getActiveDoc();
+        if (!doc) return;
         let cursorPosition = ActiveDocAndEditor.getCursorPosition();
         if (!cursorPosition) return;
-        let wordRange = doc?.getWordRangeAtPosition(cursorPosition);
+        let wordRange = doc.getWordRangeAtPosition(cursorPosition);
         if (!wordRange) return;
-        let srCode = doc?.getText(wordRange).replace(Data.REGEX_PATTERNS.COLON, Data.MISC.EMPTY_STRING);
+        let srCode = doc.getText(wordRange).replace(Data.REGEX_PATTERNS.COLON, Data.MISC.EMPTY_STRING);
         return srCode;
     }
 
