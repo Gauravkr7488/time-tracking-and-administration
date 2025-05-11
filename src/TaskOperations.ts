@@ -1,24 +1,25 @@
 import { Timer, TimerCommands } from "./timer";
-import { ValidateAndGet } from "./Validator";
-import { Message, TextUtils } from "./VsCodeUtils";
+import { ActiveDocAndEditor } from "./VsCodeUtils";
+import { TextUtils } from "./TextUtils";
+import { Message } from './VsCodeUtils';
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { YamlKeyExtractor } from "./ymlReferenceExtractor";
 import { YamlEditors } from "./ymlModifier";
+import { LinkFollower } from "./linkFollower";
+import { Data } from "./Data";
 
 
 export class TaskCommands {
-    private validateAndGet = new ValidateAndGet();
-    private textUtils = new TextUtils();
-    private message = new Message();
+
+    private yamlKeyExtractor = new YamlKeyExtractor();
+    private yamleditors = new YamlEditors();
+
     private timerCommand: TimerCommands;
     private context: vscode.ExtensionContext;
-    private yamlLink?: string;
-    private yamlKeyExtractor = new YamlKeyExtractor(); // TODO refactor this, not important 
     private timer: Timer;
-    private srCode: string = '';
+    private srCode?: string;
     private srDocUri?: vscode.Uri;
-    private yamleditors = new YamlEditors();
     private srEntry?: yaml.YAMLMap<unknown, unknown>;
 
     constructor(context: vscode.ExtensionContext) {
@@ -27,43 +28,44 @@ export class TaskCommands {
         this.timer = new Timer(this.context);
     }
 
-    specifyStandupReport(): void {
-        const srDoc = this.validateAndGet.getActiveDoc();
+    async specifyStandupReport() {
+        const srDoc = ActiveDocAndEditor.getActiveDoc();
         if (!srDoc) return;
-        this.srDocUri = srDoc.uri;
-        if (!this.validateAndGet.isThisYamlDoc()) return;
-        let srCode = this.textUtils.extractCurrentWord();
+
+        const srCode = TextUtils.extractCurrentWord();
         if (!srCode) {
-            this.message.err("there is no srcode under the cursor");
+            Message.err(Data.MESSAGES.ERRORS.NO_SR_CODE);
             return;
         }
-        this.message.info(`${srCode} is selected as the Standup Report. Please select a Task and issue the Start timer on Task command`);
+
+        this.srDocUri = srDoc.uri;
         this.srCode = srCode;
+
+        Message.info(Data.MESSAGES.INFO.SR_SPECIFIED(srCode));
     }
 
     async selectTask(): Promise<void> {
         if (!this.srCode) {
-            this.message.err("run specify Standup report first");
+            Message.err(Data.MESSAGES.ERRORS.RUN_SPECIFY_SR_FIRST);
             return;
         }
-        if (this.timerCommand.isTaskRunnig()) {
-            await this.stopTask();
-        }
-        if (!this.validateAndGet.isThisYamlDoc()) return; // change the name of the class
-        this.yamlLink = this.textUtils.isThisYamlLink(); // uitls is a err
-        if (!this.yamlLink) this.yamlLink = await this.yamlKeyExtractor.createYamlLink();
-        await this.timer.startTimer(); // this needs refactoring since using old code
+
+        if (this.timerCommand.isTaskRunnig()) await this.stopTask();
+
+        let f2YamlLink = TextUtils.isThisYamlLink();
+        if (!f2YamlLink) f2YamlLink = await this.yamlKeyExtractor.createYamlLink();
+
+        await this.timer.startTimer();
         const startTime = await this.timerCommand.giveStartTime();
-        this.srEntry = this.yamleditors.createSrEntry(this.yamlLink, startTime);
+        const srEntry = this.yamleditors.createSrEntry(f2YamlLink, startTime);
+
         if (!this.srDocUri) return;
+        let srEntryIndex = await this.yamleditors.checkIfTaskIsAlreadyInSr(srEntry, this.srCode, this.srDocUri);
+        if (srEntryIndex == -1) this.yamleditors.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
 
-        let srEntryIndex = await this.yamleditors.checkIfTaskIsAlreadyInSr(this.srEntry, this.srCode, this.srDocUri);
-        if (srEntryIndex == -1) {
+        this.srEntry = srEntry;
 
-            this.yamleditors.moveEntryToWasInSr(this.srEntry, this.srCode, this.srDocUri);
-        }
-
-        this.message.info(`The timer has started on Task: ${this.yamlLink}`);
+        Message.info(Data.MESSAGES.INFO.TASK_SELECTED(f2YamlLink));
     }
 
     pauseOrResumeTask() {
@@ -72,20 +74,22 @@ export class TaskCommands {
 
     async stopTask() {
         if (!this.timerCommand.isTaskRunnig()) {
-            this.message.err("There is no active task");
+            Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
             return;
         }
         const duration = this.timer.stopTimer();
+
         if (!this.srEntry) return;
         if (!this.srDocUri) return;
+        if (!this.srCode) return;
         await this.yamleditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
     }
 
     async generateWorkLogs() {
+        if (this.timerCommand.isTaskRunnig()) await this.stopTask();
+        
         if (!this.srDocUri) return;
-        if (this.timerCommand.isTaskRunnig()) {
-            await this.stopTask();
-        }
+        if (!this.srCode) return;
         await this.yamleditors.generateWorkLogs(this.srCode, this.srDocUri);
     }
 
