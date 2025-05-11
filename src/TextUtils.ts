@@ -1,26 +1,25 @@
-import { Message, ActiveDocAndEditorUtils } from './DocAndEditorUtils';
+import { Data } from './Data';
+import { ActiveDocAndEditor } from './VsCodeUtils';
 
-let message = new Message();
 export class TextUtils {
-    private validateAndGet = new ActiveDocAndEditorUtils();
-    extractCurrentWord() {
-        let doc = this.validateAndGet.getActiveDoc();
-        let cursorPosition = this.validateAndGet.getCursorPosition();
+    static extractCurrentWord() {
+        let doc = ActiveDocAndEditor.getActiveDoc();
+        let cursorPosition = ActiveDocAndEditor.getCursorPosition();
         if (!cursorPosition) return;
         let wordRange = doc?.getWordRangeAtPosition(cursorPosition);
         if (!wordRange) return;
-        let srCode = doc?.getText(wordRange).replace(/:$/,'');
+        let srCode = doc?.getText(wordRange).replace(Data.REGEX_PATTERNS.COLON, Data.MISC.EMPTY_STRING);
         return srCode;
     }
 
-    isThisYamlLink(): string{
-        let doc = this.validateAndGet.getActiveDoc();
-        if(!doc) return '';
-        let cursorPosition = this.validateAndGet.getCursorPosition();
-        if(!cursorPosition) return '';
+    static isThisYamlLink() {
+        let doc = ActiveDocAndEditor.getActiveDoc();
+        if (!doc) return;
+        let cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        if (!cursorPosition) return;
         let line = doc.lineAt(cursorPosition.line);
         let lineText = line.text;
-        let linkPattern = /-->.*</g;
+        let linkPattern = Data.REGEX_PATTERNS.LINK;
         let match;
 
         while ((match = linkPattern.exec(lineText)) !== null) {  // .exec returns array
@@ -32,17 +31,17 @@ export class TextUtils {
                 return link;
             }
         }
-        return '';
+        return;
     }
-    
-    isThisYamlReference(): string{
-        let doc = this.validateAndGet.getActiveDoc();
-        if(!doc) return '';
-        let cursorPosition = this.validateAndGet.getCursorPosition();
-        if(!cursorPosition) return '';
+
+    static isThisYamlReference() {
+        let doc = ActiveDocAndEditor.getActiveDoc();
+        if (!doc) return;
+        let cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        if (!cursorPosition) return;
         let line = doc.lineAt(cursorPosition.line);
         let lineText = line.text;
-        let referencePattern = /\$@.*@\$/g;
+        let referencePattern = Data.REGEX_PATTERNS.REFERENCE;
         let match;
 
         while ((match = referencePattern.exec(lineText)) !== null) {  // .exec returns array
@@ -54,6 +53,6 @@ export class TextUtils {
                 return link;
             }
         }
-        return '';
+        return;
     }
 }
