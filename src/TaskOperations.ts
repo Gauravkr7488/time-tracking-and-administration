@@ -1,4 +1,4 @@
-import { Timer, TimerCommands } from "./timer";
+import { Timer } from "./timer";
 import { ActiveDocAndEditor } from "./VsCodeUtils";
 import { TextUtils } from "./TextUtils";
 import { Message } from './VsCodeUtils';
@@ -90,34 +90,35 @@ export class TaskCommands {
 }
 
 export class LinkCommands {
-    private yamlLink?: string;
-    private textUtils = new TextUtils();
-    private yamlKeyExtractor = new YamlKeyExtractor(); // TODO refactor this, not important 
+    private static yamlLink?: string;
+    private static linkFollower = new LinkFollower();
 
-    async generateOrCopyF2yamlLink() {
-        this.yamlLink = this.textUtils.isThisYamlLink(); // uitls is a err
-        if (!this.yamlLink) this.yamlLink = await this.yamlKeyExtractor.createYamlLink();
-        vscode.window.showInformationMessage(`'${this.yamlLink}' copied to your clipboard`);
+    public static async generateOrCopyF2yamlLink() {
+        this.yamlLink = await TextUtils.isThisYamlLink();
+        if (!this.yamlLink) this.yamlLink = await YamlKeyExtractor.createYamlLink();
+        Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(this.yamlLink));
         vscode.env.clipboard.writeText(this.yamlLink);
     }
 
-    async generateOrCopyF2yamlReference2() {
-        this.yamlLink = this.textUtils.isThisYamlReference();
+    public static async generateOrCopyF2yamlReference() {
+        this.yamlLink = TextUtils.isThisYamlReference();
+        if (!this.yamlLink) return;
         let cleanLink = this.yamlLink.slice(2, -2);
 
         if (!this.yamlLink) {
-            this.yamlLink = await this.yamlKeyExtractor.createYamlLink();
+            this.yamlLink = await YamlKeyExtractor.createYamlLink();
             cleanLink = this.yamlLink.slice(3, -1);
         }
-        let f2YamlRef2 = `$@${cleanLink}@$`;
-        vscode.window.showInformationMessage(`'${f2YamlRef2}' copied to your clipboard`);
-        vscode.env.clipboard.writeText(f2YamlRef2);
+        const f2YamlRef = `$@${cleanLink}@$`;
+        Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlRef));
+        vscode.env.clipboard.writeText(f2YamlRef);
     }
 
 
-    async followLink() {
-        this.yamlLink = this.textUtils.isThisYamlLink();
-        if (!this.yamlLink) this.yamlLink = this.textUtils.isThisYamlReference();
+    public static async followLink() {
+        this.yamlLink = await TextUtils.isThisYamlLink();
+        if (!this.yamlLink) this.yamlLink = TextUtils.isThisYamlReference();
+        if (!this.yamlLink) return;
         this.linkFollower.followLink(this.yamlLink);
     }
 }
