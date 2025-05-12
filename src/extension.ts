@@ -8,7 +8,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     const disposableForTaskSelection = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
-        TaskCommands.selectTask();
+        await TaskCommands.selectTask();
     });
 
     const disposableForPauseResumeTimer = vscode.commands.registerCommand('time-tracking-and-administration.pauseResumeTimer', async () => {
