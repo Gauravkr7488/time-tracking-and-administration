@@ -6,7 +6,7 @@ import { Data } from './Data';
 
 export class YamlEditors {
 
-    private static taskFileUri: vscode.Uri;
+    public static taskFileUri: vscode.Uri;
     private static taskYamlDoc: yaml.Document<yaml.Node, true>
 
 
@@ -167,10 +167,8 @@ export class YamlEditors {
         return srEntryMap;
     }
 
-    private static async getTaskObj(yamlLink: string) {
-        const cleanF2YamlLink = this.removeLinkSymbolsFromLink(yamlLink);
-        const yamlKeys = this.parseF2YamlLink(cleanF2YamlLink);
-        const cleanYamlKeys = this.removeEmptyKeys(yamlKeys);
+    public static async getTaskObj(yamlLink: string) {
+        const cleanYamlKeys = YamlEditors.getCleanYamlKeys(yamlLink);
         const taskFileUri = await this.createFileURI(cleanYamlKeys);
         if (!taskFileUri) return;
         const taskYamlDoc = await this.parseYaml(taskFileUri);
@@ -186,6 +184,13 @@ export class YamlEditors {
 
         return taskObj;
 
+    }
+
+    public static getCleanYamlKeys(yamlLink: string) {
+        const cleanF2YamlLink = this.removeLinkSymbolsFromLink(yamlLink);
+        const yamlKeys = this.parseF2YamlLink(cleanF2YamlLink);
+        const cleanYamlKeys = this.removeEmptyKeys(yamlKeys);
+        return cleanYamlKeys;
     }
 
     private static async replaceTheTaskObj(parentOfTaskObj: any, taskObj: any) {
