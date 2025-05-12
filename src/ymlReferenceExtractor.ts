@@ -3,11 +3,7 @@ import { Data } from './Data';
 import { ActiveDocAndEditor } from './VsCodeUtils';
 
 export class YamlKeyExtractor {
-    private static extractedSymbols: Array<string>;
-
-    constructor() {
-        YamlKeyExtractor.extractedSymbols = [];
-    }
+    private static extractedSymbols: Array<string> = [];
 
     private static async extractAllYamlKeys() {
         const doc = ActiveDocAndEditor.getActiveDoc();
