@@ -2,39 +2,37 @@ import * as vscode from 'vscode';
 import { LinkCommands, TaskCommands } from './TaskOperations';
 
 export function activate(context: vscode.ExtensionContext) {
-    const taskCommand = new TaskCommands(context);
-    const linkCommands = new LinkCommands();
 
     const disposableForSr = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
-        taskCommand.specifyStandupReport();
+        await TaskCommands.specifyStandupReport();
     });
 
     const disposableForTaskSelection = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
-        taskCommand.selectTask();
+        TaskCommands.selectTask();
     });
 
     const disposableForPauseResumeTimer = vscode.commands.registerCommand('time-tracking-and-administration.pauseResumeTimer', async () => {
-        taskCommand.pauseOrResumeTask();
+        TaskCommands.pauseOrResumeTask();
     });
 
     const disposableForStopTimer = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
-        await taskCommand.stopTask();
+        await TaskCommands.stopTask();
     });
 
     const disposableForWorkLogGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateWorkLogs', async () => {
-        await taskCommand.generateWorkLogs();
+        await TaskCommands.generateWorkLogs();
     });
 
     const disposableForF2yamlLinkGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateF2yamlLink', async () => {
-        await linkCommands.generateOrCopyF2yamlLink();
+        await LinkCommands.generateOrCopyF2yamlLink();
     });
 
     const disposableForF2yamlReferenceGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateF2yamlReference', async () => {
-        await linkCommands.generateOrCopyF2yamlReference2();
+        await LinkCommands.generateOrCopyF2yamlReference();
     });
 
     const disposableForLinkFollower = vscode.commands.registerCommand('time-tracking-and-administration.followLink', async () => {
-        await linkCommands.followLink();
+        await LinkCommands.followLink();
     });
 
 
