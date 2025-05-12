@@ -2,7 +2,7 @@ import { Data } from './Data';
 import { ActiveDocAndEditor } from './VsCodeUtils';
 
 export class TextUtils {
-    static extractCurrentWord() {
+    public static extractCurrentWord() {
         const doc = ActiveDocAndEditor.getActiveDoc();
         const cursorPosition = ActiveDocAndEditor.getCursorPosition();
 
@@ -16,7 +16,7 @@ export class TextUtils {
         return srCode;
     }
 
-    static isThisYamlLink() {
+    public static async isThisYamlLink() {
         const doc = ActiveDocAndEditor.getActiveDoc();
         const cursorPosition = ActiveDocAndEditor.getCursorPosition();
         
@@ -26,8 +26,8 @@ export class TextUtils {
         const lineText = line.text;
         const linkPattern = Data.REGEX_PATTERNS.LINK;
 
-        let match;
-        while ((match = linkPattern.exec(lineText)) !== null) {  // .exec returns array
+        let match = linkPattern.exec(lineText);
+        while (match != null) {
             const startChar = match.index;
             const endChar = startChar + match[0].length;
 
@@ -39,7 +39,7 @@ export class TextUtils {
         return;
     }
 
-    static isThisYamlReference() {
+    public static isThisYamlReference() {
         const doc = ActiveDocAndEditor.getActiveDoc();
         const cursorPosition = ActiveDocAndEditor.getCursorPosition();
 
