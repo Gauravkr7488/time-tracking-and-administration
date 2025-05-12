@@ -3,12 +3,12 @@ import { Data } from './Data';
 
 export class Timer {
 
-    private startTime?: number;
-    private accumulatedTime: number = 0;
-    private isTimerPaused: boolean = false;
-    private startDateIsoFormat?: string;
+    private static startTime?: number;
+    private static accumulatedTime: number = 0;
+    private static isTimerPaused: boolean = false;
+    private static startDateIsoFormat?: string;
 
-    public async startTimer() {
+    public static async startTimer() {
         const startTime = Date.now();
         const accumulatedTime = 0;
         const isTimerPaused = false;
@@ -24,7 +24,7 @@ export class Timer {
         return;
     }
 
-    public pauseResumeTimer(): void {
+    public static pauseResumeTimer(): void {
         const startTime = this.startTime;
         const isTimerPaused = this.isTimerPaused;
         if (!startTime) return;
@@ -35,14 +35,14 @@ export class Timer {
         }
     }
 
-    private resumeTimer() {
+    private static resumeTimer() {
         this.startTime = Date.now();
         this.isTimerPaused = false;
 
         Message.info(Data.MESSAGES.INFO.TIMER_RESUMED);
     }
 
-    private pauseTimer(startTime: number) {
+    private static pauseTimer(startTime: number) {
         const currentTime = Date.now();
         const elapsed = currentTime - startTime;
         const accumulatedTime = this.accumulatedTime + elapsed;
@@ -54,7 +54,7 @@ export class Timer {
         Message.info(Data.MESSAGES.INFO.TIMER_PAUSED);
     }
 
-    public stopTimer() {
+    public static stopTimer() {
         const startTime = this.startTime;
         let totalDurationMs = this.accumulatedTime;
 
@@ -74,7 +74,7 @@ export class Timer {
         return durationMinutes;
     }
 
-    private formatDateToCustomISO(date: Date): string {
+    private static formatDateToCustomISO(date: Date): string {
         const year = date.getFullYear();
         const month = String(date.getMonth() + 1).padStart(2, '0');
         const day = String(date.getDate()).padStart(2, '0');
@@ -86,12 +86,12 @@ export class Timer {
 
     }
 
-    async giveStartTime() {
+    public static async giveStartTime() {
         const startDateIsoFormat = this.startDateIsoFormat;
         return startDateIsoFormat;
     }
 
-    isTaskRunnig(): boolean {
+    public static isTaskRunnig(): boolean {
         if (this.startTime) return true;
         return false;
     }
