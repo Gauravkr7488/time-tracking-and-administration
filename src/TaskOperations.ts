@@ -12,23 +12,11 @@ import { Data } from "./Data";
 
 export class TaskCommands {
 
-    private yamlKeyExtractor = new YamlKeyExtractor();
-    private yamleditors = new YamlEditors();
+    private static srCode?: string;
+    private static srDocUri?: vscode.Uri;
+    private static srEntry?: yaml.YAMLMap<unknown, unknown>;
 
-    private timerCommand: TimerCommands;
-    private context: vscode.ExtensionContext;
-    private timer: Timer;
-    private srCode?: string;
-    private srDocUri?: vscode.Uri;
-    private srEntry?: yaml.YAMLMap<unknown, unknown>;
-
-    constructor(context: vscode.ExtensionContext) {
-        this.context = context;
-        this.timerCommand = new TimerCommands(this.context);
-        this.timer = new Timer(this.context);
-    }
-
-    async specifyStandupReport() {
+    public static async specifyStandupReport() {
         const srDoc = ActiveDocAndEditor.getActiveDoc();
         if (!srDoc) return;
 
@@ -44,53 +32,58 @@ export class TaskCommands {
         Message.info(Data.MESSAGES.INFO.SR_SPECIFIED(srCode));
     }
 
-    async selectTask(): Promise<void> {
+    public static async selectTask(): Promise<void> {
         if (!this.srCode) {
             Message.err(Data.MESSAGES.ERRORS.RUN_SPECIFY_SR_FIRST);
             return;
         }
 
-        if (this.timerCommand.isTaskRunnig()) await this.stopTask();
+        if (Timer.isTaskRunnig()) await this.stopTask();
 
-        let f2YamlLink = TextUtils.isThisYamlLink();
-        if (!f2YamlLink) f2YamlLink = await this.yamlKeyExtractor.createYamlLink();
+        let yamlLink = await TextUtils.isThisYamlLink();
+        if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
 
-        await this.timer.startTimer();
-        const startTime = await this.timerCommand.giveStartTime();
-        const srEntry = this.yamleditors.createSrEntry(f2YamlLink, startTime);
+        await Timer.startTimer();
+        const startTime = await Timer.giveStartTime();
+        if(!startTime) return;
+        const srEntry = YamlEditors.createSrEntry(yamlLink, startTime);
 
         if (!this.srDocUri) return;
-        let srEntryIndex = await this.yamleditors.checkIfTaskIsAlreadyInSr(srEntry, this.srCode, this.srDocUri);
-        if (srEntryIndex == -1) this.yamleditors.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
+        let srEntryIndex = await YamlEditors.checkIfTaskIsAlreadyInSr(srEntry, this.srCode, this.srDocUri);
+        if (srEntryIndex == -1) YamlEditors.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
 
         this.srEntry = srEntry;
 
-        Message.info(Data.MESSAGES.INFO.TASK_SELECTED(f2YamlLink));
+        Message.info(Data.MESSAGES.INFO.TASK_SELECTED(yamlLink));
     }
 
-    pauseOrResumeTask() {
-        this.timer.pauseResumeTimer();
-    }
-
-    async stopTask() {
-        if (!this.timerCommand.isTaskRunnig()) {
+    public static pauseOrResumeTask() {
+        if (!Timer.isTaskRunnig()) {
             Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
             return;
         }
-        const duration = this.timer.stopTimer();
 
+        Timer.pauseResumeTimer();
+    }
+
+    public static async stopTask() {
+        if (!Timer.isTaskRunnig()) {
+            Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
+            return;
+        }
+        const duration = Timer.stopTimer();
+        if(duration === undefined) return;
         if (!this.srEntry) return;
         if (!this.srDocUri) return;
         if (!this.srCode) return;
-        await this.yamleditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
+        await YamlEditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
     }
 
-    async generateWorkLogs() {
-        if (this.timerCommand.isTaskRunnig()) await this.stopTask();
-        
+    public static async generateWorkLogs() {
+        if (Timer.isTaskRunnig()) await this.stopTask();
         if (!this.srDocUri) return;
         if (!this.srCode) return;
-        await this.yamleditors.generateWorkLogs(this.srCode, this.srDocUri);
+        await YamlEditors.generateWorkLogs(this.srCode, this.srDocUri);
     }
 
 
