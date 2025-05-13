@@ -43,9 +43,15 @@ export class TaskCommands {
         let yamlLink = await TextUtils.isThisYamlLink();
         if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
 
+        const isthisTask = await YamlEditors.isThisTask(yamlLink);
+        if(!isthisTask){
+            Message.err("nope not a task");
+            return;
+        }
+
         await Timer.startTimer();
         const startTime = await Timer.giveStartTime();
-        if(!startTime) return;
+        if (!startTime) return;
         const srEntry = YamlEditors.createSrEntry(yamlLink, startTime);
 
         if (!this.srDocUri) return;
@@ -72,7 +78,7 @@ export class TaskCommands {
             return;
         }
         const duration = Timer.stopTimer();
-        if(duration === undefined) return;
+        if (duration === undefined) return;
         if (!this.srEntry) return;
         if (!this.srDocUri) return;
         if (!this.srCode) return;

@@ -5,7 +5,6 @@ import { Message } from './VsCodeUtils';
 import { Data } from './Data';
 
 export class YamlEditors {
-
     public static taskFileUri: vscode.Uri;
     private static taskYamlDoc: yaml.Document<yaml.Node, true>
 
@@ -167,22 +166,22 @@ export class YamlEditors {
         return srEntryMap;
     }
 
-    public static async getTaskObj(yamlLink: string) {
+    public static async getTaskObjAndItsParent(yamlLink: string) {
         const cleanYamlKeys = YamlEditors.getCleanYamlKeys(yamlLink);
         const taskFileUri = await this.createFileURI(cleanYamlKeys);
         if (!taskFileUri) return;
         const taskYamlDoc = await this.parseYaml(taskFileUri);
         if (!taskYamlDoc) return;
-        let result = await this.findTaskObj(cleanYamlKeys, taskYamlDoc);
+        let result = await this.findTaskObjAndItsParent(cleanYamlKeys, taskYamlDoc);
         if (!result) return;
         let { taskObj, parentOfTaskObj } = result;
         if (!taskObj.value.items) {
-            taskObj = this.replaceTheTaskObj(parentOfTaskObj, taskObj);
+            taskObj = await this.replaceTheTaskObj(parentOfTaskObj, taskObj);
         }
         this.taskYamlDoc = taskYamlDoc;
         this.taskFileUri = taskFileUri;
 
-        return taskObj;
+        return { taskObj, parentOfTaskObj };
 
     }
 
@@ -193,7 +192,7 @@ export class YamlEditors {
         return cleanYamlKeys;
     }
 
-    private static async replaceTheTaskObj(parentOfTaskObj: any, taskObj: any) {
+    private static async replaceTheTaskObj(parentOfTaskObj: any, taskObj: any) { // change its name this one is probably making the yamlscalar to yaml map
         for (let index = 0; index < parentOfTaskObj.items.length; index++) {
             let currentObj = parentOfTaskObj.items[index];
             if (currentObj === taskObj) {
@@ -208,7 +207,7 @@ export class YamlEditors {
         }
     }
 
-    private static async findTaskObj(cleanYamlKeys: string[], yamlDoc: yaml.Document) {
+    private static async findTaskObjAndItsParent(cleanYamlKeys: string[], yamlDoc: yaml.Document) {
         let parentOfTaskObj;
         let taskObj;
         const fileAndFolderName = cleanYamlKeys[0];
@@ -342,7 +341,9 @@ export class YamlEditors {
     }
 
     private static async addWorkLogInTask(workLog: any, yamlLink: string) {
-        const taskObj = await this.getTaskObj(yamlLink);
+        const result = await this.getTaskObjAndItsParent(yamlLink);
+        if (!result) return;
+        const { taskObj } = result;
         const workLogObj = await this.getWorkLogObj(taskObj);
         if (!workLogObj) return;
         let name = this.getName();
@@ -377,4 +378,38 @@ export class YamlEditors {
         }
         return;
     }
+
+    static async isThisTask(yamlLink: string) {
+        const taskYamlLink = this.createTaskYamlLink(yamlLink);
+        const result = await this.getTaskObjAndItsParent(taskYamlLink);
+        if (!result) return;
+        const { taskObj, parentOfTaskObj } = result;
+        const taskKey = taskObj.key.value;
+        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
+        const arrayOfStatusCodes: string[] = config.get<string[]>('ignoreWords', []);
+        for (let index = 0; index < arrayOfStatusCodes.length; index++) {
+            const element = arrayOfStatusCodes[index];
+            const statusCode = new RegExp(element, "i");
+            const match = statusCode.exec(taskKey);
+            if (match) return true;
+        }
+        return false;
+        // let a = parentOfTaskObj;
+    }
+
+    static createTaskYamlLink(yamlLink: string) {
+        const arrayOfYamlKeys = this.getCleanYamlKeys(yamlLink);
+        for (let index = 0; index < arrayOfYamlKeys.length; index++) {
+            const element = arrayOfYamlKeys[index];
+            const match = element.match(/^\d+$/); // match full numeric parts only
+            if (match) {
+                // Slice up to the numeric part (excluding it), and join with '.'
+                const result = arrayOfYamlKeys.slice(0, index).join(".");
+                return `-->${result}<`;
+            }
+        }
+        // If no number is found, return the original string
+        return yamlLink;
+    }
+
 }

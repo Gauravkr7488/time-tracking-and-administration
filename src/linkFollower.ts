@@ -6,6 +6,7 @@ export class LinkFollower {
     async followLink(yamlLink: string) {
         const summaryWithSpaces = await this.giveExactSummaryWithSpaces(yamlLink);
         const taskDoc = await vscode.workspace.openTextDocument(YamlEditors.taskFileUri);
+        if (!summaryWithSpaces) return;
         const taskSummaryRegex = new RegExp(summaryWithSpaces, "i")
         await this.findTheTask(taskSummaryRegex, taskDoc);
 
@@ -31,7 +32,9 @@ export class LinkFollower {
 
 
     async giveExactSummaryWithSpaces(yamlLink: string) {
-        const taskObj = await YamlEditors.getTaskObj(yamlLink)
+        const result = await YamlEditors.getTaskObjAndItsParent(yamlLink)
+        if (!result) return;
+        let { taskObj } = result;
         const exactSummary = taskObj.key.value;
         const yamlKeys = YamlEditors.getCleanYamlKeys(yamlLink);
         let spaces: string = "";
