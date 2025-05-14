@@ -290,7 +290,7 @@ export class YamlEditors {
     }
 
     private static async cleanStatusCodesFromKeys(key: string) {
-        const config = vscode.workspace.getConfiguration("F2ToolInterface"); // TODO change name
+        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
         const ignoredWords: string[] = config.get<string[]>('ignoreWords', []);
         for (let index = 0; index < ignoredWords.length; index++) {
             if (key.startsWith(ignoredWords[index])) {
