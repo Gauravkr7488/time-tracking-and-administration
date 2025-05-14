@@ -7,6 +7,7 @@ import { Data } from './Data';
 export class YamlEditors {
     public static taskFileUri: vscode.Uri;
     private static taskYamlDoc: yaml.Document<yaml.Node, true>
+    static taskYamlLink: string;
 
 
     private static async parseYaml(docUri: vscode.Uri) {
@@ -192,7 +193,7 @@ export class YamlEditors {
         return cleanYamlKeys;
     }
 
-    private static async replaceTheTaskObj(parentOfTaskObj: any, taskObj: any) { // change its name this one is probably making the yamlscalar to yaml map
+    private static async replaceTheTaskObj(parentOfTaskObj: any, taskObj: any) { // TODO change its name this one is probably making the yamlscalar to yaml map
         for (let index = 0; index < parentOfTaskObj.items.length; index++) {
             let currentObj = parentOfTaskObj.items[index];
             if (currentObj === taskObj) {
@@ -207,7 +208,7 @@ export class YamlEditors {
         }
     }
 
-    private static async findTaskObjAndItsParent(cleanYamlKeys: string[], yamlDoc: yaml.Document) {
+    private static async findTaskObjAndItsParent(cleanYamlKeys: string[], yamlDoc: yaml.Document) { // TODO refactor
         let parentOfTaskObj;
         let taskObj;
         const fileAndFolderName = cleanYamlKeys[0];
@@ -379,11 +380,12 @@ export class YamlEditors {
         return;
     }
 
+
     static async isThisTask(yamlLink: string) {
-        const taskYamlLink = this.createTaskYamlLink(yamlLink);
-        const result = await this.getTaskObjAndItsParent(taskYamlLink);
+        const cleanYamlLink = this.removeSeqNumberFromYamlLink(yamlLink);
+        const result = await this.getTaskObjAndItsParent(cleanYamlLink);
         if (!result) return;
-        const { taskObj, parentOfTaskObj } = result;
+        const { taskObj } = result;
         const taskKey = taskObj.key.value;
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
         const arrayOfStatusCodes: string[] = config.get<string[]>('ignoreWords', []);
@@ -392,12 +394,31 @@ export class YamlEditors {
             const statusCode = new RegExp(element, "i");
             const match = statusCode.exec(taskKey);
             if (match) return true;
+
         }
+        // let something = await this.removeLastKeyOfYamlLink(cleanYamlLink);
+        // if(something == true){
+        //     this.taskYamlLink = yamlLink
+        //     return true;
+        // } 
         return false;
-        // let a = parentOfTaskObj;
     }
 
-    static createTaskYamlLink(yamlLink: string) {
+    static removeLastKeyOfYamlLink(cleanYamlLink: string) {
+        const arrayOfYamlKeys = this.getCleanYamlKeys(cleanYamlLink);
+        for (let index = 0; index < arrayOfYamlKeys.length; index++) {
+            if (index == arrayOfYamlKeys.length - 1) {
+                arrayOfYamlKeys.pop();
+            }
+        }
+        const jointYamlKeys = arrayOfYamlKeys.join(".");
+        const newYamlLink = `-->${jointYamlKeys}<`;
+        // let isThisTask = await this.isThisTask(newYamlLink);
+        return newYamlLink;
+    }
+
+
+    static removeSeqNumberFromYamlLink(yamlLink: string) {
         const arrayOfYamlKeys = this.getCleanYamlKeys(yamlLink);
         for (let index = 0; index < arrayOfYamlKeys.length; index++) {
             const element = arrayOfYamlKeys[index];
@@ -410,6 +431,13 @@ export class YamlEditors {
         }
         // If no number is found, return the original string
         return yamlLink;
+    }
+
+    static async getTaskYamlLink(yamlLink: string) {
+        let newYamlLink = this.removeLastKeyOfYamlLink(yamlLink);
+        const isThisTask = await this.isThisTask(newYamlLink);
+        if (!isThisTask) newYamlLink = await this.getTaskYamlLink(newYamlLink);
+        return newYamlLink;
     }
 
 }

@@ -44,11 +44,12 @@ export class TaskCommands {
         if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
 
         const isthisTask = await YamlEditors.isThisTask(yamlLink);
-        if(!isthisTask){
+        if(!isthisTask) yamlLink = await YamlEditors.getTaskYamlLink(yamlLink);
+        
+        if (!yamlLink) {
             Message.err("nope not a task");
             return;
         }
-
         await Timer.startTimer();
         const startTime = await Timer.giveStartTime();
         if (!startTime) return;
