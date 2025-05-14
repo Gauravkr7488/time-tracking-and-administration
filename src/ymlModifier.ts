@@ -387,13 +387,15 @@ export class YamlEditors {
         if (!result) return;
         const { taskObj } = result;
         const taskKey = taskObj.key.value;
+        const taskKeyForSingleLineTask = taskObj.key
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
         const arrayOfStatusCodes: string[] = config.get<string[]>('ignoreWords', []);
         for (let index = 0; index < arrayOfStatusCodes.length; index++) {
             const element = arrayOfStatusCodes[index];
             const statusCode = new RegExp(element, "i");
-            const match = statusCode.exec(taskKey);
-            if (match) return true;
+            const match1 = statusCode.exec(taskKey);
+            const match2 = statusCode.exec(taskKeyForSingleLineTask);
+            if (match1 || match2) return true;
 
         }
         // let something = await this.removeLastKeyOfYamlLink(cleanYamlLink);

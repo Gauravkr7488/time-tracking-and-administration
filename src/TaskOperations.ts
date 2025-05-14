@@ -57,7 +57,7 @@ export class TaskCommands {
 
         if (!this.srDocUri) return;
         let srEntryIndex = await YamlEditors.checkIfTaskIsAlreadyInSr(srEntry, this.srCode, this.srDocUri);
-        if (srEntryIndex == -1) YamlEditors.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
+        if (srEntryIndex == -1) await YamlEditors.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
 
         this.srEntry = srEntry;
 
