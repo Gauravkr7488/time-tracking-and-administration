@@ -34,7 +34,8 @@ export class LinkFollower { // TODO: refactor
     async giveExactSummaryWithSpaces(yamlLink: string) {
         const taskObj = await YamlEditors.getTaskObjAndItsParent(yamlLink)
         if (!taskObj) return;
-        const exactSummary = taskObj.key.value;
+        let exactSummary = taskObj.key.value;
+        if(!exactSummary) exactSummary = taskObj.key;
         const yamlKeys = YamlEditors.getCleanYamlKeys(yamlLink);
         let spaces: string = "";
         for (let index = 1; index < yamlKeys.length; index++) {
