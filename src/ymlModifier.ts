@@ -365,6 +365,7 @@ export class YamlEditors {
         name = new yaml.Scalar(name);
         workLog.items.unshift(name);
         await this.insertEntryInNode(workLogObj, workLog);
+        return true;
     }
 
     public static async checkIfTaskIsAlreadyInSr(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri) {
@@ -387,8 +388,8 @@ export class YamlEditors {
         for (let index = 0; index < wasNode.items.length; index++) {
             const currentYamlLink = wasNode.items[index].items[0].key.value;
             const workLog = wasNode.items[index].items[0].value;
-            await this.addWorkLogInTask(workLog, currentYamlLink);
-
+            let operationStatus = await this.addWorkLogInTask(workLog, currentYamlLink);
+            if (!operationStatus) return;
             const taskDoc = await vscode.workspace.openTextDocument(this.taskFileUri);
             if (!this.taskYamlDoc) return;
             await this.applyEditToDoc(this.taskYamlDoc, taskDoc);
