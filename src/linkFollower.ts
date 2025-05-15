@@ -1,7 +1,7 @@
 import { YamlEditors } from "./ymlModifier";
 import * as vscode from 'vscode';
 
-export class LinkFollower {
+export class LinkFollower { // TODO: bug
 
     async followLink(yamlLink: string) {
         const summaryWithSpaces = await this.giveExactSummaryWithSpaces(yamlLink);

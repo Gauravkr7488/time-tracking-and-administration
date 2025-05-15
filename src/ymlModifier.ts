@@ -239,7 +239,7 @@ export class YamlEditors {
                 }
             }
         }
-        if(!taskObj || !parentOfTaskObj){
+        if (!taskObj || !parentOfTaskObj) {
             Message.err("Unable to find the task");
             return;
         }
@@ -380,14 +380,17 @@ export class YamlEditors {
         if (!yamlDoc) return;
         const wasNode = await this.getWasObj(yamlDoc, srCode);
         if (!wasNode) return;
+        let checkDocStructure = await YamlEditors.parseYaml(this.taskFileUri);
+        if (!checkDocStructure) return;
         for (let index = 0; index < wasNode.items.length; index++) {
             const currentYamlLink = wasNode.items[index].items[0].key.value;
             const workLog = wasNode.items[index].items[0].value;
             await this.addWorkLogInTask(workLog, currentYamlLink);
 
             const taskDoc = await vscode.workspace.openTextDocument(this.taskFileUri);
-            if (!this.taskYamlDoc) return
+            if (!this.taskYamlDoc) return;
             await this.applyEditToDoc(this.taskYamlDoc, taskDoc);
+            // return true;
         }
         return;
     }

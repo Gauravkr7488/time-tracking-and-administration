@@ -107,10 +107,14 @@ export class TaskCommands {
     }
 
     public static async generateWorkLogs() {
-        if (Timer.isTaskRunnig()) await this.stopTask();
-        if (!this.srDocUri) return;
-        if (!this.srCode) return;
-        await YamlEditors.generateWorkLogs(this.srCode, this.srDocUri);
+        try {
+            if (Timer.isTaskRunnig()) await this.stopTask();
+            if (!this.srDocUri) return;
+            if (!this.srCode) return;
+            await YamlEditors.generateWorkLogs(this.srCode, this.srDocUri); // insert the task stat
+        } catch (error) {
+            Message.err(error);
+        }
     }
 
 
