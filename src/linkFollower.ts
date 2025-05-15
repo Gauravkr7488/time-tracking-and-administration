@@ -26,6 +26,7 @@ export class LinkFollower { // TODO: refactor
         const range = new vscode.Range(startPos, endPos);
 
         const editor = await vscode.window.showTextDocument(taskDoc, { preview: false });
+        editor.selection = new vscode.Selection(startPos, endPos);
         editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
     }
 
