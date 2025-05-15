@@ -239,8 +239,10 @@ export class YamlEditors {
                 }
             }
         }
+        let taskNameIndex = cleanYamlKeys.length - 1;
+        let taskName = cleanYamlKeys[taskNameIndex];
         if (!taskObj || !parentOfTaskObj) {
-            Message.err("Unable to find the task");
+            Message.err(`Unable to find the task: ${taskName}`);
             return;
         }
         return { taskObj, parentOfTaskObj };
