@@ -10,8 +10,8 @@ export class YamlEditors {
     static taskYamlLink: string;
 
 
-    private static async parseYaml(docUri: vscode.Uri) {
-        let doc
+    public static async parseYaml(docUri: vscode.Uri) {
+        let doc;
         try {
             doc = await vscode.workspace.openTextDocument(docUri);
         } catch (error) {
@@ -156,11 +156,12 @@ export class YamlEditors {
 
     public static async updateSrEntryDuration(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri, duration: number) {
         const yamlDoc = await this.parseYaml(srDocUri);
-        if (!yamlDoc) return;
+        if (!yamlDoc) return false;
         let srEntryObj = await this.findSrEntry(srEntry, yamlDoc, srCode);
         await this.updateDuration(srEntryObj, duration, yamlDoc, srCode);
         const doc = await vscode.workspace.openTextDocument(srDocUri);
         this.applyEditToDoc(yamlDoc, doc);
+        return true;
     }
 
     private static createWorkLog(startTime: string) {
@@ -192,8 +193,7 @@ export class YamlEditors {
         this.taskYamlDoc = taskYamlDoc;
         this.taskFileUri = taskFileUri;
 
-        return { taskObj, parentOfTaskObj }; // TODO check if anyone is using the parent
-
+        return taskObj;
     }
 
     public static getCleanYamlKeys(yamlLink: string) {
@@ -238,6 +238,10 @@ export class YamlEditors {
                     break;
                 }
             }
+        }
+        if(!taskObj || !parentOfTaskObj){
+            Message.err("Unable to find the task");
+            return;
         }
         return { taskObj, parentOfTaskObj };
     }
@@ -351,9 +355,8 @@ export class YamlEditors {
     }
 
     private static async addWorkLogInTask(workLog: any, yamlLink: string) {
-        const result = await this.getTaskObjAndItsParent(yamlLink);
-        if (!result) return;
-        const { taskObj } = result;
+        const taskObj = await this.getTaskObjAndItsParent(yamlLink);
+        if (!taskObj) return;
         const workLogObj = await this.getWorkLogObj(taskObj);
         if (!workLogObj) return;
         let name = this.getName();
@@ -392,11 +395,10 @@ export class YamlEditors {
 
     static async isThisTask(yamlLink: string) {
         const cleanYamlLink = this.removeSeqNumberFromYamlLink(yamlLink);
-        const result = await this.getTaskObjAndItsParent(cleanYamlLink);
-        if (!result) return;
-        const { taskObj } = result;
+        const taskObj = await this.getTaskObjAndItsParent(cleanYamlLink);
+        if (!taskObj) return;
         const taskKey = taskObj.key.value;
-        const taskKeyForSingleLineTask = taskObj.key
+        const taskKeyForSingleLineTask = taskObj.key;
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
         const arrayOfStatusCodes: string[] = config.get<string[]>('ignoreWords', []);
         for (let index = 0; index < arrayOfStatusCodes.length; index++) {

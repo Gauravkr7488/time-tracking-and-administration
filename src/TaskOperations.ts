@@ -33,36 +33,45 @@ export class TaskCommands {
     }
 
     public static async selectTask(): Promise<void> {
-        if (!this.srCode) {
-            Message.err(Data.MESSAGES.ERRORS.RUN_SPECIFY_SR_FIRST);
-            return;
+        try {
+            let doc = ActiveDocAndEditor.getActiveDoc();
+            if(!doc) return;
+            let checkDocStructure = await YamlEditors.parseYaml(doc.uri);
+            if(!checkDocStructure) return;
+            let operationStatus = true;
+            if (!this.srCode) {
+                Message.err(Data.MESSAGES.ERRORS.RUN_SPECIFY_SR_FIRST);
+                return;
+            }
+
+            if (Timer.isTaskRunnig()) operationStatus = await this.stopTask();
+            if (!operationStatus) return
+            let yamlLink = await TextUtils.isThisYamlLink();
+            if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
+
+            const isthisTask = await YamlEditors.isThisTask(yamlLink);
+            if (isthisTask === undefined) return;
+            if (!isthisTask) yamlLink = await YamlEditors.getTaskYamlLink(yamlLink);
+
+            if (!yamlLink) {
+                Message.err("nope not a task");
+                return;
+            }
+            await Timer.startTimer();
+            const startTime = await Timer.giveStartTime();
+            if (!startTime) return;
+            const srEntry = YamlEditors.createSrEntry(yamlLink, startTime);
+
+            if (!this.srDocUri) return;
+            let srEntryIndex = await YamlEditors.checkIfTaskIsAlreadyInSr(srEntry, this.srCode, this.srDocUri);
+            if (srEntryIndex == -1) await YamlEditors.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
+
+            this.srEntry = srEntry;
+
+            Message.info(Data.MESSAGES.INFO.TASK_SELECTED(yamlLink));
+        } catch (error) {
+            Message.err(error);
         }
-
-        if (Timer.isTaskRunnig()) await this.stopTask();
-
-        let yamlLink = await TextUtils.isThisYamlLink();
-        if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
-
-        const isthisTask = await YamlEditors.isThisTask(yamlLink);
-        if (isthisTask === undefined) return;
-        if(!isthisTask) yamlLink = await YamlEditors.getTaskYamlLink(yamlLink);
-        
-        if (!yamlLink) {
-            Message.err("nope not a task");
-            return;
-        }
-        await Timer.startTimer();
-        const startTime = await Timer.giveStartTime();
-        if (!startTime) return;
-        const srEntry = YamlEditors.createSrEntry(yamlLink, startTime);
-
-        if (!this.srDocUri) return;
-        let srEntryIndex = await YamlEditors.checkIfTaskIsAlreadyInSr(srEntry, this.srCode, this.srDocUri);
-        if (srEntryIndex == -1) await YamlEditors.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
-
-        this.srEntry = srEntry;
-
-        Message.info(Data.MESSAGES.INFO.TASK_SELECTED(yamlLink));
     }
 
     public static pauseOrResumeTask() {
@@ -75,16 +84,19 @@ export class TaskCommands {
     }
 
     public static async stopTask() {
+        let operationStatus;
         if (!Timer.isTaskRunnig()) {
             Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
-            return;
+            return false;
         }
         const duration = Timer.stopTimer();
-        if (duration === undefined) return;
-        if (!this.srEntry) return;
-        if (!this.srDocUri) return;
-        if (!this.srCode) return;
-        await YamlEditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
+        if (duration === undefined) return false;
+        if (!this.srEntry) return false;
+        if (!this.srDocUri) return false;
+        if (!this.srCode) return false;
+        operationStatus = await YamlEditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
+        if (!operationStatus) return false;
+        return true;
     }
 
     public static async generateWorkLogs() {
