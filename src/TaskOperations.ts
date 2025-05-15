@@ -84,19 +84,26 @@ export class TaskCommands {
     }
 
     public static async stopTask() {
-        let operationStatus;
-        if (!Timer.isTaskRunnig()) {
-            Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
+        try {
+            if (!this.srDocUri) return false;
+            let checkDocStructure = await YamlEditors.parseYaml(this.srDocUri);
+            if(!checkDocStructure) return false;
+            let operationStatus;
+            if (!Timer.isTaskRunnig()) {
+                Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
+                return false;
+            }
+            const duration = Timer.stopTimer();
+            if (duration === undefined) return false;
+            if (!this.srEntry) return false;
+            if (!this.srCode) return false;
+            operationStatus = await YamlEditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
+            if (!operationStatus) return false;
+            return true;
+        } catch (error) {
+            Message.err(error);
             return false;
         }
-        const duration = Timer.stopTimer();
-        if (duration === undefined) return false;
-        if (!this.srEntry) return false;
-        if (!this.srDocUri) return false;
-        if (!this.srCode) return false;
-        operationStatus = await YamlEditors.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
-        if (!operationStatus) return false;
-        return true;
     }
 
     public static async generateWorkLogs() {
