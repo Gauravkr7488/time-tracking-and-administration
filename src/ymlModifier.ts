@@ -17,6 +17,11 @@ export class YamlEditors {
         const text = doc.getText();
         try {
             const yamlDoc: yaml.Document = yaml.parseDocument(text);
+            if (yamlDoc.errors.length > 0) {
+                let a = yamlDoc.errors[0];
+                Message.err(`YAML parsing error: ${a.message}`);
+                return;
+            }
             return yamlDoc;
         } catch (error) {
             Message.err(Data.MESSAGES.ERRORS.FAILED_TO_PARSE_YAML);
@@ -396,13 +401,7 @@ export class YamlEditors {
             const match1 = statusCode.exec(taskKey);
             const match2 = statusCode.exec(taskKeyForSingleLineTask);
             if (match1 || match2) return true;
-
         }
-        // let something = await this.removeLastKeyOfYamlLink(cleanYamlLink);
-        // if(something == true){
-        //     this.taskYamlLink = yamlLink
-        //     return true;
-        // } 
         return false;
     }
 

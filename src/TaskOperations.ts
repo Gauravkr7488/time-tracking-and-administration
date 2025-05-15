@@ -44,6 +44,7 @@ export class TaskCommands {
         if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
 
         const isthisTask = await YamlEditors.isThisTask(yamlLink);
+        if (isthisTask === undefined) return;
         if(!isthisTask) yamlLink = await YamlEditors.getTaskYamlLink(yamlLink);
         
         if (!yamlLink) {
