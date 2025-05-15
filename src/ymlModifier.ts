@@ -180,6 +180,7 @@ export class YamlEditors {
 
     public static async getTaskObjAndItsParent(yamlLink: string) {
         const cleanYamlKeys = YamlEditors.getCleanYamlKeys(yamlLink);
+        if (!cleanYamlKeys) return;
         const taskFileUri = await this.createFileURI(cleanYamlKeys);
         if (!taskFileUri) return;
         const taskYamlDoc = await this.parseYaml(taskFileUri);
@@ -198,6 +199,7 @@ export class YamlEditors {
 
     public static getCleanYamlKeys(yamlLink: string) {
         const cleanF2YamlLink = this.removeLinkSymbolsFromLink(yamlLink);
+        if (!cleanF2YamlLink) return;
         const yamlKeys = this.parseF2YamlLink(cleanF2YamlLink);
         const cleanYamlKeys = this.removeEmptyKeys(yamlKeys);
         return cleanYamlKeys;
@@ -242,7 +244,7 @@ export class YamlEditors {
         let taskNameIndex = cleanYamlKeys.length - 1;
         let taskName = cleanYamlKeys[taskNameIndex];
         if (!taskObj || !parentOfTaskObj) {
-            Message.err(`Unable to find the task: ${taskName}`);
+            Message.err(`Unable to find: ${taskName}`);
             return;
         }
         return { taskObj, parentOfTaskObj };
@@ -401,6 +403,7 @@ export class YamlEditors {
 
     static async isThisTask(yamlLink: string) {
         const cleanYamlLink = this.removeSeqNumberFromYamlLink(yamlLink);
+        if (!cleanYamlLink) return;
         const taskObj = await this.getTaskObjAndItsParent(cleanYamlLink);
         if (!taskObj) return;
         const taskKey = taskObj.key.value;
@@ -419,6 +422,7 @@ export class YamlEditors {
 
     static removeLastKeyOfYamlLink(cleanYamlLink: string) {
         const arrayOfYamlKeys = this.getCleanYamlKeys(cleanYamlLink);
+        if (!arrayOfYamlKeys) return;
         for (let index = 0; index < arrayOfYamlKeys.length; index++) {
             if (index == arrayOfYamlKeys.length - 1) {
                 arrayOfYamlKeys.pop();
@@ -433,6 +437,7 @@ export class YamlEditors {
 
     static removeSeqNumberFromYamlLink(yamlLink: string) {
         const arrayOfYamlKeys = this.getCleanYamlKeys(yamlLink);
+        if (!arrayOfYamlKeys) return;
         for (let index = 0; index < arrayOfYamlKeys.length; index++) {
             const element = arrayOfYamlKeys[index];
             const match = element.match(/^\d+$/); // match full numeric parts only
@@ -446,11 +451,11 @@ export class YamlEditors {
         return yamlLink;
     }
 
-    static async getTaskYamlLink(yamlLink: string) {
+    static async getTaskYamlLink(yamlLink: string): Promise<string | undefined> {
         let newYamlLink = this.removeLastKeyOfYamlLink(yamlLink);
+        if (!newYamlLink) return;
         const isThisTask = await this.isThisTask(newYamlLink);
         if (!isThisTask) newYamlLink = await this.getTaskYamlLink(newYamlLink);
         return newYamlLink;
     }
-
 }
