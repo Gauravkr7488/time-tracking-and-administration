@@ -38,9 +38,33 @@ BugFixed: TimeTracking functionality does not support empty Tasks
 BugFixed: Empty standup reports are not supported or ones with a lowercase "was"
 BugFixed: Starting the timer on a task which is already present in the SR creates a new entry
 BugFixed: Random thigns are happenig when genereate worklog is used on file ending with .yml
-### 1.0.5
 
+### 1.0.6
 BugFixed: The Worklog generator is only generating first worlkog and is working very randomly sometimes.
+
+### 1.1.0
+added the link and reference generation feature
+
+### 1.2.0
+added the feature to followLink
+
+### 1.3.0
+Now system can detect if the link pointing towards a task or not
+
+### 1.4.0
+The system can autocorrect the taskLink if the user is standing on a wrong place in a task and tries to select a task
+
+### 1.4.10
+- removed dependence on f2pInterface
+- now single line tasks will not be rejected as a task
+- now if the taskDoc's yaml structure is not proper the extension will not crash instead it will show a error
+- BugFix: now if the taskURI is incorrect the extension dosent crash
+- BugFix: now if the yamlStrucure of the srdoc is not correct during tht task select an error will be shown
+- BugFix: now if the yamlStrucure of the srdoc is not correct during the stop task command an error will be shown
+- BugFix: now if the yamlStrucure of the taskDoc is not correct during the GenerateWorkLog command an error will be shown
+- improved error message when the task is not found
+- BugFix: now if the yamlStrucure of the taskDoc is changed and then the generate worklog command is fired then an error will be shown
+- BugFix: if there is task that has the same name and more amount of space it wont be mistaken for the actual task
 
 ## For more information
 
