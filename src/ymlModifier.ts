@@ -11,7 +11,12 @@ export class YamlEditors {
 
 
     private static async parseYaml(docUri: vscode.Uri) {
-        const doc = await vscode.workspace.openTextDocument(docUri);
+        let doc
+        try {
+            doc = await vscode.workspace.openTextDocument(docUri);
+        } catch (error) {
+            Message.err(`Unable to find the file ${docUri}`);
+        }
         if (!doc) return;
         if (!ActiveDocAndEditor.isThisYamlDoc()) return;
         const text = doc.getText();
@@ -187,7 +192,7 @@ export class YamlEditors {
         this.taskYamlDoc = taskYamlDoc;
         this.taskFileUri = taskFileUri;
 
-        return { taskObj, parentOfTaskObj };
+        return { taskObj, parentOfTaskObj }; // TODO check if anyone is using the parent
 
     }
 
@@ -256,17 +261,16 @@ export class YamlEditors {
             if (!vscode.workspace.workspaceFolders) return;
             fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePathOfFile);
             await vscode.workspace.fs.stat(fileUri);
-            // this.docUri = fileUri;
         } catch (err1: any) {
             try {
                 let relativePathOfFile = relativePath + ".yaml";
                 if (!vscode.workspace.workspaceFolders) return;
                 fileUri = vscode.Uri.joinPath(vscode.workspace.workspaceFolders[0].uri, relativePathOfFile);
                 await vscode.workspace.fs.stat(fileUri);
-                // this.docUri = fileUri;
 
             } catch (err2: any) {
-                Message.err(err1 + '' + err2);
+                Message.err(`Unable to find the file ${fileUri}`);
+                return;
             }
         };
         return fileUri;
