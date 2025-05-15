@@ -1,13 +1,13 @@
 import { YamlEditors } from "./ymlModifier";
 import * as vscode from 'vscode';
 
-export class LinkFollower { // TODO: bug
+export class LinkFollower { // TODO: refactor
 
     async followLink(yamlLink: string) {
         const summaryWithSpaces = await this.giveExactSummaryWithSpaces(yamlLink);
         const taskDoc = await vscode.workspace.openTextDocument(YamlEditors.taskFileUri);
         if (!summaryWithSpaces) return;
-        const taskSummaryRegex = new RegExp(summaryWithSpaces, "i")
+        const taskSummaryRegex = new RegExp("^" + summaryWithSpaces, "im")
         await this.findTheTask(taskSummaryRegex, taskDoc);
 
     }
@@ -17,7 +17,7 @@ export class LinkFollower { // TODO: bug
         const match = taskSummaryRegex.exec(text);
 
         if (!match || match.index === undefined) {
-            vscode.window.showInformationMessage("Task not found.");
+            vscode.window.showInformationMessage("Could not find the item where the link is pointing");
             return;
         }
 
@@ -26,7 +26,6 @@ export class LinkFollower { // TODO: bug
         const range = new vscode.Range(startPos, endPos);
 
         const editor = await vscode.window.showTextDocument(taskDoc, { preview: false });
-        editor.selection = new vscode.Selection(startPos, endPos);
         editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
     }
 
