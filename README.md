@@ -66,6 +66,11 @@ The system can autocorrect the taskLink if the user is standing on a wrong place
 - BugFix: now if the yamlStrucure of the taskDoc is changed and then the generate worklog command is fired then an error will be shown
 - BugFix: if there is task that has the same name and more amount of space it wont be mistaken for the actual task
 
+### 1.4.12
+- now the follow link in not broken
+- now the follow lilnk works for the single line tasks too
+
+
 ## For more information
 
 Contact me - Gaurav
