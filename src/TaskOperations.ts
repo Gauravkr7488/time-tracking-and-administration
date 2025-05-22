@@ -35,9 +35,9 @@ export class TaskCommands {
     public static async selectTask(): Promise<void> {
         try {
             let doc = ActiveDocAndEditor.getActiveDoc();
-            if(!doc) return;
+            if (!doc) return;
             let checkDocStructure = await YamlEditors.parseYaml(doc.uri);
-            if(!checkDocStructure) return;
+            if (!checkDocStructure) return;
             let operationStatus = true;
             if (!this.srCode) {
                 Message.err(Data.MESSAGES.ERRORS.RUN_SPECIFY_SR_FIRST);
@@ -87,7 +87,7 @@ export class TaskCommands {
         try {
             if (!this.srDocUri) return false;
             let checkDocStructure = await YamlEditors.parseYaml(this.srDocUri);
-            if(!checkDocStructure) return false;
+            if (!checkDocStructure) return false;
             let operationStatus;
             if (!Timer.isTaskRunnig()) {
                 Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
@@ -117,6 +117,12 @@ export class TaskCommands {
         }
     }
 
+    static async generateCSV() {
+        const csvEntry = await YamlEditors.generateCSV();
+        if(!csvEntry) return;
+        Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(csvEntry));
+        vscode.env.clipboard.writeText(csvEntry);
+    }
 
 }
 

@@ -34,7 +34,10 @@ export function activate(context: vscode.ExtensionContext) {
     const disposableForLinkFollower = vscode.commands.registerCommand('time-tracking-and-administration.followLink', async () => {
         await LinkCommands.followLink();
     });
-
+    
+    const disposableForCSVGeneration = vscode.commands.registerCommand('time-tracking-and-administration.generateCSV', async () => {
+        await TaskCommands.generateCSV();
+    });
 
     context.subscriptions.push(
         disposableForSr,
@@ -44,7 +47,8 @@ export function activate(context: vscode.ExtensionContext) {
         disposableForWorkLogGenerator, 
         disposableForF2yamlLinkGenerator, 
         disposableForF2yamlReferenceGenerator,
-        disposableForLinkFollower
+        disposableForLinkFollower,
+        disposableForCSVGeneration
     );
 }
 

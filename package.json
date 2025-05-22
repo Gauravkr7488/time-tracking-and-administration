@@ -48,6 +48,10 @@
       {
         "command": "time-tracking-and-administration.followLink",
         "title": "Follow the F2Yaml Link"
+      },
+      {
+        "command": "time-tracking-and-administration.generateCSV",
+        "title": "Generate the CSV"
       }
     ],
     "configuration": {
@@ -92,6 +96,24 @@
           "type": "string",
           "description": "The separator to use in the extracted YAML path.",
           "default": "."
+        },
+        "time-tracking-and-administration.csvFields": {
+          "type": "array",
+          "description": "Fields of the csv generated.",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "UpdateStatus",
+            "TaskStatus",
+            "Milestone",
+            "IdLink",
+            "By",
+            "Priority",
+            "RemHrs",
+            "SummaryLink",
+            "BlockedBy"
+          ]
         }
       }
     }

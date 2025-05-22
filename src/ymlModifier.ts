@@ -3,6 +3,8 @@ import * as yaml from 'yaml';
 import { ActiveDocAndEditor } from './VsCodeUtils';
 import { Message } from './VsCodeUtils';
 import { Data } from './Data';
+import { TextUtils } from './TextUtils';
+import { YamlKeyExtractor } from './ymlReferenceExtractor';
 
 export class YamlEditors {
     public static taskFileUri: vscode.Uri;
@@ -178,7 +180,7 @@ export class YamlEditors {
         return srEntryMap;
     }
 
-    public static async getTaskObjAndItsParent(yamlLink: string) {
+    public static async getTaskObj(yamlLink: string) {
         const cleanYamlKeys = YamlEditors.getCleanYamlKeys(yamlLink);
         if (!cleanYamlKeys) return;
         const taskFileUri = await this.createFileURI(cleanYamlKeys);
@@ -359,7 +361,7 @@ export class YamlEditors {
     }
 
     private static async addWorkLogInTask(workLog: any, yamlLink: string) {
-        const taskObj = await this.getTaskObjAndItsParent(yamlLink);
+        const taskObj = await this.getTaskObj(yamlLink);
         if (!taskObj) return;
         const workLogObj = await this.getWorkLogObj(taskObj);
         if (!workLogObj) return;
@@ -404,7 +406,7 @@ export class YamlEditors {
     static async isThisTask(yamlLink: string) {
         const cleanYamlLink = this.removeSeqNumberFromYamlLink(yamlLink);
         if (!cleanYamlLink) return;
-        const taskObj = await this.getTaskObjAndItsParent(cleanYamlLink);
+        const taskObj = await this.getTaskObj(cleanYamlLink);
         if (!taskObj) return;
         const taskKey = taskObj.key.value;
         const taskKeyForSingleLineTask = taskObj.key;
@@ -457,5 +459,60 @@ export class YamlEditors {
         const isThisTask = await this.isThisTask(newYamlLink);
         if (!isThisTask) newYamlLink = await this.getTaskYamlLink(newYamlLink);
         return newYamlLink;
+    }
+    ///////////////////////////////////////////////////////////////////////////////////////////
+    static async generateCSV() { // move this somewhere else and refactor this
+        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
+        const csvFields = config.get<string[]>('csvFields', []);
+        let csvEntry = "";
+        let yamlLink = await TextUtils.isThisYamlLink();
+        if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
+        const isthisTask = await YamlEditors.isThisTask(yamlLink);
+        if (isthisTask === undefined) return;
+        if (!isthisTask) yamlLink = await YamlEditors.getTaskYamlLink(yamlLink);
+
+        if (!yamlLink) {
+            Message.err("nope not a task");
+            return;
+        }
+        const taskObj = await this.getTaskObj(yamlLink);
+        for (let index = 0; index < csvFields.length; index++) {
+            const csvField = csvFields[index];
+
+            if (csvField === "TaskStatus") { // for status
+
+                let statusCode = await this.getStatusCode(taskObj.key.value)
+                if (statusCode) {
+                    csvEntry += statusCode;
+                }
+            }
+           
+            if (csvField === "SummaryLink") { // for link
+                csvEntry += yamlLink;
+            }
+
+            for (let i = 0; i < taskObj.value.items.length; i++) { // for every other field
+                const item = taskObj.value.items[i];
+                if (item.key.value == csvField) {
+                    csvEntry += item.value.value;
+                }
+            }
+
+
+            csvEntry += ", ";
+        }
+        csvEntry = csvEntry.slice(0, -2); // Now just format the csv properly
+        return csvEntry;
+    }
+
+    private static async getStatusCode(key: string) {
+        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
+        const ignoredWords: string[] = config.get<string[]>('ignoreWords', []);
+        for (let index = 0; index < ignoredWords.length; index++) {
+            if (key.startsWith(ignoredWords[index])) {
+                return ignoredWords[index];
+            }
+        }
+        return;
     }
 }
