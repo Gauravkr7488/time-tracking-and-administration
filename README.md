@@ -70,13 +70,17 @@ The system can autocorrect the taskLink if the user is standing on a wrong place
 - now the follow link in not broken
 - now the follow lilnk works for the single line tasks too
 
-### 
+### 1.5.0
+Feature:
+    - Can create a line of CSV from the Task
+
+### Next
 Bugs:
     - Follow link should work on anyfile which have the link
     - closing the vscode should stop the task
     - stating the vscode should start the extenion
 Feature:
-    - Can create a line of CSV from the Task
+    - Can create Idlinks and add it to the csv
 
 ## For more information
 
