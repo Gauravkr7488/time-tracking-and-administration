@@ -1,7 +1,9 @@
+import { Data } from "./Data";
+import { Message } from "./VsCodeUtils";
 import { YamlEditors } from "./ymlModifier";
 import * as vscode from 'vscode';
 
-export class LinkFollower { // TODO: refactor
+export class LinkFollower {
 
     async followLink(yamlLink: string) {
         const summaryWithSpaces = await this.giveExactSummaryWithSpaces(yamlLink);
@@ -17,7 +19,7 @@ export class LinkFollower { // TODO: refactor
         const match = taskSummaryRegex.exec(text);
 
         if (!match || match.index === undefined) {
-            vscode.window.showInformationMessage("Could not find the item where the link is pointing");
+            Message.err(Data.MESSAGES.ERRORS.LINK_ITEM_NOT_FOUND);
             return;
         }
 
@@ -29,7 +31,6 @@ export class LinkFollower { // TODO: refactor
         editor.selection = new vscode.Selection(startPos, endPos);
         editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
     }
-
 
     async giveExactSummaryWithSpaces(yamlLink: string) {
         const taskObj = await YamlEditors.getTaskObj(yamlLink)
@@ -45,7 +46,4 @@ export class LinkFollower { // TODO: refactor
         const summaryWithSpaces = spaces + exactSummary;
         return summaryWithSpaces;
     }
-
-
-
 }

@@ -9,7 +9,8 @@ export class Data {
             NO_ACTIVE_TEXT_EDITOR: "No active text editor.",
             NO_WORD_AT_CURSOR: "No word found at cursor position. Place cursor on a YAML key.",
             NO_LINK_FOUND: "No link found containing the cursor.",
-            THIS_COMMAND_ONLY_WORKS_WITH_YAML_FILES: "This command only works with YAML files."
+            THIS_COMMAND_ONLY_WORKS_WITH_YAML_FILES: "This command only works with YAML files.",
+            LINK_ITEM_NOT_FOUND: "Could not find the item where the link is pointing"
         },
         INFO: {
             COPIED_TO_CLIPBOARD: (something: string) => `'${something}' copied to your clipboard`,
