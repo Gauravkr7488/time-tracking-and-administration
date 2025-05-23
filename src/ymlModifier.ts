@@ -6,7 +6,7 @@ import { Data } from './Data';
 import { TextUtils } from './TextUtils';
 import { YamlKeyExtractor } from './ymlReferenceExtractor';
 
-export class YamlEditors {
+export class YamlEditors { // TODO refactor
     public static taskFileUri: vscode.Uri;
     private static taskYamlDoc: yaml.Document<yaml.Node, true>
     static taskYamlLink: string;
