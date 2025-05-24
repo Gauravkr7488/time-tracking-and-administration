@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { LinkCommands, TaskCommands } from './TaskOperations';
+import { IdLinkCreater } from './ymlReferenceExtractor';
 
 export function activate(context: vscode.ExtensionContext) {
 

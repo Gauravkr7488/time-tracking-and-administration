@@ -4,7 +4,7 @@ import { ActiveDocAndEditor } from './VsCodeUtils';
 import { Message } from './VsCodeUtils';
 import { Data } from './Data';
 import { TextUtils } from './TextUtils';
-import { YamlKeyExtractor } from './ymlReferenceExtractor';
+import { IdLinkCreater, YamlKeyExtractor } from './ymlReferenceExtractor';
 
 export class YamlEditors { // TODO refactor
     public static taskFileUri: vscode.Uri;
@@ -308,7 +308,7 @@ export class YamlEditors { // TODO refactor
         return cleanYamlLink;
     }
 
-    private static async cleanStatusCodesFromKeys(key: string) {
+    public static async cleanStatusCodesFromKeys(key: string) {
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
         const ignoredWords: string[] = config.get<string[]>('ignoreWords', []);
         for (let index = 0; index < ignoredWords.length; index++) {
@@ -486,9 +486,14 @@ export class YamlEditors { // TODO refactor
                     csvEntry += statusCode;
                 }
             }
-           
+
             if (csvField === "SummaryLink") { // for link
                 csvEntry += yamlLink;
+            }
+
+            if (csvField == "IdLink") {
+                let idLink = await IdLinkCreater.createIdLink();
+                csvEntry += idLink
             }
 
             for (let i = 0; i < taskObj.value.items.length; i++) { // for every other field
