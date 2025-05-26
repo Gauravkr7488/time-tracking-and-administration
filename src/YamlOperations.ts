@@ -6,7 +6,7 @@ import { Data } from './Data';
 import { TextUtils } from './TextUtils';
 import { IdLinkCreater, YamlKeyExtractor } from './ymlReferenceExtractor';
 
-export class YamlEditors { // TODO refactor
+export class YamlTaskOperation {
     public static taskFileUri: vscode.Uri;
     private static taskYamlDoc: yaml.Document<yaml.Node, true>
     static taskYamlLink: string;
@@ -17,7 +17,7 @@ export class YamlEditors { // TODO refactor
         try {
             doc = await vscode.workspace.openTextDocument(docUri);
         } catch (error) {
-            Message.err(`Unable to find the file ${docUri}`);
+            Message.err(Data.MESSAGES.ERRORS.UNABLE_TO_FIND_FILE(docUri));
         }
         if (!doc) return;
         if (!ActiveDocAndEditor.isThisYamlDoc()) return;
@@ -25,8 +25,8 @@ export class YamlEditors { // TODO refactor
         try {
             const yamlDoc: yaml.Document = yaml.parseDocument(text);
             if (yamlDoc.errors.length > 0) {
-                let a = yamlDoc.errors[0];
-                Message.err(`YAML parsing error: ${a.message}`);
+                let error = yamlDoc.errors[0];
+                Message.err(Data.MESSAGES.ERRORS.PARSING_ERROR(error.message));
                 return;
             }
             return yamlDoc;
@@ -174,14 +174,14 @@ export class YamlEditors { // TODO refactor
     }
 
     public static createSrEntry(yamlLink: string, startTime: string) {
-        const workLog = YamlEditors.createWorkLog(startTime);
+        const workLog = YamlTaskOperation.createWorkLog(startTime);
         const srEntryMap = new yaml.YAMLMap();
         srEntryMap.set(yamlLink, workLog);
         return srEntryMap;
     }
 
     public static async getTaskObj(yamlLink: string) {
-        const cleanYamlKeys = YamlEditors.getCleanYamlKeys(yamlLink);
+        const cleanYamlKeys = YamlTaskOperation.getCleanYamlKeys(yamlLink);
         if (!cleanYamlKeys) return;
         const taskFileUri = await this.createFileURI(cleanYamlKeys);
         if (!taskFileUri) return;
@@ -191,7 +191,7 @@ export class YamlEditors { // TODO refactor
         if (!result) return;
         let { taskObj, parentOfTaskObj } = result;
         if (!taskObj.value.items) {
-            taskObj = await this.replaceTheTaskObj(parentOfTaskObj, taskObj);
+            taskObj = await this.replaceScalarTaskObjToMap(parentOfTaskObj, taskObj);
         }
         this.taskYamlDoc = taskYamlDoc;
         this.taskFileUri = taskFileUri;
@@ -207,7 +207,7 @@ export class YamlEditors { // TODO refactor
         return cleanYamlKeys;
     }
 
-    private static async replaceTheTaskObj(parentOfTaskObj: any, taskObj: any) { // TODO change its name this one is probably making the yamlscalar to yaml map
+    private static async replaceScalarTaskObjToMap(parentOfTaskObj: any, taskObj: any) {
         for (let index = 0; index < parentOfTaskObj.items.length; index++) {
             let currentObj = parentOfTaskObj.items[index];
             if (currentObj === taskObj) {
@@ -222,7 +222,7 @@ export class YamlEditors { // TODO refactor
         }
     }
 
-    private static async findTaskObjAndItsParent(cleanYamlKeys: string[], yamlDoc: yaml.Document) { // TODO refactor
+    private static async findTaskObjAndItsParent(cleanYamlKeys: string[], yamlDoc: yaml.Document) {
         let parentOfTaskObj;
         let taskObj;
         const fileAndFolderName = cleanYamlKeys[0];
@@ -246,7 +246,7 @@ export class YamlEditors { // TODO refactor
         let taskNameIndex = cleanYamlKeys.length - 1;
         let taskName = cleanYamlKeys[taskNameIndex];
         if (!taskObj || !parentOfTaskObj) {
-            Message.err(`Unable to find: ${taskName}`);
+            Message.err(Data.MESSAGES.ERRORS.UNABLE_TO_FIND_TASK(taskName));
             return;
         }
         return { taskObj, parentOfTaskObj };
@@ -259,7 +259,7 @@ export class YamlEditors { // TODO refactor
 
     private static async createFileURI(cleanYamlKeys: any[]) {
         const fileAndFolderName = cleanYamlKeys[0];
-        const arrFileAndFolderName = fileAndFolderName.split("//");
+        const arrFileAndFolderName = fileAndFolderName.split(Data.MISC.FILE_DIVIDER);
         let relativePath: string = ".";
         let fileUri;
         for (let index = 0; index < arrFileAndFolderName.length; index++) {
@@ -279,7 +279,7 @@ export class YamlEditors { // TODO refactor
                 await vscode.workspace.fs.stat(fileUri);
 
             } catch (err2: any) {
-                Message.err(`Unable to find the file ${fileUri}`);
+                Message.err(Data.MESSAGES.ERRORS.UNABLE_TO_FIND_FILE(fileUri));
                 return;
             }
         };
@@ -387,7 +387,7 @@ export class YamlEditors { // TODO refactor
         if (!yamlDoc) return;
         const wasNode = await this.getWasObj(yamlDoc, srCode);
         if (!wasNode) return;
-        let checkDocStructure = await YamlEditors.parseYaml(this.taskFileUri);
+        let checkDocStructure = await YamlTaskOperation.parseYaml(this.taskFileUri);
         if (!checkDocStructure) return;
         for (let index = 0; index < wasNode.items.length; index++) {
             const currentYamlLink = wasNode.items[index].items[0].key.value;
@@ -397,7 +397,6 @@ export class YamlEditors { // TODO refactor
             const taskDoc = await vscode.workspace.openTextDocument(this.taskFileUri);
             if (!this.taskYamlDoc) return;
             await this.applyEditToDoc(this.taskYamlDoc, taskDoc);
-            // return true;
         }
         return;
     }
@@ -432,7 +431,6 @@ export class YamlEditors { // TODO refactor
         }
         const jointYamlKeys = arrayOfYamlKeys.join(".");
         const newYamlLink = `-->${jointYamlKeys}<`;
-        // let isThisTask = await this.isThisTask(newYamlLink);
         return newYamlLink;
     }
 
@@ -467,9 +465,9 @@ export class YamlEditors { // TODO refactor
         let csvEntry = "";
         let yamlLink = await TextUtils.isThisYamlLink();
         if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
-        const isthisTask = await YamlEditors.isThisTask(yamlLink);
+        const isthisTask = await YamlTaskOperation.isThisTask(yamlLink);
         if (isthisTask === undefined) return;
-        if (!isthisTask) yamlLink = await YamlEditors.getTaskYamlLink(yamlLink);
+        if (!isthisTask) yamlLink = await YamlTaskOperation.getTaskYamlLink(yamlLink);
 
         if (!yamlLink) {
             Message.err("nope not a task");

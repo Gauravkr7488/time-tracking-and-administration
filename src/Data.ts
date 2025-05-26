@@ -10,7 +10,11 @@ export class Data {
             NO_WORD_AT_CURSOR: "No word found at cursor position. Place cursor on a YAML key.",
             NO_LINK_FOUND: "No link found containing the cursor.",
             THIS_COMMAND_ONLY_WORKS_WITH_YAML_FILES: "This command only works with YAML files.",
-            LINK_ITEM_NOT_FOUND: "Could not find the item where the link is pointing"
+            LINK_ITEM_NOT_FOUND: "Could not find the item where the link is pointing",
+            UNABLE_TO_FIND_FILE: (something: any) => `Unable to find the file ${something}`,
+            PARSING_ERROR: (error: any) => `YAML parsing error: ${error}`,
+            UNABLE_TO_FIND_TASK: (taskName: string) => `Unable to find: ${taskName}`,
+
         },
         INFO: {
             COPIED_TO_CLIPBOARD: (something: string) => `'${something}' copied to your clipboard`,
@@ -37,7 +41,8 @@ export class Data {
     public static readonly MISC = {
         EMPTY_STRING: "",
         YAML: "yaml",
-        EXTENSION_NAME: "time-tracking-and-administration"
+        EXTENSION_NAME: "time-tracking-and-administration",
+        FILE_DIVIDER: "//",
     }
 
     public static readonly TIME_KEYS = {
