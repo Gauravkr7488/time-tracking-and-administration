@@ -67,7 +67,7 @@ export class IdLinkCreater extends YamlKeyExtractor {
         const idValues: string[] = await this.getIdValues(this.extractedSymbols, yamlDoc);
         this.extractedSymbols = [];
         const idLink = idValues.join(".");
-        return idLink;
+        return `-->${idLink}<`;
 
     }
 
