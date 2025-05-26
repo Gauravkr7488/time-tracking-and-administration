@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Data } from './Data';
 import { ActiveDocAndEditor } from './VsCodeUtils';
-import { YamlTaskOperation } from './YamlOperations';
+import { YamlTaskOperations } from './YamlOperations';
 import * as yaml from 'yaml';
 
 
@@ -61,7 +61,7 @@ export class IdLinkCreater extends YamlKeyExtractor {
         await this.extractAllYamlKeys();
         const doc = ActiveDocAndEditor.getActiveDoc();
         if (!doc) return;
-        const yamlDoc = await YamlTaskOperation.parseYaml(doc.uri);
+        const yamlDoc = await YamlTaskOperations.parseYaml(doc.uri);
         if (!yamlDoc) return;
         let a = this.extractedSymbols; // for test
         const idValues: string[] = await this.getIdValues(this.extractedSymbols, yamlDoc);
@@ -94,7 +94,7 @@ export class IdLinkCreater extends YamlKeyExtractor {
                     } catch (error) {
 
                     }
-                    currentYamlKey = await YamlTaskOperation.cleanStatusCodesFromKeys(currentYamlKey);
+                    currentYamlKey = await YamlTaskOperations.cleanStatusCodesFromKeys(currentYamlKey);
                     if (!idValue) {
                         if (/^\S+$/.test(currentYamlKey)) {
                             idValue = currentYamlKey;

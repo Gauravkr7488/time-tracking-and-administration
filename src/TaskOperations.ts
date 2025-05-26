@@ -5,9 +5,10 @@ import { Message } from './VsCodeUtils';
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { YamlKeyExtractor } from "./ymlReferenceExtractor";
-import { YamlTaskOperation } from "./YamlOperations";
+import { YamlTaskOperations } from "./YamlOperations";
 import { LinkFollower } from "./linkFollower";
 import { Data } from "./Data";
+import { CSVOperations } from "./CSV-Operations";
 
 
 export class TaskCommands {
@@ -36,7 +37,7 @@ export class TaskCommands {
         try {
             let doc = ActiveDocAndEditor.getActiveDoc();
             if (!doc) return;
-            let checkDocStructure = await YamlTaskOperation.parseYaml(doc.uri);
+            let checkDocStructure = await YamlTaskOperations.parseYaml(doc.uri);
             if (!checkDocStructure) return;
             let operationStatus = true;
             if (!this.srCode) {
@@ -49,9 +50,9 @@ export class TaskCommands {
             let yamlLink = await TextUtils.isThisYamlLink();
             if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
 
-            const isthisTask = await YamlTaskOperation.isThisTask(yamlLink);
+            const isthisTask = await YamlTaskOperations.isThisTask(yamlLink);
             if (isthisTask === undefined) return;
-            if (!isthisTask) yamlLink = await YamlTaskOperation.getTaskYamlLink(yamlLink);
+            if (!isthisTask) yamlLink = await YamlTaskOperations.getTaskYamlLink(yamlLink);
 
             if (!yamlLink) {
                 Message.err("nope not a task");
@@ -60,11 +61,11 @@ export class TaskCommands {
             await Timer.startTimer();
             const startTime = await Timer.giveStartTime();
             if (!startTime) return;
-            const srEntry = YamlTaskOperation.createSrEntry(yamlLink, startTime);
+            const srEntry = YamlTaskOperations.createSrEntry(yamlLink, startTime);
 
             if (!this.srDocUri) return;
-            let srEntryIndex = await YamlTaskOperation.checkIfTaskIsAlreadyInSr(srEntry, this.srCode, this.srDocUri);
-            if (srEntryIndex == -1) await YamlTaskOperation.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
+            let srEntryIndex = await YamlTaskOperations.checkIfTaskIsAlreadyInSr(srEntry, this.srCode, this.srDocUri);
+            if (srEntryIndex == -1) await YamlTaskOperations.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
 
             this.srEntry = srEntry;
 
@@ -86,7 +87,7 @@ export class TaskCommands {
     public static async stopTask() {
         try {
             if (!this.srDocUri) return false;
-            let checkDocStructure = await YamlTaskOperation.parseYaml(this.srDocUri);
+            let checkDocStructure = await YamlTaskOperations.parseYaml(this.srDocUri);
             if (!checkDocStructure) return false;
             let operationStatus;
             if (!Timer.isTaskRunnig()) {
@@ -97,7 +98,7 @@ export class TaskCommands {
             if (duration === undefined) return false;
             if (!this.srEntry) return false;
             if (!this.srCode) return false;
-            operationStatus = await YamlTaskOperation.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
+            operationStatus = await YamlTaskOperations.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
             if (!operationStatus) return false;
             return true;
         } catch (error) {
@@ -111,7 +112,7 @@ export class TaskCommands {
             if (Timer.isTaskRunnig()) await this.stopTask();
             if (!this.srDocUri) return;
             if (!this.srCode) return;
-            await YamlTaskOperation.generateWorkLogs(this.srCode, this.srDocUri); // insert the task stat
+            await YamlTaskOperations.generateWorkLogs(this.srCode, this.srDocUri); // insert the task stat
             Message.info("Worklog Generated");
         } catch (error) {
             Message.err(error);
@@ -119,7 +120,7 @@ export class TaskCommands {
     }
 
     static async generateCSV() {
-        const csvEntry = await YamlTaskOperation.generateCSV();
+        const csvEntry = await CSVOperations.generateCSV();
         if(!csvEntry) return;
         Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(csvEntry));
         vscode.env.clipboard.writeText(csvEntry);

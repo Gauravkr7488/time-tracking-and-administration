@@ -6,7 +6,7 @@ import { Data } from './Data';
 import { TextUtils } from './TextUtils';
 import { IdLinkCreater, YamlKeyExtractor } from './ymlReferenceExtractor';
 
-export class YamlTaskOperation {
+export class YamlTaskOperations {
     public static taskFileUri: vscode.Uri;
     private static taskYamlDoc: yaml.Document<yaml.Node, true>
     static taskYamlLink: string;
@@ -174,14 +174,14 @@ export class YamlTaskOperation {
     }
 
     public static createSrEntry(yamlLink: string, startTime: string) {
-        const workLog = YamlTaskOperation.createWorkLog(startTime);
+        const workLog = YamlTaskOperations.createWorkLog(startTime);
         const srEntryMap = new yaml.YAMLMap();
         srEntryMap.set(yamlLink, workLog);
         return srEntryMap;
     }
 
     public static async getTaskObj(yamlLink: string) {
-        const cleanYamlKeys = YamlTaskOperation.getCleanYamlKeys(yamlLink);
+        const cleanYamlKeys = YamlTaskOperations.getCleanYamlKeys(yamlLink);
         if (!cleanYamlKeys) return;
         const taskFileUri = await this.createFileURI(cleanYamlKeys);
         if (!taskFileUri) return;
@@ -387,7 +387,7 @@ export class YamlTaskOperation {
         if (!yamlDoc) return;
         const wasNode = await this.getWasObj(yamlDoc, srCode);
         if (!wasNode) return;
-        let checkDocStructure = await YamlTaskOperation.parseYaml(this.taskFileUri);
+        let checkDocStructure = await YamlTaskOperations.parseYaml(this.taskFileUri);
         if (!checkDocStructure) return;
         for (let index = 0; index < wasNode.items.length; index++) {
             const currentYamlLink = wasNode.items[index].items[0].key.value;
@@ -458,57 +458,8 @@ export class YamlTaskOperation {
         if (!isThisTask) newYamlLink = await this.getTaskYamlLink(newYamlLink);
         return newYamlLink;
     }
-    ///////////////////////////////////////////////////////////////////////////////////////////
-    static async generateCSV() { // move this somewhere else and refactor this
-        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
-        const csvFields = config.get<string[]>('csvFields', []);
-        let csvEntry = "";
-        let yamlLink = await TextUtils.isThisYamlLink();
-        if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
-        const isthisTask = await YamlTaskOperation.isThisTask(yamlLink);
-        if (isthisTask === undefined) return;
-        if (!isthisTask) yamlLink = await YamlTaskOperation.getTaskYamlLink(yamlLink);
 
-        if (!yamlLink) {
-            Message.err("nope not a task");
-            return;
-        }
-        const taskObj = await this.getTaskObj(yamlLink);
-        for (let index = 0; index < csvFields.length; index++) {
-            const csvField = csvFields[index];
-
-            if (csvField === "TaskStatus") { // for status
-
-                let statusCode = await this.getStatusCode(taskObj.key.value)
-                if (statusCode) {
-                    csvEntry += statusCode;
-                }
-            }
-
-            if (csvField === "SummaryLink") { // for link
-                csvEntry += yamlLink;
-            }
-
-            if (csvField == "IdLink") {
-                let idLink = await IdLinkCreater.createIdLink();
-                csvEntry += idLink
-            }
-
-            for (let i = 0; i < taskObj.value.items.length; i++) { // for every other field
-                const item = taskObj.value.items[i];
-                if (item.key.value == csvField) {
-                    csvEntry += item.value.value;
-                }
-            }
-
-
-            csvEntry += ", ";
-        }
-        csvEntry = csvEntry.slice(0, -2); // Now just format the csv properly
-        return csvEntry;
-    }
-
-    private static async getStatusCode(key: string) {
+    protected static async getStatusCode(key: string) {
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
         const ignoredWords: string[] = config.get<string[]>('ignoreWords', []);
         for (let index = 0; index < ignoredWords.length; index++) {

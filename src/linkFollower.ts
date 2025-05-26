@@ -1,13 +1,13 @@
 import { Data } from "./Data";
 import { Message } from "./VsCodeUtils";
-import { YamlTaskOperation } from "./YamlOperations";
+import { YamlTaskOperations } from "./YamlOperations";
 import * as vscode from 'vscode';
 
 export class LinkFollower {
 
     async followLink(yamlLink: string) {
         const summaryWithSpaces = await this.giveExactSummaryWithSpaces(yamlLink);
-        const taskDoc = await vscode.workspace.openTextDocument(YamlTaskOperation.taskFileUri);
+        const taskDoc = await vscode.workspace.openTextDocument(YamlTaskOperations.taskFileUri);
         if (!summaryWithSpaces) return;
         const taskSummaryRegex = new RegExp("^" + summaryWithSpaces, "im")
         await this.findTheTask(taskSummaryRegex, taskDoc);
@@ -33,11 +33,11 @@ export class LinkFollower {
     }
 
     async giveExactSummaryWithSpaces(yamlLink: string) {
-        const taskObj = await YamlTaskOperation.getTaskObj(yamlLink)
+        const taskObj = await YamlTaskOperations.getTaskObj(yamlLink)
         if (!taskObj) return;
         let exactSummary = taskObj.key.value;
         if(!exactSummary) exactSummary = taskObj.key;
-        const yamlKeys = YamlTaskOperation.getCleanYamlKeys(yamlLink);
+        const yamlKeys = YamlTaskOperations.getCleanYamlKeys(yamlLink);
         if (!yamlKeys) return;
         let spaces: string = "";
         for (let index = 1; index < yamlKeys.length; index++) {
