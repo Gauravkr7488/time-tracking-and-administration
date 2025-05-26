@@ -74,13 +74,17 @@ The system can autocorrect the taskLink if the user is standing on a wrong place
 Feature:
     - Can create a line of CSV from the Task
 
+### 1.6.0
+
+Feature:
+    - Can create Idlinks and add it to the csv
+
 ### Next
 Bugs:
     - Follow link should work on anyfile which have the link
     - closing the vscode should stop the task
     - stating the vscode should start the extenion
 Feature:
-    - Can create Idlinks and add it to the csv
 
 ## For more information
 
