@@ -6,7 +6,7 @@ import * as yaml from 'yaml';
 
 
 export class YamlKeyExtractor {
-    protected static extractedSymbols: Array<string> = []; // TODO remove this
+    protected static extractedSymbols: Array<string> = []; 
 
     protected static async extractAllYamlKeys() {
         const doc = ActiveDocAndEditor.getActiveDoc();
@@ -37,7 +37,7 @@ export class YamlKeyExtractor {
         return `${pathFromRoot}`;
     }
 
-    public static async createYamlLink() { // TODO move this somewhre else
+    public static async createYamlLink() {
         await this.extractAllYamlKeys();
         let fullPath = this.fullPath();
         if (!fullPath) return '';
@@ -64,53 +64,12 @@ export class IdLinkCreater extends YamlKeyExtractor {
         const yamlDoc = await YamlTaskOperations.parseYaml(doc.uri);
         if (!yamlDoc) return;
         let a = this.extractedSymbols; // for test
-        const idValues: string[] = await this.getIdValues(this.extractedSymbols, yamlDoc);
+        const idValues: string[] = await YamlTaskOperations.getIdValues(this.extractedSymbols, yamlDoc);
         this.extractedSymbols = [];
         const idLink = idValues.join(".");
         return `-->${idLink}<`;
 
     }
 
-    static async getIdValues(yamlKeys: string[], yamlDoc: yaml.Document) {
-        let idValues = []
-        const fileAndFolderName = yamlKeys[0];
-        const topLevelObj: any = yamlDoc.get(fileAndFolderName);
-        let parentObj = topLevelObj;
-        let childObj;
-        let idObj;
-        let idValue;
-
-        for (let index = 1; index < yamlKeys.length; index++) {
-            let currentYamlKey = yamlKeys[index];
-            for (const item of parentObj.items) {
-                if (currentYamlKey == item.key.value) {
-                    try {
-                        for (const i of item.value.items) {
-                            if (i.key.value == "Id") {
-                                idObj = i;
-                                idValue = idObj.value.value;
-                            }
-                        }
-                    } catch (error) {
-
-                    }
-                    currentYamlKey = await YamlTaskOperations.cleanStatusCodesFromKeys(currentYamlKey);
-                    if (!idValue) {
-                        if (/^\S+$/.test(currentYamlKey)) {
-                            idValue = currentYamlKey;
-                        } else {
-                            idValue = `"${currentYamlKey}"`;
-                        }
-                    }
-                    idValues.push(idValue);
-                    idValue = null;
-
-                    parentObj = item.value;
-                    break;
-                }
-            }
-
-        }
-        return idValues;
-    }
+    
 }

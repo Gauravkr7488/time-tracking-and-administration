@@ -469,4 +469,46 @@ export class YamlTaskOperations {
         }
         return;
     }
+
+    static async getIdValues(yamlKeys: string[], yamlDoc: yaml.Document) {
+        let idValues = []
+        const fileAndFolderName = yamlKeys[0];
+        const topLevelObj: any = yamlDoc.get(fileAndFolderName);
+        let parentObj = topLevelObj;
+        let idObj;
+        let idValue;
+
+        for (let index = 1; index < yamlKeys.length; index++) {
+            let currentYamlKey = yamlKeys[index];
+            for (const item of parentObj.items) {
+                if (currentYamlKey == item.key.value) {
+                    try {
+                        for (const i of item.value.items) {
+                            if (i.key.value == "Id") {
+                                idObj = i;
+                                idValue = idObj.value.value;
+                            }
+                        }
+                    } catch (error) {
+                        Message.err(error);
+                    }
+                    currentYamlKey = await this.cleanStatusCodesFromKeys(currentYamlKey);
+                    if (!idValue) {
+                        if (/^\S+$/.test(currentYamlKey)) {
+                            idValue = currentYamlKey;
+                        } else {
+                            idValue = `"${currentYamlKey}"`;
+                        }
+                    }
+                    idValues.push(idValue);
+                    idValue = null;
+
+                    parentObj = item.value;
+                    break;
+                }
+            }
+
+        }
+        return idValues;
+    }
 }
