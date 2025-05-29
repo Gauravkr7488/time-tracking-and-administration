@@ -4,39 +4,39 @@ import { IdLinkCreater } from './ymlReferenceExtractor';
 
 export function activate(context: vscode.ExtensionContext) {
 
-    const disposableForSr = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
+    const disposableForSr = vscode.commands.registerCommand('f2tools.specifyStandupReport', async () => {
         await TaskCommands.specifyStandupReport();
     });
 
-    const disposableForTaskSelection = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
+    const disposableForTaskSelection = vscode.commands.registerCommand('f2tools.taskSelection', async () => {
         await TaskCommands.selectTask();
     });
 
-    const disposableForPauseResumeTimer = vscode.commands.registerCommand('time-tracking-and-administration.pauseResumeTimer', async () => {
+    const disposableForPauseResumeTimer = vscode.commands.registerCommand('f2tools.pauseResumeTimer', async () => {
         TaskCommands.pauseOrResumeTask();
     });
 
-    const disposableForStopTimer = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
+    const disposableForStopTimer = vscode.commands.registerCommand('f2tools.stopTimer', async () => {
         await TaskCommands.stopTask();
     });
 
-    const disposableForWorkLogGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateWorkLogs', async () => {
+    const disposableForWorkLogGenerator = vscode.commands.registerCommand('f2tools.generateWorkLogs', async () => {
         await TaskCommands.generateWorkLogs();
     });
 
-    const disposableForF2yamlLinkGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateF2yamlLink', async () => {
+    const disposableForF2yamlLinkGenerator = vscode.commands.registerCommand('f2tools.generateF2yamlLink', async () => {
         await LinkCommands.generateOrCopyF2yamlLink();
     });
 
-    const disposableForF2yamlReferenceGenerator = vscode.commands.registerCommand('time-tracking-and-administration.generateF2yamlReference', async () => {
+    const disposableForF2yamlReferenceGenerator = vscode.commands.registerCommand('f2tools.generateF2yamlReference', async () => {
         await LinkCommands.generateOrCopyF2yamlReference();
     });
 
-    const disposableForLinkFollower = vscode.commands.registerCommand('time-tracking-and-administration.followLink', async () => {
+    const disposableForLinkFollower = vscode.commands.registerCommand('f2tools.followLink', async () => {
         await LinkCommands.followLink();
     });
     
-    const disposableForCSVGeneration = vscode.commands.registerCommand('time-tracking-and-administration.generateCSV', async () => {
+    const disposableForCSVGeneration = vscode.commands.registerCommand('f2tools.generateCSV', async () => {
         await TaskCommands.generateCSV();
     });
 

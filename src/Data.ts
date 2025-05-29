@@ -41,7 +41,7 @@ export class Data {
     public static readonly MISC = {
         EMPTY_STRING: "",
         YAML: "yaml",
-        EXTENSION_NAME: "time-tracking-and-administration",
+        EXTENSION_NAME: "f2tools",
         FILE_DIVIDER: "//",
     }
 

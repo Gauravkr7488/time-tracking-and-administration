@@ -1,7 +1,8 @@
 {
-  "name": "time-tracking-and-administration",
-  "displayName": "Time Tracking and Administration",
+  "name": "f2tools",
+  "displayName": "F2tools",
   "description": "",
+  "publisher": "tf2p.org",
   "version": "1.6.0",
   "repository": {
     "type": "git",
@@ -18,51 +19,51 @@
   "contributes": {
     "commands": [
       {
-        "command": "time-tracking-and-administration.specifyStandupReport",
+        "command": "f2tools.specifyStandupReport",
         "title": "Specify Standup Report"
       },
       {
-        "command": "time-tracking-and-administration.taskSelection",
+        "command": "f2tools.taskSelection",
         "title": "Select Task"
       },
       {
-        "command": "time-tracking-and-administration.pauseResumeTimer",
+        "command": "f2tools.pauseResumeTimer",
         "title": "Pause/Resume Timer"
       },
       {
-        "command": "time-tracking-and-administration.stopTimer",
+        "command": "f2tools.stopTimer",
         "title": "Stop Task/Timer"
       },
       {
-        "command": "time-tracking-and-administration.generateWorkLogs",
+        "command": "f2tools.generateWorkLogs",
         "title": "Generate WorkLogs from SR"
       },
       {
-        "command": "time-tracking-and-administration.generateF2yamlLink",
+        "command": "f2tools.generateF2yamlLink",
         "title": "Generate or copy F2Yaml link"
       },
       {
-        "command": "time-tracking-and-administration.generateF2yamlReference",
+        "command": "f2tools.generateF2yamlReference",
         "title": "Generate or copy F2Yaml References"
       },
       {
-        "command": "time-tracking-and-administration.followLink",
+        "command": "f2tools.followLink",
         "title": "Follow the F2Yaml Link"
       },
       {
-        "command": "time-tracking-and-administration.generateCSV",
+        "command": "f2tools.generateCSV",
         "title": "Generate the CSV"
       }
     ],
     "configuration": {
-      "title": "Time Tracking and Administration",
+      "title": "F2tools",
       "properties": {
-        "time-tracking-and-administration.userName": {
+        "f2tools.userName": {
           "type": "string",
           "default": "YourUserName",
           "description": "Your username"
         },
-        "time-tracking-and-administration.ignoreWords": {
+        "f2tools.ignoreWords": {
           "type": "array",
           "description": "Words to remove from the extracted YAML path.",
           "items": {
@@ -92,12 +93,12 @@
             "Closed"
           ]
         },
-        "time-tracking-and-administration.PathSeparator": {
+        "f2tools.PathSeparator": {
           "type": "string",
           "description": "The separator to use in the extracted YAML path.",
           "default": "."
         },
-        "time-tracking-and-administration.csvFields": {
+        "f2tools.csvFields": {
           "type": "array",
           "description": "Fields of the csv generated.",
           "items": {
