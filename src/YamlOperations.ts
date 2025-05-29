@@ -20,7 +20,6 @@ export class YamlTaskOperations {
             Message.err(Data.MESSAGES.ERRORS.UNABLE_TO_FIND_FILE(docUri));
         }
         if (!doc) return;
-        if (!ActiveDocAndEditor.isThisYamlDoc()) return;
         const text = doc.getText();
         try {
             const yamlDoc: yaml.Document = yaml.parseDocument(text);
