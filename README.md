@@ -75,13 +75,17 @@ Feature:
     - Can create a line of CSV from the Task
 
 ### 1.6.0
-
 Feature:
     - Can create Idlinks and add it to the csv
 
-### Next
+### 1.6.3
 Bugs:
     - Follow link should work on anyfile which have the link
+    - Name of the extenion
+    - Name of the publisher
+
+### Next
+Bugs:
     - closing the vscode should stop the task
     - stating the vscode should start the extenion
 Feature:
