@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { Data } from './Data';
 
 const CONSTANTS = {
     MESSAGES: {
@@ -85,5 +86,9 @@ export class SimpleStringTools {
         }
 
         return '';
+    }
+
+    static escapeSpecialCharacters(text: string){
+        return text.replace(Data.REGEX_PATTERNS.BACK_SLASH, "\\\\");
     }
 }

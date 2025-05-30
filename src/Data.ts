@@ -35,7 +35,9 @@ export class Data {
     public static readonly REGEX_PATTERNS = {
         LINK: /-->.*</,
         COLON: /:$/,
-        REFERENCE: /\$@.*@\$/g
+        REFERENCE: /\$@.*@\$/g,
+        BACK_SLASH: /\\/g,
+        DOUBLE_BACK_SLASH: /\\\\/g,
     }
 
     public static readonly MISC = {

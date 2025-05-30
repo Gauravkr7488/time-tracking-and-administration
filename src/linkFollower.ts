@@ -1,4 +1,5 @@
 import { Data } from "./Data";
+import { SimpleStringTools } from "./SimpleStringTools";
 import { Message } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";
 import * as vscode from 'vscode';
@@ -6,9 +7,10 @@ import * as vscode from 'vscode';
 export class LinkFollower {
 
     async followLink(yamlLink: string) {
-        const summaryWithSpaces = await this.giveExactSummaryWithSpaces(yamlLink);
-        const taskDoc = await vscode.workspace.openTextDocument(YamlTaskOperations.taskFileUri);
+        let summaryWithSpaces = await this.giveExactSummaryWithSpaces(yamlLink);
         if (!summaryWithSpaces) return;
+        summaryWithSpaces = SimpleStringTools.escapeSpecialCharacters(summaryWithSpaces);
+        const taskDoc = await vscode.workspace.openTextDocument(YamlTaskOperations.taskFileUri);
         const taskSummaryRegex = new RegExp("^" + summaryWithSpaces, "im")
         await this.findTheTask(taskSummaryRegex, taskDoc);
 
