@@ -108,11 +108,20 @@ export class TaskCommands {
     }
 
     public static async generateWorkLogs() {
+        const srDoc = ActiveDocAndEditor.getActiveDoc();
+        if (!srDoc) return;
+
+        const srCode = TextUtils.extractCurrentWord();
+        if (!srCode) {
+            Message.err(Data.MESSAGES.ERRORS.NO_SR_CODE);
+            return;
+        }
+        
         try {
-            if (Timer.isTaskRunnig()) await this.stopTask();
-            if (!this.srDocUri) return;
-            if (!this.srCode) return;
-            await YamlTaskOperations.generateWorkLogs(this.srCode, this.srDocUri); // insert the task stat
+            if(srCode == this.srCode){
+                if (Timer.isTaskRunnig()) await this.stopTask();
+            }
+            await YamlTaskOperations.generateWorkLogs(srCode, srDoc.uri);
             Message.info("Worklog Generated");
         } catch (error) {
             Message.err(error);
@@ -121,7 +130,7 @@ export class TaskCommands {
 
     static async generateCSV() {
         const csvEntry = await CSVOperations.generateCSV();
-        if(!csvEntry) return;
+        if (!csvEntry) return;
         Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(csvEntry));
         vscode.env.clipboard.writeText(csvEntry);
     }
