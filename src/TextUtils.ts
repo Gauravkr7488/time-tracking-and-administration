@@ -25,7 +25,6 @@ export class TextUtils {
         if (!cursorPosition) return;
         const line = doc.lineAt(cursorPosition.line);
         const lineText = line.text;
-        const linkPattern = Data.REGEX_PATTERNS.LINK;
         let betterLink = this.findLinkInText(lineText, cursorPosition); // WIP
         return betterLink;
     }

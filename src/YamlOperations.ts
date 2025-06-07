@@ -291,13 +291,39 @@ export class YamlTaskOperations {
 
     private static parseF2YamlLink(cleanYamlLink: string) {
         const yamlKeys = cleanYamlLink.split(".");
+        let inDoubleQuotes = false;
+        let newKeys = [];
+        let buff = "";
         for (let index = 0; index < yamlKeys.length; index++) {
             if (yamlKeys[index] == "") {
                 yamlKeys[index + 1] = "." + yamlKeys[index + 1];
             }
 
         }
-        return yamlKeys;
+        for (let index = 0; index < yamlKeys.length; index++) {
+            let element = yamlKeys[index];
+
+            if (element.includes("\"")) {
+                if (inDoubleQuotes == true) {
+                    inDoubleQuotes = false
+                    buff += element;
+                    newKeys.push(buff);
+
+                } else {
+                    inDoubleQuotes = true
+                }
+            }
+
+            if (inDoubleQuotes == true) {
+                buff += element;
+            } else {
+                if (!element.includes("\"")) {
+
+                    newKeys.push(element);
+                }
+            }
+        }
+        return newKeys;
     }
 
     private static removeLinkSymbolsFromLink(yamlLink: string) {
@@ -393,7 +419,7 @@ export class YamlTaskOperations {
             let srObjWorkLogDate = workLog.items[3].value
             let srObjWorkLogName = workLog.items[0].value
             // if (!taskObjWorkLogDate) return false;
-            if (taskObjWorkLogDate == srObjWorkLogDate && taskObjWorkLogName ==  srObjWorkLogName) {
+            if (taskObjWorkLogDate == srObjWorkLogDate && taskObjWorkLogName == srObjWorkLogName) {
                 return true;
             }
         }
