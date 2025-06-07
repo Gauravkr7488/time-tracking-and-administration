@@ -28,37 +28,45 @@ export class TextUtils {
         const linkPattern = Data.REGEX_PATTERNS.LINK;
         let betterLink = this.findLinkInText(lineText, cursorPosition); // WIP
         return betterLink;
-        // let match = linkPattern.exec(lineText);
-        // while (match != null) {
-        //     const startChar = match.index;
-        //     const endChar = startChar + match[0].length;
-
-        //     if (cursorPosition.character >= startChar && cursorPosition.character <= endChar) {
-        //         const link = match[0].toString();
-        //         return link;
-        //     }
-        // }
-        // return;
     }
     // -->someting< and -->somethingElse< again -->something"-->entrelyDifferent<"<
     static findLinkInText(lineText: string, cursorPosition: Position) {
         let inLink;
         let startOfLink;
         let endOfLink;
+        let inDoubleQuotes = false;
         for (let index = 0; index < cursorPosition.character; index++) {
-            const element = lineText[index];
-            if (lineText[index] + lineText[index + 1] + lineText[index + 2] == '-->') {
+            if (lineText[index] + lineText[index + 1] + lineText[index + 2] == '-->' && inDoubleQuotes == false) {
                 inLink = true
                 startOfLink = index;
             }
-            if (lineText[index] == '<') {
+
+            if (inLink == true && lineText[index] == '\"') {
+                if (inDoubleQuotes == true) {
+                    inDoubleQuotes = false
+                } else {
+
+                    inDoubleQuotes = true;
+                }
+            }
+
+            if (lineText[index] == '<' && inDoubleQuotes == false) {
                 inLink = false
             }
         }
         if (inLink == true) {
             for (let index = cursorPosition.character - 1; index < lineText.length; index++) {
-                const element = lineText[index];
-                if (lineText[index] == '<') {
+
+                if (inLink == true && lineText[index] == '\"') {
+                    if (inDoubleQuotes == true) {
+                        inDoubleQuotes = false
+                    }else{
+
+                        inDoubleQuotes = true;
+                    }
+                }
+
+                if (lineText[index] == '<' && inDoubleQuotes == false) {
                     endOfLink = index;
                     break;
                 }
