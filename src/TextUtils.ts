@@ -1,3 +1,4 @@
+import { Position } from 'vscode';
 import { Data } from './Data';
 import { ActiveDocAndEditor } from './VsCodeUtils';
 
@@ -19,24 +20,56 @@ export class TextUtils {
     public static async isThisYamlLink() {
         const doc = ActiveDocAndEditor.getActiveDoc();
         const cursorPosition = ActiveDocAndEditor.getCursorPosition();
-        
-        if (!doc) return; 
+
+        if (!doc) return;
         if (!cursorPosition) return;
         const line = doc.lineAt(cursorPosition.line);
         const lineText = line.text;
         const linkPattern = Data.REGEX_PATTERNS.LINK;
+        let betterLink = this.findLinkInText(lineText, cursorPosition); // WIP
+        return betterLink;
+        // let match = linkPattern.exec(lineText);
+        // while (match != null) {
+        //     const startChar = match.index;
+        //     const endChar = startChar + match[0].length;
 
-        let match = linkPattern.exec(lineText);
-        while (match != null) {
-            const startChar = match.index;
-            const endChar = startChar + match[0].length;
-
-            if (cursorPosition.character >= startChar && cursorPosition.character <= endChar) {
-                const link = match[0].toString();
-                return link;
+        //     if (cursorPosition.character >= startChar && cursorPosition.character <= endChar) {
+        //         const link = match[0].toString();
+        //         return link;
+        //     }
+        // }
+        // return;
+    }
+    // -->someting< and -->somethingElse< again -->something"-->entrelyDifferent<"<
+    static findLinkInText(lineText: string, cursorPosition: Position) {
+        let inLink;
+        let startOfLink;
+        let endOfLink;
+        for (let index = 0; index < cursorPosition.character; index++) {
+            const element = lineText[index];
+            if (lineText[index] + lineText[index + 1] + lineText[index + 2] == '-->') {
+                inLink = true
+                startOfLink = index;
+            }
+            if (lineText[index] == '<') {
+                inLink = false
             }
         }
-        return;
+        if (inLink == true) {
+            for (let index = cursorPosition.character - 1; index < lineText.length; index++) {
+                const element = lineText[index];
+                if (lineText[index] == '<') {
+                    endOfLink = index;
+                    break;
+                }
+            }
+        }
+        let betterLink = "";
+        if (startOfLink == undefined || endOfLink == undefined) return;
+        for (let index = startOfLink; index <= endOfLink; index++) {
+            betterLink += lineText[index];
+        }
+        return betterLink;
     }
 
     public static isThisYamlReference() {
