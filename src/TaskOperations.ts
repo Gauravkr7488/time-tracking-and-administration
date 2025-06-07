@@ -18,6 +18,7 @@ export class TaskCommands {
     private static srEntry?: yaml.YAMLMap<unknown, unknown>;
 
     public static async specifyStandupReport() {
+        if (Timer.isTaskRunnig()) await this.stopTask();
         const srDoc = ActiveDocAndEditor.getActiveDoc();
         if (!srDoc) return;
 
