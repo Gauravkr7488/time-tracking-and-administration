@@ -367,8 +367,37 @@ export class YamlTaskOperations {
         let name = this.getName();
         name = new yaml.Scalar(name);
         workLog.items.unshift(name);
-        await this.insertEntryInNode(workLogObj, workLog);
-        return true;
+
+        // let isThisDuplicateWorkLog: boolean;
+
+        let isThisDuplicateWorkLog = YamlTaskOperations.checkDuplicateWorklog(workLogObj, workLog);
+        if (isThisDuplicateWorkLog == false) {
+
+            await this.insertEntryInNode(workLogObj, workLog);
+            return true;
+        }
+        return false;
+    }
+
+    private static checkDuplicateWorklog(workLogObj: any, workLog: any) {
+        for (let index = 0; index < workLogObj.items.length; index++) {
+            const element = workLogObj.items[index];
+            let taskObjWorkLogDate;
+            let taskObjWorkLogName;
+            try {
+                taskObjWorkLogDate = element.items[3].value
+                taskObjWorkLogName = element.items[0].value
+            } catch (error) {
+                return false
+            }
+            let srObjWorkLogDate = workLog.items[3].value
+            let srObjWorkLogName = workLog.items[0].value
+            // if (!taskObjWorkLogDate) return false;
+            if (taskObjWorkLogDate == srObjWorkLogDate && taskObjWorkLogName ==  srObjWorkLogName) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static async checkIfTaskIsAlreadyInSr(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri) {
@@ -388,16 +417,17 @@ export class YamlTaskOperations {
         if (!wasNode) return;
         let checkDocStructure = await YamlTaskOperations.parseYaml(this.taskFileUri);
         if (!checkDocStructure) return;
+        let workLogAddedToTask;
         for (let index = 0; index < wasNode.items.length; index++) {
             const currentYamlLink = wasNode.items[index].items[0].key.value;
             const workLog = wasNode.items[index].items[0].value;
-            let operationStatus = await this.addWorkLogInTask(workLog, currentYamlLink);
-            if (!operationStatus) return;
+            workLogAddedToTask = await this.addWorkLogInTask(workLog, currentYamlLink);
+            if (workLogAddedToTask == undefined) return;
             const taskDoc = await vscode.workspace.openTextDocument(this.taskFileUri);
             if (!this.taskYamlDoc) return;
             await this.applyEditToDoc(this.taskYamlDoc, taskDoc);
         }
-        return;
+        return workLogAddedToTask;
     }
 
 

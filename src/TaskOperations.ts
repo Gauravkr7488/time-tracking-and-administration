@@ -121,7 +121,8 @@ export class TaskCommands {
             if(srCode == this.srCode){
                 if (Timer.isTaskRunnig()) await this.stopTask();
             }
-            await YamlTaskOperations.generateWorkLogs(srCode, srDoc.uri);
+            let workLogGenerated = await YamlTaskOperations.generateWorkLogs(srCode, srDoc.uri);
+            if(!workLogGenerated) return
             Message.info("Worklog Generated");
         } catch (error) {
             Message.err(error);
