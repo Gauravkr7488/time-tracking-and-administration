@@ -323,7 +323,34 @@ export class YamlTaskOperations {
                 }
             }
         }
+
+
+        for (let index = 0; index < newKeys.length; index++) {
+            const element: string = newKeys[index];
+            if(element.includes("-->")){
+                newKeys[index] = this.replaceSubLink(element, cleanYamlLink)
+            }
+        }
         return newKeys;
+    }
+
+    static replaceSubLink(element: any, cleanYamlLink: string): any {
+        let cleanSubLink = YamlTaskOperations.getSubLink(cleanYamlLink);
+        
+        const [firstPart, rest] = element.split("-->");
+        const [linkPart, end] = rest.split("<");
+
+        let newLink = firstPart + "-->" + cleanSubLink + "<" + end;
+
+        return newLink;
+    }
+
+    private static getSubLink(cleanYamlLink: string) {
+        let linkParts = cleanYamlLink.split("-->");
+        let linkPartWithEndingChar = linkParts[1];
+        linkParts = linkPartWithEndingChar.split("<");
+        let cleanSubLink = linkParts[0];
+        return cleanSubLink;
     }
 
     private static removeLinkSymbolsFromLink(yamlLink: string) {
