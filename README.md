@@ -83,6 +83,14 @@ Bugs:
     - Follow link should work on anyfile which have the link
     - Name of the extenion
     - Name of the publisher
+### 1.6.8
+Bugs:
+    - Unable to find the link when there is a '' in the task summary
+    - To Issue the GenerateWorkLogFromSR command SpecifyStandupReport command needs to be issued first
+    - If GenerateWorkLogFromSR command is issued multiple times multiple duplicate worklogs get created
+    - If there if more than one f2yamlLInk in a line then the follow link function follows the one which comes first
+    - After running SpecifyStandupReport command on a new standup ID the SelectTask command at first stops the timer only and after issuing it again it selects the task
+
 
 ### Next
 Bugs:
