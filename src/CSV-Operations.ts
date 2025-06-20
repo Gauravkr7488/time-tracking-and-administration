@@ -1,3 +1,4 @@
+import { escape } from "querystring";
 import { Data } from "./Data";
 import { TextUtils } from "./TextUtils";
 import { Message } from "./VsCodeUtils";
@@ -34,11 +35,16 @@ export class CSVOperations extends YamlTaskOperations {
             }
 
             if (csvField === "SummaryLink") { // for link
+                yamlLink = TextUtils.escapeCharacter(yamlLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
+                yamlLink = "\"" + yamlLink + "\"";
                 csvEntry += yamlLink;
             }
 
             if (csvField == "IdLink") {
                 let idLink = await IdLinkCreater.createIdLink();
+                if(!idLink) return;
+                idLink = TextUtils.escapeCharacter(idLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
+                idLink = "\"" + idLink + "\"";
                 csvEntry += idLink
             }
 
@@ -53,6 +59,9 @@ export class CSVOperations extends YamlTaskOperations {
             csvEntry += ", ";
         }
         csvEntry = csvEntry.slice(0, -2); // Now just format the csv properly
+
         return csvEntry;
     }
+
+
 }

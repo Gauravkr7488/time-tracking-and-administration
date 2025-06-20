@@ -3,6 +3,16 @@ import { Data } from './Data';
 import { ActiveDocAndEditor } from './VsCodeUtils';
 
 export class TextUtils {
+    static escapeCharacter(inputString: string, characterToEscape: string, characterToEscapeWith: string): string {
+        let result = '';
+        for(const char of inputString){
+            result += char 
+            if (char == characterToEscape) {
+                result += characterToEscapeWith;
+            }
+        }
+        return result;
+    }
     public static extractCurrentWord() {
         const doc = ActiveDocAndEditor.getActiveDoc();
         const cursorPosition = ActiveDocAndEditor.getCursorPosition();

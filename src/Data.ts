@@ -45,6 +45,7 @@ export class Data {
         YAML: "yaml",
         EXTENSION_NAME: "f2tools",
         FILE_DIVIDER: "//",
+        DOUBLE_QUOTE: "\""
     }
 
     public static readonly TIME_KEYS = {
