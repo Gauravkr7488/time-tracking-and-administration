@@ -40,7 +40,7 @@
       },
       {
         "command": "f2tools.generateF2yamlLink",
-        "title": "Generate or copy F2Yaml link"
+        "title": "Extract F2Yaml Summary Link"
       },
       {
         "command": "f2tools.generateF2yamlReference",
