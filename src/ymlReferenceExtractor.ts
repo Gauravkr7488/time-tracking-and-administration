@@ -2,10 +2,10 @@ import * as vscode from 'vscode';
 import { Data } from './Data';
 import { ActiveDocAndEditor } from './VsCodeUtils';
 import { YamlTaskOperations } from './YamlOperations';
-import * as yaml from 'yaml';
+import * as yaml from 'yaml'; // tf
 
 
-export class YamlKeyExtractor {
+export class YamlKeyExtractor { // parsing should be used
     protected static extractedSymbols: Array<string> = []; 
 
     protected static async extractAllYamlKeys() {
@@ -63,10 +63,13 @@ export class IdLinkCreater extends YamlKeyExtractor {
         if (!doc) return;
         const yamlDoc = await YamlTaskOperations.parseYaml(doc.uri);
         if (!yamlDoc) return;
-        let a = this.extractedSymbols; // for test
+        let a = this.extractedSymbols; // for test // rm
         const idValues: string[] = await YamlTaskOperations.getIdValues(this.extractedSymbols, yamlDoc);
+        if(!yamlDoc || !yamlDoc.contents) return;
+        const fileAndFolderName = this.extractedSymbols[0];
         this.extractedSymbols = [];
-        const idLink = idValues.join(".");
+        let idLink = idValues.join(".");
+        idLink = fileAndFolderName + idLink;
         return `-->${idLink}<`;
 
     }

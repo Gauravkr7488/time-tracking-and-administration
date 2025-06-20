@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { Data } from './Data';
 
-const CONSTANTS = {
+const CONSTANTS = { // move this to the DATA class
     MESSAGES: {
         NO_ACTIVE_EDITOR: "No active text editor.",
         NO_WORD_AT_CURSOR: "No word found at cursor position. Place cursor on a YAML key.",

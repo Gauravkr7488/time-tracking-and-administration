@@ -7,7 +7,7 @@ import * as vscode from 'vscode';
 
 
 export class CSVOperations extends YamlTaskOperations {
-    static async generateCSV() {
+    static async generateCSV() { // TODO clean this thing
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
         const csvFields = config.get<string[]>('csvFields', []);
         let csvEntry = "";

@@ -11,7 +11,7 @@ export class LinkFollower {
         if (!summaryWithSpaces) return;
         summaryWithSpaces = SimpleStringTools.escapeSpecialCharacters(summaryWithSpaces);
         const taskDoc = await vscode.workspace.openTextDocument(YamlTaskOperations.taskFileUri);
-        const taskSummaryRegex = new RegExp("^" + summaryWithSpaces, "im")
+        const taskSummaryRegex = new RegExp("^" + summaryWithSpaces, "im") // what are those magic strings
         await this.findTheTask(taskSummaryRegex, taskDoc);
 
     }
