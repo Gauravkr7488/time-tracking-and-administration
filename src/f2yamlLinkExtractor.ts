@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import { Data } from './Data';
 import { ActiveDocAndEditor } from './VsCodeUtils';
 import { YamlTaskOperations } from './YamlOperations';
-import * as yaml from 'yaml'; // tf
 
 
 export class YamlKeyExtractor { // parsing should be used

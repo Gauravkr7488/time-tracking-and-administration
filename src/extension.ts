@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { LinkCommands, TaskCommands } from './TaskOperations';
-import { IdLinkCreater } from './ymlReferenceExtractor'; // TODO remove this
+import { IdLinkCreater } from './F2yamlLinkExtractor'; // TODO remove this
 // remove all dependencies apart from the one you are using rn
 export function activate(context: vscode.ExtensionContext) { // TODO remove async if not needed // TODO maybe remove all regex
 

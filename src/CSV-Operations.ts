@@ -3,7 +3,7 @@ import { Data } from "./Data";
 import { TextUtils } from "./TextUtils";
 import { Message } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";
-import { YamlKeyExtractor, IdLinkCreater } from "./ymlReferenceExtractor";
+import { YamlKeyExtractor, IdLinkCreater } from "./F2yamlLinkExtractor";
 import * as vscode from 'vscode';
 
 

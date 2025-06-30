@@ -4,7 +4,7 @@ import { TextUtils } from "./TextUtils";
 import { Message } from './VsCodeUtils';
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { YamlKeyExtractor } from "./ymlReferenceExtractor";
+import { YamlKeyExtractor } from "./F2yamlLinkExtractor";
 import { YamlTaskOperations } from "./YamlOperations";
 import { LinkFollower } from "./linkFollower";
 import { Data } from "./Data";
