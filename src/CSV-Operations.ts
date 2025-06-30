@@ -3,7 +3,7 @@ import { Data } from "./Data";
 import { TextUtils } from "./TextUtils";
 import { Message } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";
-import { F2yamlLinkExtractor, IdLinkCreater } from "./F2yamlLinkExtractor";
+import { F2yamlLinkExtractor } from "./F2yamlLinkExtractor";
 import * as vscode from 'vscode';
 
 
@@ -41,7 +41,7 @@ export class CSVOperations extends YamlTaskOperations {
             }
 
             if (csvField == "IdLink") {
-                let idLink = await IdLinkCreater.createIdLink();
+                let idLink = await F2yamlLinkExtractor.createIdLink();
                 if(!idLink) return;
                 idLink = TextUtils.escapeCharacter(idLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
                 idLink = "\"" + idLink + "\"";

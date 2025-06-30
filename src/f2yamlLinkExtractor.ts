@@ -53,9 +53,7 @@ export class F2yamlLinkExtractor { // parsing should be used
             this.extractYamlKeysToCursor(symbol.children, cursorPosition);
         }
     }
-}
 
-export class IdLinkCreater extends F2yamlLinkExtractor {
     public static async createIdLink() {
         await this.extractAllYamlKeys();
         const doc = ActiveDocAndEditor.getActiveDoc();
@@ -72,6 +70,25 @@ export class IdLinkCreater extends F2yamlLinkExtractor {
         return `-->${idLink}<`;
 
     }
+}
+
+// export class IdLinkCreater extends F2yamlLinkExtractor {
+//     public static async createIdLink2() {
+//         await this.extractAllYamlKeys();
+//         const doc = ActiveDocAndEditor.getActiveDoc();
+//         if (!doc) return;
+//         const yamlDoc = await YamlTaskOperations.parseYaml(doc.uri);
+//         if (!yamlDoc) return;
+//         let a = this.extractedSymbols; // for test // rm
+//         const idValues: string[] = await YamlTaskOperations.getIdValues(this.extractedSymbols, yamlDoc);
+//         if(!yamlDoc || !yamlDoc.contents) return;
+//         const fileAndFolderName = this.extractedSymbols[0];
+//         this.extractedSymbols = [];
+//         let idLink = idValues.join(".");
+//         idLink = fileAndFolderName + idLink;
+//         return `-->${idLink}<`;
+
+//     }
 
     
-}
+// }
