@@ -4,7 +4,7 @@ import { TextUtils } from "./TextUtils";
 import { Message } from './VsCodeUtils';
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { YamlKeyExtractor } from "./F2yamlLinkExtractor";
+import { F2yamlLinkExtractor } from "./F2yamlLinkExtractor";
 import { YamlTaskOperations } from "./YamlOperations";
 import { LinkFollower } from "./linkFollower";
 import { Data } from "./Data";
@@ -49,7 +49,7 @@ export class TaskCommands {
             if (Timer.isTaskRunnig()) operationStatus = await this.stopTask();
             if (!operationStatus) return
             let yamlLink = await TextUtils.isThisYamlLink();
-            if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
+            if (!yamlLink) yamlLink = await F2yamlLinkExtractor.createYamlLink();
 
             const isthisTask = await YamlTaskOperations.isThisTask(yamlLink);
             if (isthisTask === undefined) return;
@@ -145,7 +145,7 @@ export class LinkCommands {
 
     public static async generateOrCopyF2yamlLink() {
         this.yamlLink = await TextUtils.isThisYamlLink();
-        if (!this.yamlLink) this.yamlLink = await YamlKeyExtractor.createYamlLink();
+        if (!this.yamlLink) this.yamlLink = await F2yamlLinkExtractor.createYamlLink();
         Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(this.yamlLink));
         vscode.env.clipboard.writeText(this.yamlLink);
     }
@@ -156,7 +156,7 @@ export class LinkCommands {
         let cleanLink = this.yamlLink.slice(2, -2);
 
         if (!this.yamlLink) {
-            this.yamlLink = await YamlKeyExtractor.createYamlLink();
+            this.yamlLink = await F2yamlLinkExtractor.createYamlLink();
             cleanLink = this.yamlLink.slice(3, -1);
         }
         const f2YamlRef = `$@${cleanLink}@$`;

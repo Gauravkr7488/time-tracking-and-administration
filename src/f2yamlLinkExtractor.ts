@@ -4,7 +4,7 @@ import { ActiveDocAndEditor } from './VsCodeUtils';
 import { YamlTaskOperations } from './YamlOperations';
 
 
-export class YamlKeyExtractor { // parsing should be used
+export class F2yamlLinkExtractor { // parsing should be used
     protected static extractedSymbols: Array<string> = []; 
 
     protected static async extractAllYamlKeys() {
@@ -55,7 +55,7 @@ export class YamlKeyExtractor { // parsing should be used
     }
 }
 
-export class IdLinkCreater extends YamlKeyExtractor {
+export class IdLinkCreater extends F2yamlLinkExtractor {
     public static async createIdLink() {
         await this.extractAllYamlKeys();
         const doc = ActiveDocAndEditor.getActiveDoc();

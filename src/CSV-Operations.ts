@@ -3,7 +3,7 @@ import { Data } from "./Data";
 import { TextUtils } from "./TextUtils";
 import { Message } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";
-import { YamlKeyExtractor, IdLinkCreater } from "./F2yamlLinkExtractor";
+import { F2yamlLinkExtractor, IdLinkCreater } from "./F2yamlLinkExtractor";
 import * as vscode from 'vscode';
 
 
@@ -13,7 +13,7 @@ export class CSVOperations extends YamlTaskOperations {
         const csvFields = config.get<string[]>('csvFields', []);
         let csvEntry = "";
         let yamlLink = await TextUtils.isThisYamlLink();
-        if (!yamlLink) yamlLink = await YamlKeyExtractor.createYamlLink();
+        if (!yamlLink) yamlLink = await F2yamlLinkExtractor.createYamlLink();
         const isthisTask = await YamlTaskOperations.isThisTask(yamlLink);
         if (isthisTask === undefined) return;
         if (!isthisTask) yamlLink = await YamlTaskOperations.getTaskYamlLink(yamlLink);

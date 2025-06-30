@@ -4,7 +4,7 @@ import { ActiveDocAndEditor } from './VsCodeUtils';
 import { Message } from './VsCodeUtils';
 import { Data } from './Data';
 import { TextUtils } from './TextUtils';
-import { IdLinkCreater, YamlKeyExtractor } from './F2yamlLinkExtractor';
+import { IdLinkCreater, F2yamlLinkExtractor } from './F2yamlLinkExtractor';
 
 export class YamlTaskOperations {
     public static taskFileUri: vscode.Uri;
