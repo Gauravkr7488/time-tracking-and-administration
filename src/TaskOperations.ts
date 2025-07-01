@@ -140,10 +140,13 @@ export class TaskCommands {
 }
 
 export class LinkCommands {
+    static extractF2YamlIdLink() {
+        throw new Error('Method not implemented.');
+    }
     private static yamlLink?: string;
     private static linkFollower = new LinkFollower();
 
-    public static async generateOrCopyF2yamlLink() {
+    public static async extractF2YamlSummaryLink() {
         this.yamlLink = await TextUtils.isThisYamlLink();
         if (!this.yamlLink) this.yamlLink = await F2yamlLinkExtractor.createYamlLink();
         Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(this.yamlLink));

@@ -23,8 +23,12 @@ export function activate(context: vscode.ExtensionContext) { // TODO remove asyn
         await TaskCommands.generateWorkLogs();
     });
 
-    const disposableForF2yamlLinkGenerator = vscode.commands.registerCommand('f2tools.generateF2yamlLink', async () => {
-        await LinkCommands.generateOrCopyF2yamlLink();
+    const disposableForF2yamlSummaryLinkExtractor = vscode.commands.registerCommand('f2tools.extractF2YamlSummaryLink', async () => {
+        await LinkCommands.extractF2YamlSummaryLink();
+    });
+   
+    const disposableForF2yamlIdLinkExtractor = vscode.commands.registerCommand('f2tools.extractF2YamlIdLink', async () => {
+        await LinkCommands.extractF2YamlIdLink();
     });
 
     const disposableForF2yamlReferenceGenerator = vscode.commands.registerCommand('f2tools.generateF2yamlReference', async () => {
@@ -45,7 +49,8 @@ export function activate(context: vscode.ExtensionContext) { // TODO remove asyn
         disposableForPauseResumeTimer, 
         disposableForStopTimer, 
         disposableForWorkLogGenerator, 
-        disposableForF2yamlLinkGenerator, 
+        disposableForF2yamlSummaryLinkExtractor, 
+        disposableForF2yamlIdLinkExtractor,
         disposableForF2yamlReferenceGenerator,
         disposableForLinkFollower,
         disposableForCSVGeneration

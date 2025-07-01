@@ -39,8 +39,12 @@
         "title": "Generate WorkLogs from SR"
       },
       {
-        "command": "f2tools.generateF2yamlLink",
+        "command": "f2tools.extractF2YamlSummaryLink",
         "title": "Extract F2Yaml Summary Link"
+      },
+      {
+        "command": "f2tools.extractF2YamlIdLink",
+        "title": "Extract F2Yaml Id Link"
       },
       {
         "command": "f2tools.generateF2yamlReference",
