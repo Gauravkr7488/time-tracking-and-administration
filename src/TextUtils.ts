@@ -1,6 +1,7 @@
 import { Position } from 'vscode';
 import { Data } from './Data';
 import { ActiveDocAndEditor } from './VsCodeUtils';
+import * as vscode from 'vscode';
 
 export class TextUtils {
     static escapeCharacter(inputString: string, characterToEscape: string, characterToEscapeWith: string): string {
@@ -27,13 +28,9 @@ export class TextUtils {
         return srCode;
     }
 
-    public static async isThisYamlLink() {
-        const doc = ActiveDocAndEditor.getActiveDoc();
-        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+    public static async isThisYamlLink(activeDoc: vscode.TextDocument, cursorPosition:  vscode.Position) {
 
-        if (!doc) return;
-        if (!cursorPosition) return;
-        const line = doc.lineAt(cursorPosition.line);
+        const line = activeDoc.lineAt(cursorPosition.line);
         const lineText = line.text;
         let betterLink = this.findLinkInText(lineText, cursorPosition); // WIP
         return betterLink;

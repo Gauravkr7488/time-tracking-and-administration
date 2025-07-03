@@ -35,7 +35,10 @@ export class ActiveDocAndEditor {
 
     static getCursorPosition() { 
         const activeEditor = this.getActiveEditor();
-        if(!activeEditor) return;
+        if(!activeEditor){
+            Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TEXT_EDITOR);
+            return;
+        } 
         const cursorPosition = activeEditor.selection.active;
         return cursorPosition;
     }

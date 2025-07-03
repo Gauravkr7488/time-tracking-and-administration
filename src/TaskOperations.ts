@@ -4,7 +4,7 @@ import { TextUtils } from "./TextUtils";
 import { Message } from './VsCodeUtils';
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { F2yamlLinkExtractor } from "./F2yamlLinkExtractor";
+import { F2yamlLinkExtractor } from "./f2yamlLinkExtractor";
 import { YamlTaskOperations } from "./YamlOperations";
 import { LinkFollower } from "./linkFollower";
 import { Data } from "./Data";
@@ -36,9 +36,11 @@ export class TaskCommands {
 
     public static async selectTask(): Promise<void> {
         try {
-            let doc = ActiveDocAndEditor.getActiveDoc();
-            if (!doc) return;
-            let checkDocStructure = await YamlTaskOperations.parseYaml(doc.uri);
+            const activeDoc = ActiveDocAndEditor.getActiveDoc();
+            const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+            if (!activeDoc || !cursorPosition) return;
+
+            let checkDocStructure = await YamlTaskOperations.parseYaml(activeDoc.uri);
             if (!checkDocStructure) return;
             let operationStatus = true;
             if (!this.srCode) {
@@ -48,7 +50,7 @@ export class TaskCommands {
 
             if (Timer.isTaskRunnig()) operationStatus = await this.stopTask();
             if (!operationStatus) return
-            let yamlLink = await TextUtils.isThisYamlLink();
+            let yamlLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
             if (!yamlLink) yamlLink = await F2yamlLinkExtractor.createYamlLink();
 
             const isthisTask = await YamlTaskOperations.isThisTask(yamlLink);
@@ -117,13 +119,13 @@ export class TaskCommands {
             Message.err(Data.MESSAGES.ERRORS.NO_SR_CODE);
             return;
         }
-        
+
         try {
-            if(srCode == this.srCode){
+            if (srCode == this.srCode) {
                 if (Timer.isTaskRunnig()) await this.stopTask();
             }
             let workLogGenerated = await YamlTaskOperations.generateWorkLogs(srCode, srDoc.uri);
-            if(!workLogGenerated) return
+            if (!workLogGenerated) return
             Message.info("Worklog Generated");
         } catch (error) {
             Message.err(error);
@@ -147,7 +149,11 @@ export class LinkCommands {
     private static linkFollower = new LinkFollower();
 
     public static async extractF2YamlSummaryLink() {
-        this.yamlLink = await TextUtils.isThisYamlLink();
+        const activeDoc = ActiveDocAndEditor.getActiveDoc();
+        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        if (!activeDoc || !cursorPosition) return;
+
+        let f2YamlSymmaryLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
         if (!this.yamlLink) this.yamlLink = await F2yamlLinkExtractor.createYamlLink();
         Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(this.yamlLink));
         vscode.env.clipboard.writeText(this.yamlLink);
@@ -169,7 +175,11 @@ export class LinkCommands {
 
 
     public static async followLink() {
-        this.yamlLink = await TextUtils.isThisYamlLink();
+        const activeDoc = ActiveDocAndEditor.getActiveDoc();
+        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        if (!activeDoc || !cursorPosition) return;
+
+        this.yamlLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
         if (!this.yamlLink) this.yamlLink = TextUtils.isThisYamlReference();
         if (!this.yamlLink) return;
         this.linkFollower.followLink(this.yamlLink);
