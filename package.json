@@ -119,6 +119,10 @@
             "SummaryLink",
             "BlockedBy"
           ]
+        },
+        "f2tools.rootPath": {
+          "type": "string",
+          "description": "Enter the file path of the root directory"
         }
       }
     }

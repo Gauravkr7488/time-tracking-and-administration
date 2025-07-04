@@ -46,7 +46,7 @@ export class TextUtils {
 
         if (startOfLink == undefined || endOfLink == undefined) return;
         for (let index = startOfLink; index <= endOfLink; index++) f2YamlLink += lineText[index];
-        
+
         return f2YamlLink;
     }
 
@@ -99,4 +99,18 @@ export class TextUtils {
         }
         return;
     }
+
+    static removeFirstWordIfFollowedByDot(str: string): string {
+        const trimmed = str.trimStart();
+        const firstSpaceIndex = trimmed.indexOf(' ');
+
+        if (firstSpaceIndex === -1) return str; // No space → can't match pattern
+
+        if (trimmed[firstSpaceIndex + 1] === '.') {
+            return trimmed.substring(firstSpaceIndex + 1); // Remove word + space
+        }
+
+        return str;
+    }
+
 }

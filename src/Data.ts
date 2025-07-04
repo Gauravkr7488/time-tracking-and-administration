@@ -14,6 +14,7 @@ export class Data {
             UNABLE_TO_FIND_FILE: (something: any) => `Unable to find the file ${something}`,
             PARSING_ERROR: (error: any) => `YAML parsing error: ${error}`,
             UNABLE_TO_FIND_TASK: (taskName: string) => `Unable to find: ${taskName}`,
+            NO_ROOT_PATH: " Please enter the root path in the settings",
 
         },
         INFO: {
@@ -39,7 +40,8 @@ export class Data {
         BACK_SLASH: /\\/g,
         DOUBLE_BACK_SLASH: /\\\\/g,
         START_OF_F2YAML_LINK: '-->',
-        END_OF_F2YAML_LINK: '<'
+        END_OF_F2YAML_LINK: '<',
+        FIRST_WORD: /^\S+\s*/
     }
 
     public static readonly MISC = {

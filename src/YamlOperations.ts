@@ -8,7 +8,6 @@ export class YamlTaskOperations {
     private static taskYamlDoc: yaml.Document<yaml.Node, true>
     static taskYamlLink: string;
 
-
     public static async parseYaml(docUri: vscode.Uri) {
         let doc;
         try {
@@ -324,7 +323,7 @@ export class YamlTaskOperations {
 
         for (let index = 0; index < newKeys.length; index++) {
             const element: string = newKeys[index];
-            if(element.includes("-->")){
+            if (element.includes("-->")) {
                 newKeys[index] = this.replaceSubLink(element, cleanYamlLink)
             }
         }
@@ -333,7 +332,7 @@ export class YamlTaskOperations {
 
     static replaceSubLink(element: any, cleanYamlLink: string): any {
         let cleanSubLink = YamlTaskOperations.getSubLink(cleanYamlLink);
-        
+
         const [firstPart, rest] = element.split("-->");
         const [linkPart, end] = rest.split("<");
 
