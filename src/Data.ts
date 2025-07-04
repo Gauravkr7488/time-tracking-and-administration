@@ -32,12 +32,14 @@ export class Data {
         DETECTED_YAML_LINK: "detectedYamlLink"
     }
 
-    public static readonly REGEX_PATTERNS = {
+    public static readonly PATTERNS = {
         LINK: /-->.*</,
         COLON: /:$/,
         REFERENCE: /\$@.*@\$/g,
         BACK_SLASH: /\\/g,
         DOUBLE_BACK_SLASH: /\\\\/g,
+        START_OF_F2YAML_LINK: '-->',
+        END_OF_F2YAML_LINK: '<'
     }
 
     public static readonly MISC = {

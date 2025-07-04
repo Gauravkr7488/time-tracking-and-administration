@@ -154,9 +154,9 @@ export class LinkCommands {
         if (!activeDoc || !cursorPosition) return;
 
         let f2YamlSymmaryLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
-        if (!this.yamlLink) this.yamlLink = await F2yamlLinkExtractor.createYamlLink();
-        Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(this.yamlLink));
-        vscode.env.clipboard.writeText(this.yamlLink);
+        if (!f2YamlSymmaryLink) f2YamlSymmaryLink = await F2yamlLinkExtractor.createYamlLink();
+        Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlSymmaryLink));
+        vscode.env.clipboard.writeText(f2YamlSymmaryLink);
     }
 
     public static async generateOrCopyF2yamlReference() {

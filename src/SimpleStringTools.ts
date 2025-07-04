@@ -89,6 +89,6 @@ export class SimpleStringTools {
     }
 
     static escapeSpecialCharacters(text: string){
-        return text.replace(Data.REGEX_PATTERNS.BACK_SLASH, "\\\\");
+        return text.replace(Data.PATTERNS.BACK_SLASH, "\\\\");
     }
 }
