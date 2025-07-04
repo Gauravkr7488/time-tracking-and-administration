@@ -101,16 +101,35 @@ export class TextUtils {
     }
 
     static removeFirstWordIfFollowedByDot(str: string): string {
-        const trimmed = str.trimStart();
+        if (!str.startsWith('"') || !str.endsWith('"')) return str; // not a quoted string
+
+        const inner = str.slice(1, -1); // Remove outer quotes
+        const trimmed = inner.trimStart();
         const firstSpaceIndex = trimmed.indexOf(' ');
 
-        if (firstSpaceIndex === -1) return str; // No space → can't match pattern
+        if (firstSpaceIndex === -1) return str;
 
         if (trimmed[firstSpaceIndex + 1] === '.') {
-            return trimmed.substring(firstSpaceIndex + 1); // Remove word + space
+            const newInner = trimmed.substring(firstSpaceIndex + 2); // skip space and dot
+            return `"${newInner}"`; // Re-wrap in quotes
         }
 
         return str;
+    }
+
+
+    static isThisSingleWord(string: string) {
+        return /^\S+$/.test(string)
+    }
+    
+    static wrapInQuotesIfMultiWord(str: string): string {
+        const trimmed = str.trim();
+
+        if (trimmed.includes(' ') && !trimmed.startsWith('"') && !trimmed.endsWith('"')) {
+            return `"${trimmed}"`;
+        }
+
+        return trimmed;
     }
 
 }

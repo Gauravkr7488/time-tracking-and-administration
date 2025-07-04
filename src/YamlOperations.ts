@@ -2,8 +2,10 @@ import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { Message } from './VsCodeUtils';
 import { Data } from './Data';
+import { TextUtils } from './TextUtils';
 
 export class YamlTaskOperations {
+
     public static taskFileUri: vscode.Uri;
     private static taskYamlDoc: yaml.Document<yaml.Node, true>
     static taskYamlLink: string;
@@ -588,5 +590,49 @@ export class YamlTaskOperations {
 
         }
         return idValues;
+    }
+
+    static async getYamlKeyValues(yamlKeys: string[], yamlKeyType: string, activeDoc: vscode.TextDocument): Promise<string[] | undefined>{
+        const yamlDoc = await this.parseYaml(activeDoc.uri);
+        if (!yamlDoc) return;
+        let yamlValues = [];
+        const fileAndFolderName = yamlKeys[0];
+        const topLevelObj: any = yamlDoc.get(fileAndFolderName);
+        let parentObj = topLevelObj;
+        let yamlObj;
+        let yamlKeyValue;
+
+        for (let index = 1; index < yamlKeys.length; index++) {
+            let currentYamlKey = yamlKeys[index];
+            for (const item of parentObj.items) {
+                if (currentYamlKey == item.key.value) {
+                    try {
+                        for (const i of item.value.items) {
+                            if (i.key.value == yamlKeyType) {
+                                yamlObj = i;
+                                yamlKeyValue = yamlObj.value.value;
+                            }
+                        }
+                    } catch (error) {
+                        Message.err(error);
+                    }
+                    // currentYamlKey = await this.cleanStatusCodesFromKeys(currentYamlKey);
+                    if (!yamlKeyValue) {
+                        if (TextUtils.isThisSingleWord(currentYamlKey)) {
+                            yamlKeyValue = currentYamlKey;
+                        } else {
+                            yamlKeyValue = `"${currentYamlKey}"`;
+                        }
+                    }
+                    yamlValues.push(yamlKeyValue);
+                    yamlKeyValue = null;
+
+                    parentObj = item.value;
+                    break;
+                }
+            }
+
+        }
+        return yamlValues;
     }
 }

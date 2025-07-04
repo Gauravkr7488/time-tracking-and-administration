@@ -142,9 +142,7 @@ export class TaskCommands {
 }
 
 export class LinkCommands {
-    static extractF2YamlIdLink() {
-        throw new Error('Method not implemented.');
-    }
+
     private static yamlLink?: string;
     private static linkFollower = new LinkFollower();
 
@@ -157,6 +155,17 @@ export class LinkCommands {
         if (!f2YamlSymmaryLink) f2YamlSymmaryLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
         Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlSymmaryLink));
         vscode.env.clipboard.writeText(f2YamlSymmaryLink);
+    }
+
+    static async extractF2YamlIdLink() {
+        const activeDoc = ActiveDocAndEditor.getActiveDoc();
+        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        if (!activeDoc || !cursorPosition) return;
+
+        let f2YamlIdLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
+        if (!f2YamlIdLink) f2YamlIdLink = await F2yamlLinkExtractor.createF2YamlIdLink(activeDoc, cursorPosition);
+        Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlIdLink));
+        vscode.env.clipboard.writeText(f2YamlIdLink);
     }
 
     public static async generateOrCopyF2yamlReference() {

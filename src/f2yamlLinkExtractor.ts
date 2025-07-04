@@ -48,7 +48,7 @@ export class F2yamlLinkExtractor { // parsing should be used
 
     public static async createF2YamlSummaryLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         let F2YamlSummaryLink = '';
-        let filePath = activeDoc.uri.fsPath; // TODO make a setting for root directory
+        let filePath = activeDoc.uri.fsPath;
         filePath = this.removeRootPath(filePath);
         let yamlPath = await this.getYamlPath(activeDoc, cursorPosition);
         return F2YamlSummaryLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
@@ -58,8 +58,20 @@ export class F2yamlLinkExtractor { // parsing should be used
         let yamlPath = '';
         let yamlKeys = await this.getYamlKeys(activeDoc, cursorPosition)
         if (!yamlKeys) return;
-        let yamlParts: string[] = this.removeStatus(yamlKeys);
-        return yamlPath = yamlParts.join('.');
+        let yamlKeyValues;
+        if (yamlKeyType != "summary") {
+            yamlKeyValues = await YamlTaskOperations.getYamlKeyValues(yamlKeys, yamlKeyType, activeDoc)
+            if (!yamlKeyValues) return;
+            let yamlParts: string[] = this.removeStatus(yamlKeyValues);
+            return yamlPath = yamlParts.join('.');
+        }
+
+        let summaryYamlParts = [];
+        for (const key of yamlKeys) {
+            summaryYamlParts.push(TextUtils.wrapInQuotesIfMultiWord(key));
+        }
+        let cleanSymmaryKeys = this.removeStatus(summaryYamlParts);
+        return yamlPath = cleanSymmaryKeys.join('.');
     }
 
     static removeStatus(yamlKeys: string[]): string[] {
@@ -130,6 +142,15 @@ export class F2yamlLinkExtractor { // parsing should be used
         let idLink = idValues.join(".");
         idLink = fileAndFolderName + idLink;
         return `-->${idLink}<`;
+
+    }
+
+    static async createF2YamlIdLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
+        let F2YamlIdLink = '';
+        let filePath = activeDoc.uri.fsPath;
+        filePath = this.removeRootPath(filePath);
+        let yamlPath = await this.getYamlPath(activeDoc, cursorPosition, "Id");
+        return F2YamlIdLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
 
     }
 }
