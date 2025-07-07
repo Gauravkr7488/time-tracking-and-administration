@@ -51,7 +51,7 @@ export class TaskCommands {
             if (Timer.isTaskRunnig()) operationStatus = await this.stopTask();
             if (!operationStatus) return
             let yamlLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
-            if (!yamlLink) yamlLink = await F2yamlLinkExtractor.createYamlLink();
+            if (!yamlLink) yamlLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
 
             const isthisTask = await YamlTaskOperations.isThisTask(yamlLink);
             if (isthisTask === undefined) return;
@@ -168,19 +168,19 @@ export class LinkCommands {
         vscode.env.clipboard.writeText(f2YamlIdLink);
     }
 
-    public static async generateOrCopyF2yamlReference() {
-        this.yamlLink = TextUtils.isThisYamlReference();
-        if (!this.yamlLink) return;
-        let cleanLink = this.yamlLink.slice(2, -2);
+    // public static async generateOrCopyF2yamlReference() {
+    //     this.yamlLink = TextUtils.isThisYamlReference();
+    //     if (!this.yamlLink) return;
+    //     let cleanLink = this.yamlLink.slice(2, -2);
 
-        if (!this.yamlLink) {
-            this.yamlLink = await F2yamlLinkExtractor.createYamlLink();
-            cleanLink = this.yamlLink.slice(3, -1);
-        }
-        const f2YamlRef = `$@${cleanLink}@$`;
-        Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlRef));
-        vscode.env.clipboard.writeText(f2YamlRef);
-    }
+    //     if (!this.yamlLink) {
+    //         this.yamlLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
+    //         cleanLink = this.yamlLink.slice(3, -1);
+    //     }
+    //     const f2YamlRef = `$@${cleanLink}@$`;
+    //     Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlRef));
+    //     vscode.env.clipboard.writeText(f2YamlRef);
+    // }
 
 
     public static async followLink() {

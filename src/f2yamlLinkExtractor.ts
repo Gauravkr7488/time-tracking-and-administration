@@ -8,18 +8,18 @@ import { TextUtils } from './TextUtils';
 export class F2yamlLinkExtractor { // parsing should be used
     protected static extractedSymbols: Array<string> = [];
 
-    protected static async extractAllYamlKeys() {
-        const doc = ActiveDocAndEditor.getActiveDoc();
-        if (!doc) return;
-        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
-        if (!cursorPosition) return;
-        let yamlKeys = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
-            'vscode.executeDocumentSymbolProvider',
-            doc.uri
-        );
-        if (yamlKeys === undefined) return;
-        this.extractYamlKeysToCursor(yamlKeys, cursorPosition);
-    }
+    // protected static async extractAllYamlKeys() {
+    //     const doc = ActiveDocAndEditor.getActiveDoc();
+    //     if (!doc) return;
+    //     const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+    //     if (!cursorPosition) return;
+    //     let yamlKeys = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+    //         'vscode.executeDocumentSymbolProvider',
+    //         doc.uri
+    //     );
+    //     if (yamlKeys === undefined) return;
+    //     this.extractYamlKeysToCursor(yamlKeys, cursorPosition);
+    // }
 
     private static fullPath(): string { // TODO simplify this
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
@@ -37,14 +37,14 @@ export class F2yamlLinkExtractor { // parsing should be used
         return `${pathFromRoot}`;
     }
 
-    public static async createYamlLink() {
-        await this.extractAllYamlKeys();
-        let fullPath = this.fullPath();
-        if (!fullPath) return '';
-        let yamlLink = `-->${fullPath}<`;
-        this.extractedSymbols = [];
-        return yamlLink;
-    }
+    // public static async createF2YamlSummaryLink() {
+    //     await this.extractAllYamlKeys();
+    //     let fullPath = this.fullPath();
+    //     if (!fullPath) return '';
+    //     let yamlLink = `-->${fullPath}<`;
+    //     this.extractedSymbols = [];
+    //     return yamlLink;
+    // }
 
     public static async createF2YamlSummaryLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         let F2YamlSummaryLink = '';
@@ -77,19 +77,37 @@ export class F2yamlLinkExtractor { // parsing should be used
     static removeStatus(yamlKeys: string[]): string[] {
         let cleanYamlKeys: string[] = []
         for (let yamlKey of yamlKeys) {
-            cleanYamlKeys.push(TextUtils.removeFirstWordIfFollowedByDot(yamlKey));
+            cleanYamlKeys.push(TextUtils.removeFirstWordIfFollowedBySpaceAndDot(yamlKey));
         }
         return cleanYamlKeys;
     }
 
     static async getYamlKeys(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         ActiveDocAndEditor.isThisYamlDoc();
-        let allYamlKeys = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
+        let allYamlKeys;
+
+        if (allYamlKeys == undefined) { // this block is here because of the delay in vscode to load the symbols which result in undefined allYamlKeys
+            while (true) {
+                let tries = 1
+                ActiveDocAndEditor.sleep(5000);
+                allYamlKeys = await F2yamlLinkExtractor.getVsCodeDocSymbols(activeDoc);
+                tries++;
+                if(tries >= 3){
+                    Message.err("executeDocumentSymbolProvider failed")
+                    return;
+                }else if(allYamlKeys) break;
+            }
+        }
+
+        let yamlKeysToCursor = this.extractYamlKeysToCursor(allYamlKeys, cursorPosition);
+        return yamlKeysToCursor;
+    }
+
+    private static async getVsCodeDocSymbols(activeDoc: vscode.TextDocument) {
+        return await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
             'vscode.executeDocumentSymbolProvider',
             activeDoc.uri
         );
-        let yamlKeysToCursor = this.extractYamlKeysToCursor(allYamlKeys, cursorPosition);
-        return yamlKeysToCursor;
     }
 
     static removeRootPath(filePath: string) {
@@ -129,21 +147,21 @@ export class F2yamlLinkExtractor { // parsing should be used
     }
 
 
-    public static async createIdLink() {
-        await this.extractAllYamlKeys();
-        const doc = ActiveDocAndEditor.getActiveDoc();
-        if (!doc) return;
-        const yamlDoc = await YamlTaskOperations.parseYaml(doc.uri);
-        if (!yamlDoc) return;
-        const idValues: string[] = await YamlTaskOperations.getIdValues(this.extractedSymbols, yamlDoc);
-        if (!yamlDoc || !yamlDoc.contents) return;
-        const fileAndFolderName = this.extractedSymbols[0];
-        this.extractedSymbols = [];
-        let idLink = idValues.join(".");
-        idLink = fileAndFolderName + idLink;
-        return `-->${idLink}<`;
+    // public static async createF2YamlIdLink() {
+    //     await this.extractAllYamlKeys();
+    //     const doc = ActiveDocAndEditor.getActiveDoc();
+    //     if (!doc) return;
+    //     const yamlDoc = await YamlTaskOperations.parseYaml(doc.uri);
+    //     if (!yamlDoc) return;
+    //     const idValues: string[] = await YamlTaskOperations.getIdValues(this.extractedSymbols, yamlDoc);
+    //     if (!yamlDoc || !yamlDoc.contents) return;
+    //     const fileAndFolderName = this.extractedSymbols[0];
+    //     this.extractedSymbols = [];
+    //     let idLink = idValues.join(".");
+    //     idLink = fileAndFolderName + idLink;
+    //     return `-->${idLink}<`;
 
-    }
+    // }
 
     static async createF2YamlIdLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         let F2YamlIdLink = '';

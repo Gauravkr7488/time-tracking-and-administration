@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) { // TODO remove asyn
     });
 
     const disposableForF2yamlReferenceGenerator = vscode.commands.registerCommand('f2tools.generateF2yamlReference', async () => {
-        await LinkCommands.generateOrCopyF2yamlReference();
+        // await LinkCommands.generateOrCopyF2yamlReference();
     });
 
     const disposableForLinkFollower = vscode.commands.registerCommand('f2tools.followLink', async () => {

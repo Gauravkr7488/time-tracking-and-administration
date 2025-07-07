@@ -42,6 +42,11 @@ export class ActiveDocAndEditor {
         const cursorPosition = activeEditor.selection.active;
         return cursorPosition;
     }
+
+    static sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 }
 
 export class Message {

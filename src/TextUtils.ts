@@ -100,7 +100,7 @@ export class TextUtils {
         return;
     }
 
-    static removeFirstWordIfFollowedByDot(str: string): string {
+    static removeFirstWordIfFollowedBySpaceAndDot(str: string): string {
         if (!str.startsWith('"') || !str.endsWith('"')) return str; // not a quoted string
 
         const inner = str.slice(1, -1); // Remove outer quotes
@@ -110,8 +110,8 @@ export class TextUtils {
         if (firstSpaceIndex === -1) return str;
 
         if (trimmed[firstSpaceIndex + 1] === '.') {
-            const newInner = trimmed.substring(firstSpaceIndex + 2); // skip space and dot
-            return `"${newInner}"`; // Re-wrap in quotes
+            const newInner = trimmed.substring(firstSpaceIndex + 2);
+            return `."${newInner}"`; // Re-wrap in quotes with dot
         }
 
         return str;
