@@ -87,13 +87,14 @@ export class F2yamlLinkExtractor { // parsing should be used
         let allYamlKeys;
 
         if (allYamlKeys == undefined) { // this block is here because of the delay in vscode to load the symbols which result in undefined allYamlKeys
+            let tries = 1
             while (true) {
-                let tries = 1
                 ActiveDocAndEditor.sleep(5000);
                 allYamlKeys = await F2yamlLinkExtractor.getVsCodeDocSymbols(activeDoc);
                 tries++;
                 if(tries >= 3){
-                    Message.err("executeDocumentSymbolProvider failed")
+      
+                    Message.err("executeDocumentSymbolProvider failed \n check if there is some error in yaml like +: { }:")
                     return;
                 }else if(allYamlKeys) break;
             }
