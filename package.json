@@ -51,7 +51,7 @@
         "title": "Generate or copy F2Yaml References"
       },
       {
-        "command": "f2tools.followLink",
+        "command": "f2tools.followF2yamlLink",
         "title": "Follow the F2Yaml Link"
       },
       {

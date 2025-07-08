@@ -35,8 +35,8 @@ export function activate(context: vscode.ExtensionContext) { // TODO remove asyn
         // await LinkCommands.generateOrCopyF2yamlReference();
     });
 
-    const disposableForLinkFollower = vscode.commands.registerCommand('f2tools.followLink', async () => {
-        await LinkCommands.followLink();
+    const disposableForF2yamlLinkFollower = vscode.commands.registerCommand('f2tools.followF2yamlLink', async () => {
+        await LinkCommands.followF2yamlLink();
     });
     
     const disposableForCSVGeneration = vscode.commands.registerCommand('f2tools.generateCSV', async () => {
@@ -52,7 +52,7 @@ export function activate(context: vscode.ExtensionContext) { // TODO remove asyn
         disposableForF2yamlSummaryLinkExtractor, 
         disposableForF2yamlIdLinkExtractor,
         disposableForF2yamlReferenceGenerator,
-        disposableForLinkFollower,
+        disposableForF2yamlLinkFollower,
         disposableForCSVGeneration
     );
 }

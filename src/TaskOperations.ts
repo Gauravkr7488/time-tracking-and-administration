@@ -183,7 +183,7 @@ export class LinkCommands {
     // }
 
 
-    public static async followLink() {
+    public static async followF2yamlLink() {
         const activeDoc = ActiveDocAndEditor.getActiveDoc();
         const cursorPosition = ActiveDocAndEditor.getCursorPosition();
         if (!activeDoc || !cursorPosition) return;
