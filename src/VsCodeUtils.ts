@@ -1,8 +1,20 @@
 import * as vscode from 'vscode';
 import { Data } from './Data';
+import path from 'path';
 
 
-export class ActiveDocAndEditor {
+export class VsCodeUtils {
+
+    static getFileUri(filePath: any): vscode.Uri {
+        let fileUri;
+        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
+        const rootPath = config.get<string>('rootPath');
+        if (!rootPath) throw new Error("root path is not set") // todo 
+        const filePathFromRoot = rootPath + "\\" + filePath;
+        fileUri = vscode.Uri.file(path.resolve(filePathFromRoot));
+        return  fileUri;
+
+    }
 
     static getActiveDoc() {
         const activeEditor = this.getActiveEditor();
@@ -25,7 +37,7 @@ export class ActiveDocAndEditor {
 
     static isThisYamlDoc(): boolean {
         const activeDocument = this.getActiveDoc();
-        if(!activeDocument) return false;
+        if (!activeDocument) return false;
         if (activeDocument.languageId !== Data.MISC.YAML) {
             Message.err(Data.MESSAGES.ERRORS.THIS_COMMAND_ONLY_WORKS_WITH_YAML_FILES);
             return false;
@@ -33,19 +45,19 @@ export class ActiveDocAndEditor {
         return true
     }
 
-    static getCursorPosition() { 
+    static getCursorPosition() {
         const activeEditor = this.getActiveEditor();
-        if(!activeEditor){
+        if (!activeEditor) {
             Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TEXT_EDITOR);
             return;
-        } 
+        }
         const cursorPosition = activeEditor.selection.active;
         return cursorPosition;
     }
 
     static sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-}
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
 }
 

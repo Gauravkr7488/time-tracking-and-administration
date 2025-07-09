@@ -1,5 +1,5 @@
 import { Timer } from "./timer";
-import { ActiveDocAndEditor } from "./VsCodeUtils";
+import { VsCodeUtils } from "./VsCodeUtils";
 import { TextUtils } from "./TextUtils";
 import { Message } from './VsCodeUtils';
 import * as vscode from 'vscode';
@@ -19,7 +19,7 @@ export class TaskCommands {
 
     public static async specifyStandupReport() {
         if (Timer.isTaskRunnig()) await this.stopTask();
-        const srDoc = ActiveDocAndEditor.getActiveDoc();
+        const srDoc = VsCodeUtils.getActiveDoc();
         if (!srDoc) return;
 
         const srCode = TextUtils.extractCurrentWord();
@@ -36,8 +36,8 @@ export class TaskCommands {
 
     public static async selectTask(): Promise<void> {
         try {
-            const activeDoc = ActiveDocAndEditor.getActiveDoc();
-            const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+            const activeDoc = VsCodeUtils.getActiveDoc();
+            const cursorPosition = VsCodeUtils.getCursorPosition();
             if (!activeDoc || !cursorPosition) return;
 
             let checkDocStructure = await YamlTaskOperations.parseYaml(activeDoc.uri);
@@ -111,7 +111,7 @@ export class TaskCommands {
     }
 
     public static async generateWorkLogs() {
-        const srDoc = ActiveDocAndEditor.getActiveDoc();
+        const srDoc = VsCodeUtils.getActiveDoc();
         if (!srDoc) return;
 
         const srCode = TextUtils.extractCurrentWord();
@@ -147,8 +147,8 @@ export class LinkCommands {
     private static linkFollower = new LinkFollower();
 
     public static async extractF2YamlSummaryLink() {
-        const activeDoc = ActiveDocAndEditor.getActiveDoc();
-        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        const activeDoc = VsCodeUtils.getActiveDoc();
+        const cursorPosition = VsCodeUtils.getCursorPosition();
         if (!activeDoc || !cursorPosition) return;
 
         let f2YamlSymmaryLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
@@ -158,8 +158,8 @@ export class LinkCommands {
     }
 
     static async extractF2YamlIdLink() {
-        const activeDoc = ActiveDocAndEditor.getActiveDoc();
-        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        const activeDoc = VsCodeUtils.getActiveDoc();
+        const cursorPosition = VsCodeUtils.getCursorPosition();
         if (!activeDoc || !cursorPosition) return;
 
         let f2YamlIdLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
@@ -184,13 +184,12 @@ export class LinkCommands {
 
 
     public static async followF2yamlLink() {
-        const activeDoc = ActiveDocAndEditor.getActiveDoc();
-        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        const activeDoc = VsCodeUtils.getActiveDoc();
+        const cursorPosition = VsCodeUtils.getCursorPosition();
         if (!activeDoc || !cursorPosition) return;
-
-        this.yamlLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
-        if (!this.yamlLink) this.yamlLink = TextUtils.isThisYamlReference();
-        if (!this.yamlLink) return;
-        this.linkFollower.followLink(this.yamlLink);
+        let yamlLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
+        // if (!yamlLink) yamlLink = TextUtils.isThisYamlReference();
+        if (!yamlLink) throw new Error("there is no link"); // TODO Fix this ie there should always be a link and if there is not then we should do try catch here
+        LinkFollower.followF2yamlLink(yamlLink); // TODO make this static
     }
 }

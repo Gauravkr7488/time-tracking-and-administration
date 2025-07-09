@@ -1,7 +1,7 @@
 import { escape } from "querystring";
 import { Data } from "./Data";
 import { TextUtils } from "./TextUtils";
-import { ActiveDocAndEditor, Message } from "./VsCodeUtils";
+import { VsCodeUtils, Message } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";
 import { F2yamlLinkExtractor } from "./f2yamlLinkExtractor";
 import * as vscode from 'vscode';
@@ -12,8 +12,8 @@ export class CSVOperations extends YamlTaskOperations {
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
         const csvFields = config.get<string[]>('csvFields', []);
         let csvEntry = "";
-        const activeDoc = ActiveDocAndEditor.getActiveDoc();
-        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        const activeDoc = VsCodeUtils.getActiveDoc();
+        const cursorPosition = VsCodeUtils.getCursorPosition();
         if (!activeDoc || !cursorPosition) return;
         let yamlLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
         if (!yamlLink) yamlLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);

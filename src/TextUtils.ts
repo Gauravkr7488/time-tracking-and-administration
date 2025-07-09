@@ -1,22 +1,92 @@
 import { Position } from 'vscode';
 import { Data } from './Data';
-import { ActiveDocAndEditor } from './VsCodeUtils';
+import { VsCodeUtils } from './VsCodeUtils';
 import * as vscode from 'vscode';
 
 export class TextUtils {
+    static escapeSpecialCharacters(keyValueWithSpaces: string): string {
+        let sanitisedString = keyValueWithSpaces;
+
+        sanitisedString = this.escapeCharacter(sanitisedString, "(", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, ")", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, ".", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, "?", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, "+", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, "*", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, "^", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, "$", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, "[", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, "]", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, "{", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, "}", "\\");
+        sanitisedString = this.escapeCharacter(sanitisedString, "|", "\\");
+        // sanitisedString = this.escapeCharacter(sanitisedString, "\\", "\\"); // escape the backslash itself
+
+        return sanitisedString;
+    }
+
+
+    static removeQuotesWrapping(yamlKey: string): string {
+        if (
+            (yamlKey.startsWith('"') && yamlKey.endsWith('"')) ||
+            (yamlKey.startsWith("'") && yamlKey.endsWith("'"))
+        ) {
+            return yamlKey.slice(1, -1);
+        }
+        return yamlKey;
+    }
+
+
+    static parseYamlPath(yamlPath: string): string[] {
+        const rawParts = yamlPath.split(".");
+        const yamlParts: string[] = [];
+
+        for (let i = 0; i < rawParts.length; i++) {
+            if (rawParts[i] !== "") {
+                yamlParts.push(rawParts[i]);
+            }
+        }
+
+        return yamlParts;
+    }
+
+    static parseF2yamlLink(yamlLink: string): { filePath: any; yamlPath: any; } {
+        const cleanLink = this.removeLinkSymbolsFromLink(yamlLink);
+
+        const lastBackslashIndex = cleanLink.lastIndexOf("\\");
+
+        if (lastBackslashIndex === -1) throw new Error("not a valid link"); // TODO
+
+        const filePath = cleanLink.slice(0, lastBackslashIndex);
+        const yamlPath = cleanLink.slice(lastBackslashIndex + 1);
+
+        return { filePath, yamlPath };
+    }
+
+
+    private static removeLinkSymbolsFromLink(yamlLink: string) {
+        const lengthOfFrontLinkSymbols = 3;
+        const lengthOfBackLinkSymbols = 1;
+        const cleanYamlLink = yamlLink.slice(lengthOfFrontLinkSymbols, -lengthOfBackLinkSymbols);
+        return cleanYamlLink;
+    }
+
+
     static escapeCharacter(inputString: string, characterToEscape: string, characterToEscapeWith: string): string {
         let result = '';
         for (const char of inputString) {
-            result += char
-            if (char == characterToEscape) {
-                result += characterToEscapeWith;
+            if (char === characterToEscape) {
+                result += characterToEscapeWith + char;
+            } else {
+                result += char;
             }
         }
         return result;
     }
+
     public static extractCurrentWord() {
-        const doc = ActiveDocAndEditor.getActiveDoc();
-        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        const doc = VsCodeUtils.getActiveDoc();
+        const cursorPosition = VsCodeUtils.getCursorPosition();
 
         if (!doc) return;
         if (!cursorPosition) return;
@@ -78,8 +148,8 @@ export class TextUtils {
     }
 
     public static isThisYamlReference() {
-        const doc = ActiveDocAndEditor.getActiveDoc();
-        const cursorPosition = ActiveDocAndEditor.getCursorPosition();
+        const doc = VsCodeUtils.getActiveDoc();
+        const cursorPosition = VsCodeUtils.getCursorPosition();
 
         if (!doc) return;
         if (!cursorPosition) return;
@@ -101,6 +171,14 @@ export class TextUtils {
     }
 
     static removeFirstWordIfFollowedBySpaceAndDot(str: string): string {
+        const firstSpaceIndex = str.indexOf(' .');
+
+        const cleanString = str.substring(firstSpaceIndex + 2);
+
+        return cleanString;
+    }
+
+    static removeFirstWordIfFollowedBySpaceAndDotIfWrappendInQuotes(str: string): string {
         if (!str.startsWith('"') || !str.endsWith('"')) return str; // not a quoted string
 
         const inner = str.slice(1, -1); // Remove outer quotes
@@ -121,7 +199,7 @@ export class TextUtils {
     static isThisSingleWord(string: string) {
         return /^\S+$/.test(string)
     }
-    
+
     static wrapInQuotesIfMultiWord(str: string): string {
         const trimmed = str.trim();
 

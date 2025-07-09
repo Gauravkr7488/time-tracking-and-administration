@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Data } from './Data';
-import { ActiveDocAndEditor, Message } from './VsCodeUtils';
+import { VsCodeUtils, Message } from './VsCodeUtils';
 import { YamlTaskOperations } from './YamlOperations';
 import { TextUtils } from './TextUtils';
 
@@ -77,19 +77,19 @@ export class F2yamlLinkExtractor { // parsing should be used
     static removeStatus(yamlKeys: string[]): string[] {
         let cleanYamlKeys: string[] = []
         for (let yamlKey of yamlKeys) {
-            cleanYamlKeys.push(TextUtils.removeFirstWordIfFollowedBySpaceAndDot(yamlKey));
+            cleanYamlKeys.push(TextUtils.removeFirstWordIfFollowedBySpaceAndDotIfWrappendInQuotes(yamlKey));
         }
         return cleanYamlKeys;
     }
 
     static async getYamlKeys(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
-        ActiveDocAndEditor.isThisYamlDoc();
+        VsCodeUtils.isThisYamlDoc();
         let allYamlKeys;
 
         if (allYamlKeys == undefined) { // this block is here because of the delay in vscode to load the symbols which result in undefined allYamlKeys
             let tries = 1
             while (true) {
-                ActiveDocAndEditor.sleep(5000);
+                VsCodeUtils.sleep(5000);
                 allYamlKeys = await F2yamlLinkExtractor.getVsCodeDocSymbols(activeDoc);
                 tries++;
                 if(tries >= 3){
@@ -112,8 +112,8 @@ export class F2yamlLinkExtractor { // parsing should be used
     }
 
     static removeRootPath(filePath: string) {
-        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
-        const rootPath = config.get<string>('rootPath') + "\\";
+        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME); // todo replace with method in the vscode utils
+        const rootPath = config.get<string>('rootPath') + "\\"; 
 
         if (!rootPath) {
             Message.err(Data.MESSAGES.ERRORS.NO_ROOT_PATH);

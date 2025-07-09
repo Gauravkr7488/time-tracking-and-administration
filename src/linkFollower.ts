@@ -1,10 +1,34 @@
 import { Data } from "./Data";
 import { SimpleStringTools } from "./SimpleStringTools";
-import { Message } from "./VsCodeUtils";
+import { TextUtils } from "./TextUtils";
+import { Message, VsCodeUtils } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";
 import * as vscode from 'vscode';
 
 export class LinkFollower {
+
+    static async followF2yamlLink(yamlLink: string) {
+        const { filePath, yamlPath } = TextUtils.parseF2yamlLink(yamlLink);
+        const fileUri: vscode.Uri = VsCodeUtils.getFileUri(filePath);
+        const yamlKeys: string[] = TextUtils.parseYamlPath(yamlPath);
+        const yamlObj: any = await YamlTaskOperations.getYamlObj(yamlKeys, fileUri);
+        const keyValueOfYamlObj: string = YamlTaskOperations.getYamlKeyValue(yamlObj)
+        const keyValueWithSpaces = this.addSpacesInKey(keyValueOfYamlObj, yamlKeys);
+        const docOftheLink = await vscode.workspace.openTextDocument(fileUri);
+        const cleanKeyValue = TextUtils.escapeSpecialCharacters(keyValueWithSpaces)
+        const taskSummaryRegex = new RegExp("^\s*" + cleanKeyValue, "im") // what are those magic strings
+        await this.findTheTask(taskSummaryRegex, docOftheLink);
+    }
+
+    static addSpacesInKey(keyValueOfYamlObj: string, yamlKeys: string[]) {
+        let keyWithSpaces = '';
+        let spaces = '';
+        for (let index = 0; index < yamlKeys.length; index++) {
+            spaces += "  ";
+        }
+        keyWithSpaces = spaces + keyValueOfYamlObj;
+        return keyWithSpaces;
+    }
 
     async followLink(yamlLink: string) {
         let summaryWithSpaces = await this.giveExactSummaryWithSpaces(yamlLink);
@@ -12,14 +36,14 @@ export class LinkFollower {
         summaryWithSpaces = SimpleStringTools.escapeSpecialCharacters(summaryWithSpaces);
         const taskDoc = await vscode.workspace.openTextDocument(YamlTaskOperations.taskFileUri);
         const taskSummaryRegex = new RegExp("^" + summaryWithSpaces, "im") // what are those magic strings
-        await this.findTheTask(taskSummaryRegex, taskDoc);
+        await LinkFollower.findTheTask(taskSummaryRegex, taskDoc);
 
     }
 
-    async findTheTask(taskSummaryRegex: RegExp, taskDoc: vscode.TextDocument) {
+    static async findTheTask(taskSummaryRegex: RegExp, taskDoc: vscode.TextDocument) {
         const text = taskDoc.getText();
         const match = taskSummaryRegex.exec(text);
-
+        
         if (!match || match.index === undefined) {
             Message.err(Data.MESSAGES.ERRORS.LINK_ITEM_NOT_FOUND);
             return;
@@ -38,7 +62,7 @@ export class LinkFollower {
         const taskObj = await YamlTaskOperations.getTaskObj(yamlLink)
         if (!taskObj) return;
         let exactSummary = taskObj.key.value;
-        if(!exactSummary) exactSummary = taskObj.key;
+        if (!exactSummary) exactSummary = taskObj.key;
         const yamlKeys = YamlTaskOperations.getCleanYamlKeys(yamlLink);
         if (!yamlKeys) return;
         let spaces: string = "";

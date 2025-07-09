@@ -3,9 +3,74 @@ import * as yaml from 'yaml';
 import { Message } from './VsCodeUtils';
 import { Data } from './Data';
 import { TextUtils } from './TextUtils';
-import { YamlMap } from 'yaml-ast-parser';
 
 export class YamlTaskOperations {
+
+    static getYamlKeyValue(yamlObj: any): string {
+        let yamlKeyValue = '';
+        yamlKeyValue = yamlObj.key.value;
+        return yamlKeyValue;
+    }
+
+    static async getYamlObj(yamlKeys: string[], fileUri: vscode.Uri): Promise<any> {
+        let yamlObj: any;
+        const yamlDoc = await this.parseYaml(fileUri);
+        if (!yamlDoc) return;
+        let parentYamlObj: any = yamlDoc.get(yamlKeys[0]);
+
+        if (!parentYamlObj) { // TODO resolve this : this is happening because the parent keys have "." before them
+            let parentKey = "." + yamlKeys[0];
+            parentYamlObj = yamlDoc.get(parentKey);
+        }
+
+        for (let index = 1; index < yamlKeys.length; index++) {
+            const yamlKey = yamlKeys[index];
+            if (yamlKey.includes("\"")) {
+                yamlObj = await this.getYamlSummaryObjFromParent(yamlKey, yamlDoc, parentYamlObj);
+                parentYamlObj = yamlObj;
+                continue;
+            }
+            yamlObj = await this.getYamlIdObjFromParentObj(yamlKey, parentYamlObj);
+            parentYamlObj = yamlObj;
+
+        }
+
+        return yamlObj;
+    }
+    
+    static getYamlIdObjFromParentObj(yamlKey: string, parentYamlObj: any): any {
+        let idObj;
+
+        let parentObjItems = parentYamlObj.items;
+        if (!parentObjItems) parentObjItems = parentYamlObj.value.items;
+
+        for (const parentObjItem of parentObjItems) {
+            let childObjItems = parentObjItem.items;
+            if (!childObjItems) childObjItems = parentObjItem.value.items;
+            if (!childObjItems) continue;
+            for (const childObjItem of childObjItems) {
+                if (childObjItem.value == yamlKey){
+                    idObj = parentObjItem;
+                    return idObj;
+                } 
+            }
+
+        }
+        return idObj;
+    }
+
+    static getYamlSummaryObjFromParent(yamlKey: string, yamlDoc: yaml.Document<yaml.Node, true>, parentYamlObj: any) {
+        let summaryObj: any;
+        let cleanYamlKey = TextUtils.removeQuotesWrapping(yamlKey);
+        let yamlObjItems = parentYamlObj.items;
+        if (!yamlObjItems) yamlObjItems = parentYamlObj.value.items;
+        for (const item of yamlObjItems) {
+            const valueOfKey = item.key.value;
+            const valueOfKeyWithoutStatus = TextUtils.removeFirstWordIfFollowedBySpaceAndDot(valueOfKey);
+            if (cleanYamlKey == valueOfKeyWithoutStatus) summaryObj = item;
+        }
+        return summaryObj;
+    }
 
     public static taskFileUri: vscode.Uri;
     private static taskYamlDoc: yaml.Document<yaml.Node, true>
@@ -288,7 +353,7 @@ export class YamlTaskOperations {
         return yamlKeys.filter(str => str.trim() !== "");
     }
 
-    private static parseF2YamlLink(cleanYamlLink: string) {
+    private static parseF2YamlLink(cleanYamlLink: string) { // remove all of this
         const yamlKeys = cleanYamlLink.split(".");
         let inDoubleQuotes = false;
         let newKeys = [];
@@ -352,7 +417,7 @@ export class YamlTaskOperations {
         return cleanSubLink;
     }
 
-    private static removeLinkSymbolsFromLink(yamlLink: string) {
+    private static removeLinkSymbolsFromLink(yamlLink: string) { // TODO remove this
         const lengthOfFrontLinkSymbols = 3;
         const lengthOfBackLinkSymbols = 1;
         const cleanYamlLink = yamlLink.slice(lengthOfFrontLinkSymbols, -lengthOfBackLinkSymbols);
@@ -637,7 +702,7 @@ export class YamlTaskOperations {
     //     return yamlValues;
     // }
 
-    static async getYamlKeyValues(yamlKeys: string[], yamlKeyType: string, activeDoc: vscode.TextDocument): Promise<string[] | undefined> { 
+    static async getYamlKeyValues(yamlKeys: string[], yamlKeyType: string, activeDoc: vscode.TextDocument): Promise<string[] | undefined> {
         let yamlKeyValues: string[] = [];
         const yamlDoc = await this.parseYaml(activeDoc.uri);
         if (!yamlDoc) return;
@@ -647,15 +712,15 @@ export class YamlTaskOperations {
 
         for (let index = 1; index < yamlKeys.length; index++) {
             const yamlKey = yamlKeys[index];
-            const yamlObj = await this.getYamlObj(yamlKey, yamlDoc, parentYamlObj);
-            const yamlKeyValue = await this.getYamlKeyValue(yamlObj, yamlKeyType);
+            const yamlObj = await this.getYamlObjFromParentObj(yamlKey, yamlDoc, parentYamlObj);
+            const yamlKeyValue = await this.getYamlKeyValueBasedOnKeyType(yamlObj, yamlKeyType);
             if (!yamlKeyValue) {
                 const yamlKeySummary = TextUtils.wrapInQuotesIfMultiWord(yamlKey);
                 yamlKeyValues.push(yamlKeySummary);
                 continue;
             }
             yamlKeyValues.push(yamlKeyValue);
-            parentYamlObj = yamlObj; 
+            parentYamlObj = yamlObj;
         }
         // first I need to get the actual yaml-obj from the yamlKeys
         // second I need to get the value of the yamlkeys form the objects and there if the yamlKeyType is not found then give the summary instead of the value of the key
@@ -663,24 +728,24 @@ export class YamlTaskOperations {
     }
 
     private static getParentValue(parentYamlObj: any, yamlKeyType: string, yamlKeys: string[]) {
-        let parentKeyValue = this.getYamlKeyValue(parentYamlObj, yamlKeyType);
+        let parentKeyValue = this.getYamlKeyValueBasedOnKeyType(parentYamlObj, yamlKeyType);
         let parentKeySummary;
         if (!parentKeyValue) parentKeySummary = TextUtils.wrapInQuotesIfMultiWord(yamlKeys[0]);
         parentKeyValue = parentKeySummary;
         return parentKeyValue;
     }
 
-    static getYamlObj(yamlKey: string, yamlDoc: yaml.Document<yaml.Node, true>, parentYamlObj: any) {
+    static getYamlObjFromParentObj(yamlKey: string, yamlDoc: yaml.Document<yaml.Node, true>, parentYamlObj: any) {
         let yamlObj: any;
         let yamlObjItems = parentYamlObj.items;
-        if(!yamlObjItems) yamlObjItems = parentYamlObj.value.items;
+        if (!yamlObjItems) yamlObjItems = parentYamlObj.value.items;
         for (const item of yamlObjItems) {
             if (yamlKey == item.key.value) yamlObj = item;
         }
         return yamlObj;
     }
 
-    static getYamlKeyValue(yamlObj: any, yamlKeyType: string) {
+    static getYamlKeyValueBasedOnKeyType(yamlObj: any, yamlKeyType: string) {
         let yamlKeyValue;
         try {
             for (const item of yamlObj.value.items) {
