@@ -133,7 +133,11 @@ export class TaskCommands {
     }
 
     static async generateCSV() {
-        const csvEntry = await CSVOperations.generateCSV();
+        const activeDoc = VsCodeUtils.getActiveDoc();
+        const cursorPosition = VsCodeUtils.getCursorPosition();
+        if (!activeDoc || !cursorPosition) return;
+
+        const csvEntry = await CSVOperations.generateCSV(activeDoc, cursorPosition);
         if (!csvEntry) return;
         Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(csvEntry));
         vscode.env.clipboard.writeText(csvEntry);

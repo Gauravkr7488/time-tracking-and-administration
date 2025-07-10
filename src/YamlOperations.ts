@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { Message } from './VsCodeUtils';
+import { Message, VsCodeUtils } from './VsCodeUtils';
 import { Data } from './Data';
 import { TextUtils } from './TextUtils';
 
@@ -37,7 +37,7 @@ export class YamlTaskOperations {
 
         return yamlObj;
     }
-    
+
     static getYamlIdObjFromParentObj(yamlKey: string, parentYamlObj: any): any {
         let idObj;
 
@@ -49,10 +49,10 @@ export class YamlTaskOperations {
             if (!childObjItems) childObjItems = parentObjItem.value.items;
             if (!childObjItems) continue;
             for (const childObjItem of childObjItems) {
-                if (childObjItem.value == yamlKey){
+                if (childObjItem.value == yamlKey) {
                     idObj = parentObjItem;
                     return idObj;
-                } 
+                }
             }
 
         }
@@ -66,7 +66,8 @@ export class YamlTaskOperations {
         if (!yamlObjItems) yamlObjItems = parentYamlObj.value.items;
         for (const item of yamlObjItems) {
             const valueOfKey = item.key.value;
-            const valueOfKeyWithoutStatus = TextUtils.removeFirstWordIfFollowedBySpaceAndDot(valueOfKey);
+            let a = TextUtils.seperateStatusCodeAndTask(valueOfKey); // TODO clean this
+            const valueOfKeyWithoutStatus = a[1] //
             if (cleanYamlKey == valueOfKeyWithoutStatus) summaryObj = item;
         }
         return summaryObj;
@@ -243,24 +244,31 @@ export class YamlTaskOperations {
         return srEntryMap;
     }
 
-    public static async getTaskObj(yamlLink: string) {
-        const cleanYamlKeys = YamlTaskOperations.getCleanYamlKeys(yamlLink);
-        if (!cleanYamlKeys) return;
-        const taskFileUri = await this.createFileURI(cleanYamlKeys);
-        if (!taskFileUri) return;
-        const taskYamlDoc = await this.parseYaml(taskFileUri);
-        if (!taskYamlDoc) return;
-        let result = await this.findTaskObjAndItsParent(cleanYamlKeys, taskYamlDoc);
-        if (!result) return;
-        let { taskObj, parentOfTaskObj } = result;
-        if (!taskObj.value.items) {
-            taskObj = await this.replaceScalarTaskObjToMap(parentOfTaskObj, taskObj);
-        }
-        this.taskYamlDoc = taskYamlDoc;
-        this.taskFileUri = taskFileUri;
-
-        return taskObj;
+    public static async getTaskObj(yamlLink: string) { // TODO 
+        let taskObj: any;
+        const { filePath, yamlPath } = TextUtils.parseF2yamlLink(yamlLink);
+        const fileUri: vscode.Uri = VsCodeUtils.getFileUri(filePath);
+        const yamlKeys: string[] = TextUtils.parseYamlPath(yamlPath);
+        return taskObj = await YamlTaskOperations.getYamlObj(yamlKeys, fileUri);
     }
+    // public static async getTaskObj(yamlLink: string) { // TODO 
+    //     const cleanYamlKeys = YamlTaskOperations.getCleanYamlKeys(yamlLink);
+    //     if (!cleanYamlKeys) return;
+    //     const taskFileUri = await this.createFileURI(cleanYamlKeys);
+    //     if (!taskFileUri) return;
+    //     const taskYamlDoc = await this.parseYaml(taskFileUri);
+    //     if (!taskYamlDoc) return;
+    //     let result = await this.findTaskObjAndItsParent(cleanYamlKeys, taskYamlDoc);
+    //     if (!result) return;
+    //     let { taskObj, parentOfTaskObj } = result;
+    //     if (!taskObj.value.items) {
+    //         taskObj = await this.replaceScalarTaskObjToMap(parentOfTaskObj, taskObj);
+    //     }
+    //     this.taskYamlDoc = taskYamlDoc;
+    //     this.taskFileUri = taskFileUri;
+
+    //     return taskObj;
+    // }
 
     public static getCleanYamlKeys(yamlLink: string) {
         const cleanF2YamlLink = this.removeLinkSymbolsFromLink(yamlLink);
@@ -605,16 +613,16 @@ export class YamlTaskOperations {
         return newYamlLink;
     }
 
-    protected static async getStatusCode(key: string) {
-        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
-        const ignoredWords: string[] = config.get<string[]>('ignoreWords', []);
-        for (let index = 0; index < ignoredWords.length; index++) {
-            if (key.startsWith(ignoredWords[index])) {
-                return ignoredWords[index];
-            }
-        }
-        return;
-    }
+    // protected static async getStatusCode(key: string) {
+    //     const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
+    //     const ignoredWords: string[] = config.get<string[]>('ignoreWords', []);
+    //     for (let index = 0; index < ignoredWords.length; index++) {
+    //         if (key.startsWith(ignoredWords[index])) {
+    //             return ignoredWords[index];
+    //         }
+    //     }
+    //     return;
+    // }
 
     static async getIdValues(yamlKeys: string[], yamlDoc: yaml.Document) { // todo
         let idValues = []
@@ -759,5 +767,33 @@ export class YamlTaskOperations {
         return yamlKeyValue;
     }
 
+
+    // static getYamlKeyValueBasedOnKeyType(yamlObj: any, yamlKeyType: string) {
+    //     let yamlKeyValue;
+    //     let objItems;
+    //     try {
+    //         objItems = yamlObj.items;
+    //         if (!objItems) objItems = yamlObj.value.items;
+    //     } catch (error) {
+    //         Message.err(error);
+    //     }
+    //     for (const item of objItems) {
+    //         if (item.key.value == yamlKeyType) {
+    //             yamlKeyValue = item.value.value;
+    //         }
+    //     }
+    //     // try {
+    //     //     let objItems = yamlObj.value.items;
+    //     //     if(!objItems) objItems = yamlObj.items;
+    //     //     for (const item of objItems) {
+    //     //         if (item.key.value == yamlKeyType) {
+    //     //             yamlKeyValue = item.value.value;
+    //     //         }
+    //     //     }
+    //     // } catch (error) {
+    //     //     Message.err(error);
+    //     // }
+    //     return yamlKeyValue;
+    // }
 
 }

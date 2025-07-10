@@ -4,6 +4,14 @@ import { VsCodeUtils } from './VsCodeUtils';
 import * as vscode from 'vscode';
 
 export class TextUtils {
+    
+    static getStatusCode(activeDoc: vscode.TextDocument, cursorPosition: Position) {
+        let statusCode = ''
+        const line = activeDoc.lineAt(cursorPosition.line);
+        const seperatedTask =  this.seperateStatusCodeAndTask(line.text)
+        statusCode = seperatedTask[0];
+        return statusCode.trim();
+    }
     static escapeSpecialCharacters(keyValueWithSpaces: string): string {
         let sanitisedString = keyValueWithSpaces;
 
@@ -170,12 +178,10 @@ export class TextUtils {
         return;
     }
 
-    static removeFirstWordIfFollowedBySpaceAndDot(str: string): string {
-        const firstSpaceIndex = str.indexOf(' .');
-
-        const cleanString = str.substring(firstSpaceIndex + 2);
-
-        return cleanString;
+    static seperateStatusCodeAndTask(str: string): string[] {
+        const seperator = " ."; // TODO clean
+        const seperatedSummary = str.split(seperator);
+        return seperatedSummary;
     }
 
     static removeFirstWordIfFollowedBySpaceAndDotIfWrappendInQuotes(str: string): string {
