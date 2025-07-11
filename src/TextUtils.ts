@@ -4,11 +4,15 @@ import { VsCodeUtils } from './VsCodeUtils';
 import * as vscode from 'vscode';
 
 export class TextUtils {
-    
+    static removeExtraQuotes(yamlLink: string): string {
+        return yamlLink.split('""').join('"');
+    }
+
+
     static getStatusCode(activeDoc: vscode.TextDocument, cursorPosition: Position) {
         let statusCode = ''
         const line = activeDoc.lineAt(cursorPosition.line);
-        const seperatedTask =  this.seperateStatusCodeAndTask(line.text)
+        const seperatedTask = this.seperateStatusCodeAndTask(line.text)
         statusCode = seperatedTask[0];
         return statusCode.trim();
     }

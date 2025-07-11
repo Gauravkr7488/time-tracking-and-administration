@@ -5,7 +5,6 @@ import { VsCodeUtils, Message } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";
 import { F2yamlLinkExtractor } from "./f2yamlLinkExtractor";
 import * as vscode from 'vscode';
-import { LinkCommands } from "./TaskOperations";
 
 
 export class CSVOperations extends YamlTaskOperations {
