@@ -4,6 +4,16 @@ import { VsCodeUtils } from './VsCodeUtils';
 import * as vscode from 'vscode';
 
 export class TextUtils {
+
+    static removeExtension(filePath: string): string {
+        if (filePath.endsWith('.yaml')) {
+            return filePath.slice(0, -5); 
+        } else if (filePath.endsWith('.yml')) {
+            return filePath.slice(0, -4); 
+        }
+        return filePath;
+    }
+
     static removeExtraQuotes(yamlLink: string): string {
         return yamlLink.split('""').join('"');
     }
@@ -65,8 +75,13 @@ export class TextUtils {
     static parseF2yamlLink(yamlLink: string): { filePath: any; yamlPath: any; } {
         const cleanLink = this.removeLinkSymbolsFromLink(yamlLink);
 
-        const lastBackslashIndex = cleanLink.lastIndexOf("\\");
-
+        // const lastBackslashIndex = cleanLink.lastIndexOf("\\");
+        const lastBackslashIndex = TextUtils.getLastIndexOfCharInF2YamlLink(cleanLink, "\\");
+        const oldLink = TextUtils.isThisOldLink(cleanLink, lastBackslashIndex);
+        if (oldLink) {
+            const { filePath, yamlPath } = TextUtils.parseOldLink(cleanLink);
+            return { filePath, yamlPath };
+        }
         if (lastBackslashIndex === -1) throw new Error("not a valid link"); // TODO
 
         const filePath = cleanLink.slice(0, lastBackslashIndex);
@@ -74,6 +89,48 @@ export class TextUtils {
 
         return { filePath, yamlPath };
     }
+
+    static parseOldLink(cleanLink: string): { filePath: any; yamlPath: any; } {
+        let modifiedLink = cleanLink.split('\\\\').join('\\');
+        const lastDotIndex = modifiedLink.indexOf(".");
+        if (lastDotIndex === -1) throw new Error("not a valid link"); // TODO
+
+        const filePath = modifiedLink.slice(0, lastDotIndex);
+        let yamlPath = modifiedLink.slice(lastDotIndex + 1);
+        let yamlParts = yamlPath.split(".");
+        let newParts: string[] = [];
+        for (const parts of yamlParts) {
+            newParts.push(TextUtils.wrapInQuotesIfMultiWord(parts));
+        }
+        yamlPath = newParts.join(".");
+        return { filePath, yamlPath };
+    }
+
+    static isThisOldLink(yamlLink: string, lastBackslashIndex: number) {
+        if (yamlLink[lastBackslashIndex + 1] != ".") return true;
+        return false;
+    }
+
+    static getLastIndexOfCharInF2YamlLink(cleanLink: string, str: string): number {
+        let inQuotes = false;
+        let lastIndex = -1;
+        const strLength = str.length;
+        let match;
+        for (let index = 0; index < cleanLink.length; index++) {
+            const currChar = cleanLink[index];
+
+            if (currChar == "\"") {
+                inQuotes = !inQuotes;
+                continue;
+            }
+
+            if (!inQuotes && cleanLink.substring(index, index + strLength) === str) {
+                lastIndex = index;
+            }
+        }
+        return lastIndex;
+    }
+
 
 
     private static removeLinkSymbolsFromLink(yamlLink: string) {

@@ -5,15 +5,28 @@ import path from 'path';
 
 export class VsCodeUtils {
 
-    static getFileUri(filePath: any): vscode.Uri {
+    static async getFileUri(filePath: any): Promise<vscode.Uri> {
         let fileUri;
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
-        const rootPath = config.get<string>('rootPath');
-        if (!rootPath) throw new Error("root path is not set") // todo 
-        const filePathFromRoot = rootPath + "\\" + filePath;
-        fileUri = vscode.Uri.file(path.resolve(filePathFromRoot));
-        return  fileUri;
+        const rootPath = VsCodeUtils.getRootPath(config); // todo 
+        try {
+            const filePathFromRoot = rootPath + filePath + ".yaml";
+            fileUri = vscode.Uri.file(path.resolve(filePathFromRoot));
+            await vscode.workspace.fs.stat(fileUri);
+        } catch (error) {
+            const filePathFromRoot = rootPath + filePath + ".yml";
+            fileUri = vscode.Uri.file(path.resolve(filePathFromRoot));
+            await vscode.workspace.fs.stat(fileUri);
+        }
+        return fileUri;
+    }
 
+    private static getRootPath(config: vscode.WorkspaceConfiguration) {
+        let rootPath = config.get<string>('rootPath');
+        if (!rootPath) throw new Error("root path is not set"); // todo 
+        let lastChar = rootPath[rootPath.length - 1]
+        if (lastChar != "\\") rootPath = rootPath + "\\";
+        return rootPath;
     }
 
     static getActiveDoc() {

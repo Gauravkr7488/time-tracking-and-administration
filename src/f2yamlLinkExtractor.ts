@@ -50,6 +50,7 @@ export class F2yamlLinkExtractor { // parsing should be used
         let F2YamlSummaryLink = '';
         let filePath = activeDoc.uri.fsPath;
         filePath = this.removeRootPath(filePath);
+        filePath = TextUtils.removeExtension(filePath);
         let yamlPath = await this.getYamlPath(activeDoc, cursorPosition);
         return F2YamlSummaryLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
     }
@@ -168,6 +169,7 @@ export class F2yamlLinkExtractor { // parsing should be used
         let F2YamlIdLink = '';
         let filePath = activeDoc.uri.fsPath;
         filePath = this.removeRootPath(filePath);
+        filePath = TextUtils.removeExtension(filePath);
         let yamlPath = await this.getYamlPath(activeDoc, cursorPosition, "Id");
         return F2YamlIdLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
 

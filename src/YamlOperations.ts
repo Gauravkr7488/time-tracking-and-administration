@@ -247,7 +247,7 @@ export class YamlTaskOperations {
     public static async getTaskObj(yamlLink: string) { // TODO 
         let taskObj: any;
         const { filePath, yamlPath } = TextUtils.parseF2yamlLink(yamlLink);
-        const fileUri: vscode.Uri = VsCodeUtils.getFileUri(filePath);
+        const fileUri: vscode.Uri = await VsCodeUtils.getFileUri(filePath);
         const yamlKeys: string[] = TextUtils.parseYamlPath(yamlPath);
         return taskObj = await YamlTaskOperations.getYamlObj(yamlKeys, fileUri);
     }

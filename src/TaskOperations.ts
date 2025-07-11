@@ -194,6 +194,6 @@ export class LinkCommands {
         let yamlLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
         if (!yamlLink) throw new Error("there is no link"); // TODO Fix this ie there should always be a link and if there is not then we should do try catch here
         if(activeDoc.languageId == "csv") yamlLink = TextUtils.removeExtraQuotes(yamlLink); 
-        LinkFollower.followF2yamlLink(yamlLink); // TODO make this static
+        LinkFollower.followF2yamlLink(yamlLink);
     }
 }

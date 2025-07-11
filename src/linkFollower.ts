@@ -9,7 +9,7 @@ export class LinkFollower {
 
     static async followF2yamlLink(yamlLink: string) {
         const { filePath, yamlPath } = TextUtils.parseF2yamlLink(yamlLink);
-        const fileUri: vscode.Uri = VsCodeUtils.getFileUri(filePath);
+        const fileUri: vscode.Uri = await VsCodeUtils.getFileUri(filePath);
         const yamlKeys: string[] = TextUtils.parseYamlPath(yamlPath);
         const yamlObj: any = await YamlTaskOperations.getYamlObj(yamlKeys, fileUri);
         const keyValueOfYamlObj: string = YamlTaskOperations.getYamlKeyValue(yamlObj)
