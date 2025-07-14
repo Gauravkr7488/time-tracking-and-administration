@@ -1,6 +1,6 @@
 import { Data } from "./Data";
 import { SimpleStringTools } from "./SimpleStringTools";
-import { TextUtils } from "./TextUtils";
+import { StringOperation } from "./StringOperations";
 import { Message, VsCodeUtils } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";
 import * as vscode from 'vscode';
@@ -8,14 +8,14 @@ import * as vscode from 'vscode';
 export class LinkFollower {
 
     static async followF2yamlLink(yamlLink: string) {
-        const { filePath, yamlPath } = TextUtils.parseF2yamlLink(yamlLink);
+        const { filePath, yamlPath } = StringOperation.parseF2yamlLink(yamlLink);
         const fileUri: vscode.Uri = await VsCodeUtils.getFileUri(filePath);
-        const yamlKeys: string[] = TextUtils.parseYamlPath(yamlPath);
+        const yamlKeys: string[] = StringOperation.parseYamlPath(yamlPath);
         const yamlObj: any = await YamlTaskOperations.getYamlObj(yamlKeys, fileUri);
         const keyValueOfYamlObj: string = YamlTaskOperations.getYamlKeyValue(yamlObj)
         const keyValueWithSpaces = this.addSpacesInKey(keyValueOfYamlObj, yamlKeys);
         const docOftheLink = await vscode.workspace.openTextDocument(fileUri);
-        const cleanKeyValue = TextUtils.escapeSpecialCharacters(keyValueWithSpaces)
+        const cleanKeyValue = StringOperation.escapeSpecialCharacters(keyValueWithSpaces)
         const taskSummaryRegex = new RegExp("^\s*" + cleanKeyValue, "im") // what are those magic strings
         await this.findTheTask(taskSummaryRegex, docOftheLink);
     }

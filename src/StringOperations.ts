@@ -3,7 +3,7 @@ import { Data } from './Data';
 import { VsCodeUtils } from './VsCodeUtils';
 import * as vscode from 'vscode';
 
-export class TextUtils {
+export class StringOperation {
 
     static removeExtension(filePath: string): string {
         if (filePath.endsWith('.yaml')) {
@@ -26,6 +26,7 @@ export class TextUtils {
         statusCode = seperatedTask[0];
         return statusCode.trim();
     }
+    
     static escapeSpecialCharacters(keyValueWithSpaces: string): string {
         let sanitisedString = keyValueWithSpaces;
 
@@ -60,7 +61,7 @@ export class TextUtils {
 
 
     static parseYamlPath(yamlPath: string): string[] {
-        const rawParts = yamlPath.split(".");
+        const rawParts = yamlPath.split(Data.MISC.PATH_SEPERATOR);
         const yamlParts: string[] = [];
 
         for (let i = 0; i < rawParts.length; i++) {
@@ -72,17 +73,15 @@ export class TextUtils {
         return yamlParts;
     }
 
-    static parseF2yamlLink(yamlLink: string): { filePath: any; yamlPath: any; } {
+    static parseF2yamlLink(yamlLink: string): { filePath: string; yamlPath: string; } {
         const cleanLink = this.removeLinkSymbolsFromLink(yamlLink);
-
-        // const lastBackslashIndex = cleanLink.lastIndexOf("\\");
-        const lastBackslashIndex = TextUtils.getLastIndexOfCharInF2YamlLink(cleanLink, "\\");
-        const oldLink = TextUtils.isThisOldLink(cleanLink, lastBackslashIndex);
+        const lastBackslashIndex = StringOperation.getLastIndexOfCharInF2YamlLink(cleanLink, "\\");
+        const oldLink = StringOperation.isThisOldLink(cleanLink, lastBackslashIndex);
         if (oldLink) {
-            const { filePath, yamlPath } = TextUtils.parseOldLink(cleanLink);
+            const { filePath, yamlPath } = StringOperation.parseOldLink(cleanLink);
             return { filePath, yamlPath };
         }
-        if (lastBackslashIndex === -1) throw new Error("not a valid link"); // TODO
+        if (lastBackslashIndex === -1) throw new Error(Data.MESSAGES.ERRORS.NOT_VALID_LINK);
 
         const filePath = cleanLink.slice(0, lastBackslashIndex);
         const yamlPath = cleanLink.slice(lastBackslashIndex + 1);
@@ -91,23 +90,23 @@ export class TextUtils {
     }
 
     static parseOldLink(cleanLink: string): { filePath: any; yamlPath: any; } {
-        let modifiedLink = cleanLink.split('\\\\').join('\\');
-        const lastDotIndex = modifiedLink.indexOf(".");
-        if (lastDotIndex === -1) throw new Error("not a valid link"); // TODO
+        const linkWithSingleBackSlash = cleanLink.split('\\\\').join('\\');
+        const lastDotIndex = linkWithSingleBackSlash.indexOf(".");
+        if (lastDotIndex === -1) throw new Error(Data.MESSAGES.ERRORS.NOT_VALID_LINK);
 
-        const filePath = modifiedLink.slice(0, lastDotIndex);
-        let yamlPath = modifiedLink.slice(lastDotIndex + 1);
-        let yamlParts = yamlPath.split(".");
+        const filePath = linkWithSingleBackSlash.slice(0, lastDotIndex);
+        let yamlPath = linkWithSingleBackSlash.slice(lastDotIndex + 1);
+        let yamlParts = yamlPath.split(Data.MISC.PATH_SEPERATOR);
         let newParts: string[] = [];
         for (const parts of yamlParts) {
-            newParts.push(TextUtils.wrapInQuotesIfMultiWord(parts));
+            newParts.push(StringOperation.wrapInQuotesIfMultiWord(parts));
         }
-        yamlPath = newParts.join(".");
+        yamlPath = newParts.join(Data.MISC.PATH_SEPERATOR);
         return { filePath, yamlPath };
     }
 
     static isThisOldLink(yamlLink: string, lastBackslashIndex: number) {
-        if (yamlLink[lastBackslashIndex + 1] != ".") return true;
+        if (yamlLink[lastBackslashIndex + 1] != Data.MISC.PATH_SEPERATOR) return true;
         return false;
     }
 
@@ -115,7 +114,6 @@ export class TextUtils {
         let inQuotes = false;
         let lastIndex = -1;
         const strLength = str.length;
-        let match;
         for (let index = 0; index < cleanLink.length; index++) {
             const currChar = cleanLink[index];
 
@@ -153,21 +151,14 @@ export class TextUtils {
         return result;
     }
 
-    public static extractCurrentWord() {
+    public static extractSrCode() {
         const doc = VsCodeUtils.getActiveDoc();
         const cursorPosition = VsCodeUtils.getCursorPosition();
-
-        if (!doc) return;
-        if (!cursorPosition) return;
         const wordRange = doc.getWordRangeAtPosition(cursorPosition);
-
-        if (!wordRange) return;
-        const srCode = doc.getText(wordRange).replace(Data.PATTERNS.COLON, Data.MISC.EMPTY_STRING);
-
-        return srCode;
+        return doc.getText(wordRange).replace(Data.PATTERNS.COLON, Data.MISC.EMPTY_STRING);;
     }
 
-    public static async isThisYamlLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
+    public static async getYamlLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         const line = activeDoc.lineAt(cursorPosition.line);
         const lineText = line.text;
         let f2YamlLink = this.findLinkInText(lineText, cursorPosition);
@@ -176,16 +167,12 @@ export class TextUtils {
 
     static findLinkInText(lineText: string, cursorPosition: Position) {
         let f2YamlLink = "";
-
         let startOfLink;
-        startOfLink = TextUtils.getStartOfLink(cursorPosition, lineText);
-
+        startOfLink = StringOperation.getStartOfLink(cursorPosition, lineText);
         let endOfLink;
-        if (startOfLink != undefined) endOfLink = TextUtils.getEndOfLink(cursorPosition, lineText);
-
-        if (startOfLink == undefined || endOfLink == undefined) return;
+        if (startOfLink != undefined) endOfLink = StringOperation.getEndOfLink(cursorPosition, lineText);
+        if (startOfLink == undefined || endOfLink == undefined) throw Error(Data.MESSAGES.ERRORS.NO_LINK_FOUND);
         for (let index = startOfLink; index <= endOfLink; index++) f2YamlLink += lineText[index];
-
         return f2YamlLink;
     }
 
@@ -205,44 +192,16 @@ export class TextUtils {
         let startOfLink;
 
         for (let index = 0; index < cursorPosition.character; index++) {
-            if (lineText[index] + lineText[index + 1] + lineText[index + 2] == Data.PATTERNS.START_OF_F2YAML_LINK) {
-                startOfLink = index;
-            }
-
-            if (lineText[index] == Data.PATTERNS.END_OF_F2YAML_LINK) {
-                startOfLink = undefined; // when encountering a end of a link the staring point resets.
-            }
+            if (lineText[index] + lineText[index + 1] + lineText[index + 2] == Data.PATTERNS.START_OF_F2YAML_LINK) startOfLink = index;
+            if (lineText[index] == Data.PATTERNS.END_OF_F2YAML_LINK) startOfLink = undefined; // when encountering a end of a link the staring point resets.
         }
         return startOfLink;
     }
 
-    public static isThisYamlReference() {
-        const doc = VsCodeUtils.getActiveDoc();
-        const cursorPosition = VsCodeUtils.getCursorPosition();
-
-        if (!doc) return;
-        if (!cursorPosition) return;
-        const line = doc.lineAt(cursorPosition.line);
-        const lineText = line.text;
-        const referencePattern = Data.PATTERNS.REFERENCE;
-
-        let match;
-        while ((match = referencePattern.exec(lineText)) !== null) {  // .exec returns array
-            const startChar = match.index;
-            const endChar = startChar + match[0].length;
-
-            if (cursorPosition.character >= startChar && cursorPosition.character <= endChar) {
-                const link = match[0].toString();
-                return link;
-            }
-        }
-        return;
-    }
 
     static seperateStatusCodeAndTask(str: string): string[] {
-        const seperator = " ."; // TODO clean
-        const seperatedSummary = str.split(seperator);
-        return seperatedSummary;
+        const seperator = " " + Data.MISC.PATH_SEPERATOR;
+        return str.split(seperator);;
     }
 
     static removeFirstWordIfFollowedBySpaceAndDotIfWrappendInQuotes(str: string): string {
@@ -256,12 +215,10 @@ export class TextUtils {
 
         if (trimmed[firstSpaceIndex + 1] === '.') {
             const newInner = trimmed.substring(firstSpaceIndex + 2);
-            return `."${newInner}"`; // Re-wrap in quotes with dot
+            return `${Data.MISC.PATH_SEPERATOR}"${newInner}"`; // Re-wrap in quotes with dot
         }
-
         return str;
     }
-
 
     static isThisSingleWord(string: string) {
         return /^\S+$/.test(string)
@@ -269,12 +226,7 @@ export class TextUtils {
 
     static wrapInQuotesIfMultiWord(str: string): string {
         const trimmed = str.trim();
-
-        if (trimmed.includes(' ') && !trimmed.startsWith('"') && !trimmed.endsWith('"')) {
-            return `"${trimmed}"`;
-        }
-
+        if (trimmed.includes(' ') && !trimmed.startsWith('"') && !trimmed.endsWith('"')) return `"${trimmed}"`;
         return trimmed;
     }
-
 }

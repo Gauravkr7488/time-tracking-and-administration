@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { Data } from './Data';
 import { VsCodeUtils, Message } from './VsCodeUtils';
 import { YamlTaskOperations } from './YamlOperations';
-import { TextUtils } from './TextUtils';
+import { StringOperation } from './StringOperations';
 
 
 export class F2yamlLinkExtractor { // parsing should be used
@@ -50,7 +50,7 @@ export class F2yamlLinkExtractor { // parsing should be used
         let F2YamlSummaryLink = '';
         let filePath = activeDoc.uri.fsPath;
         filePath = this.removeRootPath(filePath);
-        filePath = TextUtils.removeExtension(filePath);
+        filePath = StringOperation.removeExtension(filePath);
         let yamlPath = await this.getYamlPath(activeDoc, cursorPosition);
         return F2YamlSummaryLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
     }
@@ -69,7 +69,7 @@ export class F2yamlLinkExtractor { // parsing should be used
 
         let summaryYamlParts = [];
         for (const key of yamlKeys) {
-            summaryYamlParts.push(TextUtils.wrapInQuotesIfMultiWord(key));
+            summaryYamlParts.push(StringOperation.wrapInQuotesIfMultiWord(key));
         }
         let cleanSymmaryKeys = this.removeStatus(summaryYamlParts);
         return yamlPath = cleanSymmaryKeys.join('.');
@@ -78,7 +78,7 @@ export class F2yamlLinkExtractor { // parsing should be used
     static removeStatus(yamlKeys: string[]): string[] {
         let cleanYamlKeys: string[] = []
         for (let yamlKey of yamlKeys) {
-            cleanYamlKeys.push(TextUtils.removeFirstWordIfFollowedBySpaceAndDotIfWrappendInQuotes(yamlKey));
+            cleanYamlKeys.push(StringOperation.removeFirstWordIfFollowedBySpaceAndDotIfWrappendInQuotes(yamlKey));
         }
         return cleanYamlKeys;
     }
@@ -169,7 +169,7 @@ export class F2yamlLinkExtractor { // parsing should be used
         let F2YamlIdLink = '';
         let filePath = activeDoc.uri.fsPath;
         filePath = this.removeRootPath(filePath);
-        filePath = TextUtils.removeExtension(filePath);
+        filePath = StringOperation.removeExtension(filePath);
         let yamlPath = await this.getYamlPath(activeDoc, cursorPosition, "Id");
         return F2YamlIdLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
 

@@ -1,6 +1,6 @@
 import { escape } from "querystring";
 import { Data } from "./Data";
-import { TextUtils } from "./TextUtils";
+import { StringOperation } from "./StringOperations";
 import { VsCodeUtils, Message } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";
 import { F2yamlLinkExtractor } from "./f2yamlLinkExtractor";
@@ -16,13 +16,13 @@ export class CSVOperations extends YamlTaskOperations {
 
         for (const field of csvFields) {
             if (field === "TaskStatus") { // for status
-                let statusCode = TextUtils.getStatusCode(activeDoc, cursorPosition);
+                let statusCode = StringOperation.getStatusCode(activeDoc, cursorPosition);
                 csvEntry += statusCode + ", ";
                 continue;
             }
 
             if (field === "SummaryLink") { // for link
-                let Escapedf2yamlSummaryLink = TextUtils.escapeCharacter(f2yamlSummaryLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
+                let Escapedf2yamlSummaryLink = StringOperation.escapeCharacter(f2yamlSummaryLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
                 Escapedf2yamlSummaryLink = "\"" + Escapedf2yamlSummaryLink + "\"";
                 csvEntry += Escapedf2yamlSummaryLink + ", ";
                 continue;
@@ -31,7 +31,7 @@ export class CSVOperations extends YamlTaskOperations {
             if (field == "IdLink") {
                 let idLink = await F2yamlLinkExtractor.createF2YamlIdLink(activeDoc, cursorPosition);
                 if (!idLink) return;
-                idLink = TextUtils.escapeCharacter(idLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
+                idLink = StringOperation.escapeCharacter(idLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
                 idLink = "\"" + idLink + "\"";
                 csvEntry += idLink + ", ";
                 continue;

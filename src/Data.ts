@@ -14,7 +14,8 @@ export class Data {
             UNABLE_TO_FIND_FILE: (something: any) => `Unable to find the file ${something}`,
             PARSING_ERROR: (error: any) => `YAML parsing error: ${error}`,
             UNABLE_TO_FIND_TASK: (taskName: string) => `Unable to find: ${taskName}`,
-            NO_ROOT_PATH: " Please enter the root path in the settings",
+            NO_ROOT_PATH: "Please enter the root path in the settings",
+            NOT_VALID_LINK: "Not a valid link",
 
         },
         INFO: {
@@ -49,7 +50,8 @@ export class Data {
         YAML: "yaml",
         EXTENSION_NAME: "f2tools",
         FILE_DIVIDER: "//",
-        DOUBLE_QUOTE: "\""
+        DOUBLE_QUOTE: "\"",
+        PATH_SEPERATOR: ".",
     }
 
     public static readonly TIME_KEYS = {

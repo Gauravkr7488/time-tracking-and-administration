@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as yaml from 'yaml';
 import { Message, VsCodeUtils } from './VsCodeUtils';
 import { Data } from './Data';
-import { TextUtils } from './TextUtils';
+import { StringOperation } from './StringOperations';
 
 export class YamlTaskOperations {
 
@@ -61,12 +61,12 @@ export class YamlTaskOperations {
 
     static getYamlSummaryObjFromParent(yamlKey: string, yamlDoc: yaml.Document<yaml.Node, true>, parentYamlObj: any) {
         let summaryObj: any;
-        let cleanYamlKey = TextUtils.removeQuotesWrapping(yamlKey);
+        let cleanYamlKey = StringOperation.removeQuotesWrapping(yamlKey);
         let yamlObjItems = parentYamlObj.items;
         if (!yamlObjItems) yamlObjItems = parentYamlObj.value.items;
         for (const item of yamlObjItems) {
             const valueOfKey = item.key.value;
-            let a = TextUtils.seperateStatusCodeAndTask(valueOfKey); // TODO clean this
+            let a = StringOperation.seperateStatusCodeAndTask(valueOfKey); // TODO clean this
             const valueOfKeyWithoutStatus = a[1] //
             if (cleanYamlKey == valueOfKeyWithoutStatus) summaryObj = item;
         }
@@ -246,9 +246,9 @@ export class YamlTaskOperations {
 
     public static async getTaskObj(yamlLink: string) { // TODO 
         let taskObj: any;
-        const { filePath, yamlPath } = TextUtils.parseF2yamlLink(yamlLink);
+        const { filePath, yamlPath } = StringOperation.parseF2yamlLink(yamlLink);
         const fileUri: vscode.Uri = await VsCodeUtils.getFileUri(filePath);
-        const yamlKeys: string[] = TextUtils.parseYamlPath(yamlPath);
+        const yamlKeys: string[] = StringOperation.parseYamlPath(yamlPath);
         return taskObj = await YamlTaskOperations.getYamlObj(yamlKeys, fileUri);
     }
     // public static async getTaskObj(yamlLink: string) { // TODO 
@@ -723,7 +723,7 @@ export class YamlTaskOperations {
             const yamlObj = await this.getYamlObjFromParentObj(yamlKey, yamlDoc, parentYamlObj);
             const yamlKeyValue = await this.getYamlKeyValueBasedOnKeyType(yamlObj, yamlKeyType);
             if (!yamlKeyValue) {
-                const yamlKeySummary = TextUtils.wrapInQuotesIfMultiWord(yamlKey);
+                const yamlKeySummary = StringOperation.wrapInQuotesIfMultiWord(yamlKey);
                 yamlKeyValues.push(yamlKeySummary);
                 continue;
             }
@@ -738,7 +738,7 @@ export class YamlTaskOperations {
     private static getParentValue(parentYamlObj: any, yamlKeyType: string, yamlKeys: string[]) {
         let parentKeyValue = this.getYamlKeyValueBasedOnKeyType(parentYamlObj, yamlKeyType);
         let parentKeySummary;
-        if (!parentKeyValue) parentKeySummary = TextUtils.wrapInQuotesIfMultiWord(yamlKeys[0]);
+        if (!parentKeyValue) parentKeySummary = StringOperation.wrapInQuotesIfMultiWord(yamlKeys[0]);
         parentKeyValue = parentKeySummary;
         return parentKeyValue;
     }

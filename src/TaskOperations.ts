@@ -1,6 +1,6 @@
 import { Timer } from "./timer";
 import { VsCodeUtils } from "./VsCodeUtils";
-import { TextUtils } from "./TextUtils";
+import { StringOperation } from "./StringOperations";
 import { Message } from './VsCodeUtils';
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
@@ -20,9 +20,7 @@ export class TaskCommands {
     public static async specifyStandupReport() {
         if (Timer.isTaskRunnig()) await this.stopTask();
         const srDoc = VsCodeUtils.getActiveDoc();
-        if (!srDoc) return;
-
-        const srCode = TextUtils.extractCurrentWord();
+        const srCode = StringOperation.extractSrCode();
         if (!srCode) {
             Message.err(Data.MESSAGES.ERRORS.NO_SR_CODE);
             return;
@@ -50,7 +48,7 @@ export class TaskCommands {
 
             if (Timer.isTaskRunnig()) operationStatus = await this.stopTask();
             if (!operationStatus) return
-            let yamlLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
+            let yamlLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
             if (!yamlLink) yamlLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
 
             const isthisTask = await YamlTaskOperations.isThisTask(yamlLink);
@@ -114,7 +112,7 @@ export class TaskCommands {
         const srDoc = VsCodeUtils.getActiveDoc();
         if (!srDoc) return;
 
-        const srCode = TextUtils.extractCurrentWord();
+        const srCode = StringOperation.extractSrCode();
         if (!srCode) {
             Message.err(Data.MESSAGES.ERRORS.NO_SR_CODE);
             return;
@@ -155,7 +153,7 @@ export class LinkCommands {
         const cursorPosition = VsCodeUtils.getCursorPosition();
         if (!activeDoc || !cursorPosition) return;
 
-        let f2YamlSymmaryLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
+        let f2YamlSymmaryLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
         if (!f2YamlSymmaryLink) f2YamlSymmaryLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
         Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlSymmaryLink));
         vscode.env.clipboard.writeText(f2YamlSymmaryLink);
@@ -166,7 +164,7 @@ export class LinkCommands {
         const cursorPosition = VsCodeUtils.getCursorPosition();
         if (!activeDoc || !cursorPosition) return;
 
-        let f2YamlIdLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
+        let f2YamlIdLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
         if (!f2YamlIdLink) f2YamlIdLink = await F2yamlLinkExtractor.createF2YamlIdLink(activeDoc, cursorPosition);
         Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlIdLink));
         vscode.env.clipboard.writeText(f2YamlIdLink);
@@ -191,9 +189,9 @@ export class LinkCommands {
         const activeDoc = VsCodeUtils.getActiveDoc();
         const cursorPosition = VsCodeUtils.getCursorPosition();
         if (!activeDoc || !cursorPosition) return;
-        let yamlLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
+        let yamlLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
         if (!yamlLink) throw new Error("there is no link"); // TODO Fix this ie there should always be a link and if there is not then we should do try catch here
-        if(activeDoc.languageId == "csv") yamlLink = TextUtils.removeExtraQuotes(yamlLink); 
+        if(activeDoc.languageId == "csv") yamlLink = StringOperation.removeExtraQuotes(yamlLink); 
         LinkFollower.followF2yamlLink(yamlLink);
     }
 }
