@@ -32,9 +32,10 @@ export class StringOperation {
     static getStatusCode(activeDoc: vscode.TextDocument, cursorPosition: Position) {
         let statusCode = ''
         const line = activeDoc.lineAt(cursorPosition.line);
-        const seperatedTask = this.seperateStatusCodeAndTask(line.text)
-        statusCode = seperatedTask[0];
-        return statusCode.trim();
+        const { status } = this.seperateStatusCodeAndTask(line.text)
+        // statusCode = seperatedTask[0];
+        let cleanStatus = status.trim();
+        return cleanStatus;
     }
 
     static escapeSpecialCharacters(keyValueWithSpaces: string): string {
