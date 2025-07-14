@@ -16,6 +16,7 @@ export class Data {
             UNABLE_TO_FIND_TASK: (taskName: string) => `Unable to find: ${taskName}`,
             NO_ROOT_PATH: "Please enter the root path in the settings",
             NOT_VALID_LINK: "Not a valid link",
+            NOT_A_TASK: "This is not a   task",
 
         },
         INFO: {

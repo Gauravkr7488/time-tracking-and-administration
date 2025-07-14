@@ -21,10 +21,6 @@ export class TaskCommands {
         if (Timer.isTaskRunnig()) await this.stopTask();
         const srDoc = VsCodeUtils.getActiveDoc();
         const srCode = StringOperation.extractSrCode();
-        if (!srCode) {
-            Message.err(Data.MESSAGES.ERRORS.NO_SR_CODE);
-            return;
-        }
 
         this.srDocUri = srDoc.uri;
         this.srCode = srCode;
@@ -36,35 +32,30 @@ export class TaskCommands {
         try {
             const activeDoc = VsCodeUtils.getActiveDoc();
             const cursorPosition = VsCodeUtils.getCursorPosition();
-            if (!activeDoc || !cursorPosition) return;
+            // if (!activeDoc || !cursorPosition) return;
 
-            let checkDocStructure = await YamlTaskOperations.parseYaml(activeDoc.uri);
-            if (!checkDocStructure) return;
+            // let checkDocStructure = await YamlTaskOperations.parseYaml(activeDoc.uri);
+            // if (!checkDocStructure) return;
             let operationStatus = true;
-            if (!this.srCode) {
-                Message.err(Data.MESSAGES.ERRORS.RUN_SPECIFY_SR_FIRST);
-                return;
-            }
+            if (!this.srCode || !this.srDocUri) throw new Error(Data.MESSAGES.ERRORS.RUN_SPECIFY_SR_FIRST);
 
             if (Timer.isTaskRunnig()) operationStatus = await this.stopTask();
             if (!operationStatus) return
             let yamlLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
             if (!yamlLink) yamlLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
 
-            const isthisTask = await YamlTaskOperations.isThisTask(yamlLink);
-            if (isthisTask === undefined) return;
-            if (!isthisTask) yamlLink = await YamlTaskOperations.getTaskYamlLink(yamlLink);
+            const isthisTask = StringOperation.isThisTask(yamlLink);
+            // if (isthisTask === undefined) return;
+            // if (!isthisTask) yamlLink = await YamlTaskOperations.getTaskYamlLink(yamlLink);
 
-            if (!yamlLink) {
-                Message.err("nope not a task");
-                return;
-            }
+            if (!isthisTask) throw new Error(Data.MESSAGES.ERRORS.NOT_A_TASK);
+
             await Timer.startTimer();
             const startTime = await Timer.giveStartTime();
             if (!startTime) return;
             const srEntry = YamlTaskOperations.createSrEntry(yamlLink, startTime);
 
-            if (!this.srDocUri) return;
+            // if (!this.srDocUri) return;
             let srEntryIndex = await YamlTaskOperations.checkIfTaskIsAlreadyInSr(srEntry, this.srCode, this.srDocUri);
             if (srEntryIndex == -1) await YamlTaskOperations.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
 
@@ -145,8 +136,8 @@ export class TaskCommands {
 
 export class LinkCommands {
 
-    private static yamlLink?: string;
-    private static linkFollower = new LinkFollower();
+    // private static yamlLink?: string;
+    // private static linkFollower = new LinkFollower();
 
     public static async extractF2YamlSummaryLink() {
         const activeDoc = VsCodeUtils.getActiveDoc();

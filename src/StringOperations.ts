@@ -5,6 +5,15 @@ import * as vscode from 'vscode';
 
 export class StringOperation {
 
+    static isThisTask(yamlLink: string) {
+        const keys: string[] = yamlLink.split(".");
+        const lastKey = keys[keys.length - 1];
+        const firstCharOfLastKey = lastKey[0];
+        const lastCharOfLastKey = lastKey[lastKey.length - 1];
+        if(firstCharOfLastKey == "\"" && lastCharOfLastKey == "\"") return true;
+        return false;
+    }
+
     static removeExtension(filePath: string): string {
         if (filePath.endsWith('.yaml')) {
             return filePath.slice(0, -5); 
