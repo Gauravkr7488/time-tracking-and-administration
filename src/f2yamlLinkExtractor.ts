@@ -52,7 +52,7 @@ export class F2yamlLinkExtractor { // parsing should be used
         filePath = this.removeRootPath(filePath);
         filePath = StringOperation.removeExtension(filePath);
         let yamlPath = await this.getYamlPath(activeDoc, cursorPosition);
-        return F2YamlSummaryLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
+        return F2YamlSummaryLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + "." + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
     }
 
     static async getYamlPath(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position, yamlKeyType: string = "summary") {
@@ -171,7 +171,7 @@ export class F2yamlLinkExtractor { // parsing should be used
         filePath = this.removeRootPath(filePath);
         filePath = StringOperation.removeExtension(filePath);
         let yamlPath = await this.getYamlPath(activeDoc, cursorPosition, "Id");
-        return F2YamlIdLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
+        return F2YamlIdLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + "." + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
 
     }
 }

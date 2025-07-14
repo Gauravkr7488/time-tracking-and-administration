@@ -116,8 +116,8 @@ export class TaskCommands {
             let workLogGenerated = await YamlTaskOperations.generateWorkLogs(srCode, srDoc.uri);
             if (!workLogGenerated) return
             Message.info("Worklog Generated");
-        } catch (error) {
-            Message.err(error);
+        } catch (error: any) {
+            Message.err(error.message);
         }
     }
 

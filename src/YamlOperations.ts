@@ -17,7 +17,8 @@ export class YamlTaskOperations {
     static async getYamlObj(yamlKeys: string[], fileUri: vscode.Uri): Promise<any> {
         let yamlObj: any;
         const yamlDoc = await this.parseYaml(fileUri);
-        if (!yamlDoc) return;
+        this.taskYamlDoc = yamlDoc;
+        // if (!yamlDoc) return;
         let parentYamlObj: any = yamlDoc.get(yamlKeys[0]);
 
         if (!parentYamlObj) { // TODO resolve this : this is happening because the parent keys have "." before them
@@ -27,12 +28,16 @@ export class YamlTaskOperations {
 
         for (let index = 1; index < yamlKeys.length; index++) {
             const yamlKey = yamlKeys[index];
-            if (yamlKey.includes("\"")) {
-                yamlObj = await this.getYamlSummaryObjFromParent(yamlKey, yamlDoc, parentYamlObj);
+            if (yamlKey.startsWith(".")) {
+                yamlObj = await this.getYamlSummaryObjFromParent(yamlKey, parentYamlObj);
                 parentYamlObj = yamlObj;
                 continue;
             }
             yamlObj = await this.getYamlIdObjFromParentObj(yamlKey, parentYamlObj);
+            // if (!yamlObj) {
+            //     let yamlKeyWithDot = "." + yamlKey;
+            //     yamlObj = await this.getYamlIdObjFromParentObj(yamlKeyWithDot, parentYamlObj);
+            // }
             parentYamlObj = yamlObj;
 
         }
@@ -61,16 +66,19 @@ export class YamlTaskOperations {
         return idObj;
     }
 
-    static getYamlSummaryObjFromParent(yamlKey: string, yamlDoc: yaml.Document<yaml.Node, true>, parentYamlObj: any) {
+    static getYamlSummaryObjFromParent(yamlKey: string, parentYamlObj: any) {
         let summaryObj: any;
-        let cleanYamlKey = StringOperation.removeQuotesWrapping(yamlKey);
+        let cleanYamlKey = StringOperation.removeQuotesWrappingAndDot(yamlKey);
         let yamlObjItems = parentYamlObj.items;
         if (!yamlObjItems) yamlObjItems = parentYamlObj.value.items;
         for (const item of yamlObjItems) {
             const valueOfKey = item.key.value;
-            let a = StringOperation.seperateStatusCodeAndTask(valueOfKey); // TODO clean this
-            const valueOfKeyWithoutStatus = a[1] //
-            if (cleanYamlKey == valueOfKeyWithoutStatus) summaryObj = item;
+            let { task } = StringOperation.seperateStatusCodeAndTask(valueOfKey); // TODO clean this
+            // const valueOfKeyWithoutStatus = a[1] //
+            if (cleanYamlKey == task) {
+                summaryObj = item;
+                break;
+            }
         }
         return summaryObj;
     }
@@ -358,8 +366,8 @@ export class YamlTaskOperations {
 
     private static async getWorkLogObj(taskObj: any) {
         if (!taskObj.value.items) {
-            Message.err(Data.MESSAGES.ERRORS.NOT_A_PROPER_TASK);
-            return
+            let newMap = new yaml.YAMLMap()
+            taskObj.value = newMap;
         }
 
         let workLogObj = taskObj.value.items.find((item: any) => item.key.value == "WorkLog");
@@ -430,19 +438,21 @@ export class YamlTaskOperations {
 
     public static async generateWorkLogs(srCode: string, srDocUri: vscode.Uri) {
         const yamlDoc = await this.parseYaml(srDocUri);
-        if (!yamlDoc) return;
+        // if (!yamlDoc) return;
         const wasNode = await this.getWasObj(yamlDoc, srCode);
-        if (!wasNode) return;
-        let checkDocStructure = await YamlTaskOperations.parseYaml(this.taskFileUri);
-        if (!checkDocStructure) return;
+        // if (!wasNode) return;
+        // let checkDocStructure = await YamlTaskOperations.parseYaml(this.taskFileUri);
+        // if (!checkDocStructure) return;
         let workLogAddedToTask;
         for (let index = 0; index < wasNode.items.length; index++) {
             const currentYamlLink = wasNode.items[index].items[0].key.value;
             const workLog = wasNode.items[index].items[0].value;
             workLogAddedToTask = await this.addWorkLogInTask(workLog, currentYamlLink);
-            if (workLogAddedToTask == undefined) return;
-            const taskDoc = await vscode.workspace.openTextDocument(this.taskFileUri);
-            if (!this.taskYamlDoc) return;
+            // if (workLogAddedToTask == undefined) return;
+            let { filePath } = StringOperation.parseF2yamlLink(currentYamlLink);
+            let fileUri = await VsCodeUtils.getFileUri(filePath);
+            const taskDoc = await vscode.workspace.openTextDocument(fileUri);
+            // const taskYamlDoc = await this.parseYaml(fileUri);
             await this.applyEditToDoc(this.taskYamlDoc, taskDoc);
         }
         return workLogAddedToTask;

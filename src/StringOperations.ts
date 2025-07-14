@@ -6,19 +6,20 @@ import * as vscode from 'vscode';
 export class StringOperation {
 
     static isThisTask(yamlLink: string) {
-        const keys: string[] = yamlLink.split(".");
+        const cleanLink = this.removeLinkSymbolsFromLink(yamlLink)
+        const keys: string[] = cleanLink.split(".");
         const lastKey = keys[keys.length - 1];
         const firstCharOfLastKey = lastKey[0];
         const lastCharOfLastKey = lastKey[lastKey.length - 1];
-        if(firstCharOfLastKey == "\"" && lastCharOfLastKey == "\"") return true;
+        if (firstCharOfLastKey == "\"" && lastCharOfLastKey == "\"") return true;
         return false;
     }
 
     static removeExtension(filePath: string): string {
         if (filePath.endsWith('.yaml')) {
-            return filePath.slice(0, -5); 
+            return filePath.slice(0, -5);
         } else if (filePath.endsWith('.yml')) {
-            return filePath.slice(0, -4); 
+            return filePath.slice(0, -4);
         }
         return filePath;
     }
@@ -35,7 +36,7 @@ export class StringOperation {
         statusCode = seperatedTask[0];
         return statusCode.trim();
     }
-    
+
     static escapeSpecialCharacters(keyValueWithSpaces: string): string {
         let sanitisedString = keyValueWithSpaces;
 
@@ -58,29 +59,78 @@ export class StringOperation {
     }
 
 
-    static removeQuotesWrapping(yamlKey: string): string {
-        if (
-            (yamlKey.startsWith('"') && yamlKey.endsWith('"')) ||
-            (yamlKey.startsWith("'") && yamlKey.endsWith("'"))
-        ) {
-            return yamlKey.slice(1, -1);
+    static removeQuotesWrappingAndDot(yamlKey: string): string {
+        // Remove leading dot if present
+        if (yamlKey.startsWith(".")) {
+            yamlKey = yamlKey.substring(1);
         }
+
+        // Trim quotes if present
+        yamlKey = yamlKey.trim();
+        if (yamlKey.startsWith("\"") && yamlKey.endsWith("\"")) {
+            yamlKey = yamlKey.substring(1, yamlKey.length - 1);
+        }
+
         return yamlKey;
     }
 
 
-    static parseYamlPath(yamlPath: string): string[] {
-        const rawParts = yamlPath.split(Data.MISC.PATH_SEPERATOR);
-        const yamlParts: string[] = [];
 
-        for (let i = 0; i < rawParts.length; i++) {
-            if (rawParts[i] !== "") {
-                yamlParts.push(rawParts[i]);
+    // static parseYamlPath(yamlPath: string): string[] {
+    //     const rawParts = yamlPath.split(Data.MISC.PATH_SEPERATOR);
+    //     const yamlParts: string[] = [];
+
+    //     for (let i = 0; i < rawParts.length; i++) {
+    //         if (rawParts[i] !== "") {
+    //             yamlParts.push(rawParts[i]);
+    //         }
+    //     }
+
+    //     return yamlParts;
+    // }
+    static parseYamlPath(yamlPath: string): string[] {
+        const yamlParts: string[] = [];
+        let i = 0;
+        while (i < yamlPath.length) {
+            let dotCount = 0;
+
+            // Count consecutive dots
+            while (i < yamlPath.length && yamlPath[i] === ".") {
+                dotCount++;
+                i++;
+            }
+
+            let part = "";
+
+            // Quoted part
+            if (yamlPath[i] === "\"") {
+                part += "\"";
+                i++;
+                while (i < yamlPath.length) {
+                    part += yamlPath[i];
+                    if (yamlPath[i] === "\"") {
+                        i++;
+                        break;
+                    }
+                    i++;
+                }
+            } else {
+                // Read until next dot
+                while (i < yamlPath.length && yamlPath[i] !== ".") {
+                    part += yamlPath[i];
+                    i++;
+                }
+            }
+
+            if (part.length > 0) {
+                if (dotCount >= 2) part = "." + part; // only if 2 or more dots before
+                yamlParts.push(part);
             }
         }
 
         return yamlParts;
     }
+
 
     static parseF2yamlLink(yamlLink: string): { filePath: string; yamlPath: string; } {
         const cleanLink = this.removeLinkSymbolsFromLink(yamlLink);
@@ -180,7 +230,7 @@ export class StringOperation {
         startOfLink = StringOperation.getStartOfLink(cursorPosition, lineText);
         let endOfLink;
         if (startOfLink != undefined) endOfLink = StringOperation.getEndOfLink(cursorPosition, lineText);
-        if (startOfLink == undefined || endOfLink == undefined) throw Error(Data.MESSAGES.ERRORS.NO_LINK_FOUND);
+        if (startOfLink == undefined || endOfLink == undefined) return;
         for (let index = startOfLink; index <= endOfLink; index++) f2YamlLink += lineText[index];
         return f2YamlLink;
     }
@@ -208,10 +258,15 @@ export class StringOperation {
     }
 
 
-    static seperateStatusCodeAndTask(str: string): string[] {
-        const seperator = " " + Data.MISC.PATH_SEPERATOR;
-        return str.split(seperator);;
+    static seperateStatusCodeAndTask(str: string): any {
+        const indexOfFirstDot = str.indexOf(".");
+        if (indexOfFirstDot === -1) return { str }; // No dot found
+
+        const status = str.substring(0, indexOfFirstDot);
+        const task = str.substring(indexOfFirstDot + 1); // Skip the dot itself
+        return { status, task };
     }
+
 
     static removeFirstWordIfFollowedBySpaceAndDotIfWrappendInQuotes(str: string): string {
         if (!str.startsWith('"') || !str.endsWith('"')) return str; // not a quoted string
