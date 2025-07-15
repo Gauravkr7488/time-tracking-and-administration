@@ -30,10 +30,6 @@ export function activate(context: vscode.ExtensionContext) { // TODO remove asyn
         await LinkCommands.extractF2YamlIdLink();
     });
 
-    const disposableForF2yamlReferenceGenerator = vscode.commands.registerCommand('f2tools.generateF2yamlReference', async () => {
-        // await LinkCommands.generateOrCopyF2yamlReference();
-    });
-
     const disposableForF2yamlLinkFollower = vscode.commands.registerCommand('f2tools.followF2yamlLink', async () => {
         await LinkCommands.followF2yamlLink();
     });
@@ -50,7 +46,6 @@ export function activate(context: vscode.ExtensionContext) { // TODO remove asyn
         disposableForWorkLogGenerator, 
         disposableForF2yamlSummaryLinkExtractor, 
         disposableForF2yamlIdLinkExtractor,
-        disposableForF2yamlReferenceGenerator,
         disposableForF2yamlLinkFollower,
         disposableForCSVGeneration
     );

@@ -3,7 +3,7 @@
   "displayName": "F2Tools",
   "description": "",
   "publisher": "tf2p",
-  "version": "1.6.8",
+  "version": "2.0.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/Gauravkr7488/time-tracking-and-administration"
@@ -45,10 +45,6 @@
       {
         "command": "f2tools.extractF2YamlIdLink",
         "title": "Extract F2Yaml Id Link"
-      },
-      {
-        "command": "f2tools.generateF2yamlReference",
-        "title": "Generate or copy F2Yaml References"
       },
       {
         "command": "f2tools.followF2yamlLink",

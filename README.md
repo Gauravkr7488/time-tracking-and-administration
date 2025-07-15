@@ -90,6 +90,9 @@ Bugs:
     - If GenerateWorkLogFromSR command is issued multiple times multiple duplicate worklogs get created
     - If there if more than one f2yamlLInk in a line then the follow link function follows the one which comes first
     - After running SpecifyStandupReport command on a new standup ID the SelectTask command at first stops the timer only and after issuing it again it selects the task
+    
+### 2.0.0
+    - removed the reliance on the ignorewords setting.
 
 
 ### Next
