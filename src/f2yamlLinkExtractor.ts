@@ -114,7 +114,7 @@ export class F2yamlLinkExtractor { // parsing should be used
 
     static removeRootPath(filePath: string) {
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME); // todo replace with method in the vscode utils
-        const rootPath = config.get<string>('rootPath') + "\\"; 
+        const rootPath = config.get<string>('pathFromRoot') + "\\"; 
 
         if (!rootPath) {
             Message.err(Data.MESSAGES.ERRORS.NO_ROOT_PATH);
