@@ -23,7 +23,7 @@ export class LinkFollower {
     static addSpacesInKey(keyValueOfYamlObj: string, yamlKeys: string[]) {
         let keyWithSpaces = '';
         let spaces = '';
-        for (let index = 0; index < yamlKeys.length; index++) {
+        for (let index = 0; index < yamlKeys.length - 1; index++) {
             spaces += "  ";
         }
         keyWithSpaces = spaces + keyValueOfYamlObj;
