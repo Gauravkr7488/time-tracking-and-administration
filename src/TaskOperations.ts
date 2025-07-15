@@ -62,8 +62,8 @@ export class TaskCommands {
             this.srEntry = srEntry;
 
             Message.info(Data.MESSAGES.INFO.TASK_SELECTED(yamlLink));
-        } catch (error) {
-            Message.err(error);
+        } catch (error: any) {
+            Message.err(error.message);
         }
     }
 

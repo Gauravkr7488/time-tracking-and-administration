@@ -2,17 +2,16 @@ import { Position } from 'vscode';
 import { Data } from './Data';
 import { VsCodeUtils } from './VsCodeUtils';
 import * as vscode from 'vscode';
-import { builtinModules } from 'module';
 
 export class StringOperation {
 
     static isThisTask(yamlLink: string) {
-        const cleanLink = this.removeLinkSymbolsFromLink(yamlLink)
-        const keys: string[] = cleanLink.split(".");
+        const {yamlPath} = this.parseF2yamlLink(yamlLink);
+        const keys: string[] = this.parseYamlPath(yamlPath);
         const lastKey = keys[keys.length - 1];
         const firstCharOfLastKey = lastKey[0];
         const lastCharOfLastKey = lastKey[lastKey.length - 1];
-        if (firstCharOfLastKey == "\"" && lastCharOfLastKey == "\"") return true;
+        if (firstCharOfLastKey == "." && lastCharOfLastKey == "\"") return true;
         return false;
     }
 
@@ -120,7 +119,6 @@ export class StringOperation {
 
                 if (i != 0 && buffer.length > 1) {
                     yamlParts.push(buffer);
-
                     continue;
                 }
             }
@@ -196,10 +194,11 @@ export class StringOperation {
 
 
     private static removeLinkSymbolsFromLink(yamlLink: string) {
-        const lengthOfFrontLinkSymbols = 3;
-        const lengthOfBackLinkSymbols = 1;
-        const cleanYamlLink = yamlLink.slice(lengthOfFrontLinkSymbols, -lengthOfBackLinkSymbols);
-        return cleanYamlLink;
+        let cleanLink = ''
+        if(yamlLink[0] + yamlLink[1] + yamlLink[2] == Data.PATTERNS.START_OF_F2YAML_LINK) cleanLink = yamlLink.slice(3);
+        if(yamlLink[yamlLink.length - 1] == Data.PATTERNS.END_OF_F2YAML_LINK) cleanLink = cleanLink.slice(0, -1);
+        if(cleanLink) return cleanLink;
+        return yamlLink;
     }
 
 
