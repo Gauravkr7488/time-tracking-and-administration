@@ -12,7 +12,7 @@ export class VsCodeUtils {
             const filePathFromRoot = rootPath + filePath + ".yaml";
             fileUri = vscode.Uri.file(path.resolve(filePathFromRoot));
             await vscode.workspace.fs.stat(fileUri);
-        } catch (error) {
+        } catch (error: any) {
             try {
                 const filePathFromRoot = rootPath + filePath + ".yml";
                 fileUri = vscode.Uri.file(path.resolve(filePathFromRoot));

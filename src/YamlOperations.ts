@@ -94,7 +94,7 @@ export class YamlTaskOperations {
                 throw new Error(Data.MESSAGES.ERRORS.PARSING_ERROR(error.message))
             }
             return yamlDoc;
-        } catch (error) {
+        } catch (error: any) {
             throw new Error(Data.MESSAGES.ERRORS.FAILED_TO_PARSE_YAML)
         }
     }
@@ -413,7 +413,7 @@ export class YamlTaskOperations {
             try {
                 taskObjWorkLogDate = element.items[3].value
                 taskObjWorkLogName = element.items[0].value
-            } catch (error) {
+            } catch (error: any) {
                 return false
             }
             let srObjWorkLogDate = workLog.items[3].value
@@ -532,7 +532,7 @@ export class YamlTaskOperations {
     //                             idValue = idObj.value.value;
     //                         }
     //                     }
-    //                 } catch (error) {
+    //                 } catch (error: any) {
     //                     Message.err(error);
     //                 }
     //                 currentYamlKey = await this.cleanStatusCodesFromKeys(currentYamlKey);
@@ -606,8 +606,8 @@ export class YamlTaskOperations {
                     yamlKeyValue = item.value.value;
                 }
             }
-        } catch (error) {
-            Message.err(error);
+        } catch (error: any) {
+            Message.err(error.message);
         }
         return yamlKeyValue;
     }

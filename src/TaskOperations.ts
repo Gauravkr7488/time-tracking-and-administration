@@ -93,8 +93,8 @@ export class TaskCommands {
             operationStatus = await YamlTaskOperations.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
             if (!operationStatus) return false;
             return true;
-        } catch (error) {
-            Message.err(error);
+        } catch (error: any) {
+            Message.err(error.message);
             return false;
         }
     }
