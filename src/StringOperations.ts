@@ -2,6 +2,7 @@ import { Position } from 'vscode';
 import { Data } from './Data';
 import { VsCodeUtils } from './VsCodeUtils';
 import * as vscode from 'vscode';
+import { builtinModules } from 'module';
 
 export class StringOperation {
 
@@ -89,44 +90,47 @@ export class StringOperation {
 
     //     return yamlParts;
     // }
+
     static parseYamlPath(yamlPath: string): string[] {
         const yamlParts: string[] = [];
-        let i = 0;
-        while (i < yamlPath.length) {
-            let dotCount = 0;
+        let inQuotes = false;
+        let buffer = '';
+        for (let i = 0; i < yamlPath.length; i++) {
+            let char = yamlPath[i]
+            if (yamlPath[i] == "\"" && yamlPath[i - 1] == ".") inQuotes = true;
+            if (yamlPath[i] == "\"" && yamlPath[i + 1] == ".") inQuotes = false;
 
-            // Count consecutive dots
-            while (i < yamlPath.length && yamlPath[i] === ".") {
-                dotCount++;
-                i++;
-            }
-
-            let part = "";
-
-            // Quoted part
-            if (yamlPath[i] === "\"") {
-                part += "\"";
-                i++;
-                while (i < yamlPath.length) {
-                    part += yamlPath[i];
-                    if (yamlPath[i] === "\"") {
-                        i++;
-                        break;
-                    }
-                    i++;
+            if (yamlPath[i] == "\"") {
+                if (yamlPath[i - 1] == ".") {
+                    inQuotes = true;
+                } else if (yamlPath[i - 1] == ".") {
+                    inQuotes = false;
                 }
-            } else {
-                // Read until next dot
-                while (i < yamlPath.length && yamlPath[i] !== ".") {
-                    part += yamlPath[i];
-                    i++;
+                buffer += "\"";
+                if (i == yamlPath.length - 1) yamlParts.push(buffer);
+                continue;
+            }
+
+            if (yamlPath[i] == "." && inQuotes == false) {
+                if (yamlPath[i + 1] == ".") {
+                    if (buffer.length > 1) yamlParts.push(buffer);
+                    buffer = '';
+                    buffer += "."
+                }
+
+                if (i != 0 && buffer.length > 1) {
+                    yamlParts.push(buffer);
+
+                    continue;
                 }
             }
 
-            if (part.length > 0) {
-                if (dotCount >= 2) part = "." + part; // only if 2 or more dots before
-                yamlParts.push(part);
-            }
+
+            if (yamlPath[i] == "." && inQuotes == false) continue;
+            buffer += yamlPath[i];
+
+            if (i == yamlPath.length - 1) yamlParts.push(buffer);
+
         }
 
         return yamlParts;
