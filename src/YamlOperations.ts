@@ -18,7 +18,6 @@ export class YamlTaskOperations {
         let yamlObj: any;
         const yamlDoc = await this.parseYaml(fileUri);
         this.taskYamlDoc = yamlDoc;
-        // if (!yamlDoc) return;
         let parentYamlObj: any = yamlDoc.get(yamlKeys[0]);
 
         if (!parentYamlObj) { // TODO resolve this : this is happening because the parent keys have "." before them
@@ -34,14 +33,10 @@ export class YamlTaskOperations {
                 continue;
             }
             yamlObj = await this.getYamlIdObjFromParentObj(yamlKey, parentYamlObj);
-            // if (!yamlObj) {
-            //     let yamlKeyWithDot = "." + yamlKey;
-            //     yamlObj = await this.getYamlIdObjFromParentObj(yamlKeyWithDot, parentYamlObj);
-            // }
             parentYamlObj = yamlObj;
 
         }
-
+        if (!yamlObj) throw new Error("Unable to find the Item");
         return yamlObj;
     }
 
@@ -221,12 +216,10 @@ export class YamlTaskOperations {
 
     public static async updateSrEntryDuration(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri, duration: number) {
         const yamlDoc = await this.parseYaml(srDocUri);
-        // if (!yamlDoc) return false;
         let srEntryObj = await this.findSrEntry(srEntry, yamlDoc, srCode);
         await this.updateDuration(srEntryObj, duration, yamlDoc, srCode);
         const doc = await vscode.workspace.openTextDocument(srDocUri);
         this.applyEditToDoc(yamlDoc, doc);
-        return true;
     }
 
     private static createWorkLog(startTime: string) {
@@ -428,9 +421,9 @@ export class YamlTaskOperations {
 
     public static async checkIfTaskIsAlreadyInSr(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri) {
         const yamlDoc = await this.parseYaml(srDocUri);
-        if (!yamlDoc) return;
+        // if (!yamlDoc) return;
         const wasNode = await this.getWasObj(yamlDoc, srCode);
-        if (!wasNode) return;
+        // if (!wasNode) return;
         let srIndex = await this.findSrEntry(srEntry, yamlDoc, srCode);
         return srIndex;
 

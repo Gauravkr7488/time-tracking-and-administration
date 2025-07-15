@@ -214,8 +214,7 @@ export class StringOperation {
         return result;
     }
 
-    public static extractSrCode() {
-        const doc = VsCodeUtils.getActiveDoc();
+    public static extractSrCode(doc : vscode.TextDocument) {
         const cursorPosition = VsCodeUtils.getCursorPosition();
         const wordRange = doc.getWordRangeAtPosition(cursorPosition);
         return doc.getText(wordRange).replace(Data.PATTERNS.COLON, Data.MISC.EMPTY_STRING);;
@@ -230,11 +229,10 @@ export class StringOperation {
 
     static findLinkInText(lineText: string, cursorPosition: Position) {
         let f2YamlLink = "";
-        let startOfLink;
-        startOfLink = StringOperation.getStartOfLink(cursorPosition, lineText);
+        let startOfLink = StringOperation.getStartOfLink(cursorPosition, lineText);
         let endOfLink;
         if (startOfLink != undefined) endOfLink = StringOperation.getEndOfLink(cursorPosition, lineText);
-        if (startOfLink == undefined || endOfLink == undefined) return;
+        if (startOfLink == undefined || endOfLink == undefined) return undefined;
         for (let index = startOfLink; index <= endOfLink; index++) f2YamlLink += lineText[index];
         return f2YamlLink;
     }

@@ -60,12 +60,12 @@ export class Timer { // TODO
 
         const endTime = Date.now();
 
-        if (!startTime) return;
+        if (!startTime) throw new Error("No timer running");
         totalDurationMs += endTime - startTime;
 
         const durationMinutes = Math.round(totalDurationMs / 1000 / 60);
 
-        const durationSeconds = (totalDurationMs / 1000).toFixed(2);
+        // const durationSeconds = (totalDurationMs / 1000).toFixed(2);
         Message.info(Data.MESSAGES.INFO.TIMER_STOPPED(durationMinutes));
 
         this.startTime = undefined;
@@ -88,6 +88,7 @@ export class Timer { // TODO
 
     public static async giveStartTime() {
         const startDateIsoFormat = this.startDateIsoFormat;
+        if(!startDateIsoFormat) throw new Error("timer failed to start");
         return startDateIsoFormat;
     }
 

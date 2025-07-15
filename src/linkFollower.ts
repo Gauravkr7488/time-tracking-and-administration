@@ -8,16 +8,20 @@ import * as vscode from 'vscode';
 export class LinkFollower {
 
     static async followF2yamlLink(yamlLink: string) {
-        const { filePath, yamlPath } = StringOperation.parseF2yamlLink(yamlLink);
-        const fileUri: vscode.Uri = await VsCodeUtils.getFileUri(filePath);
-        const yamlKeys: string[] = StringOperation.parseYamlPath(yamlPath);
-        const yamlObj: any = await YamlTaskOperations.getYamlObj(yamlKeys, fileUri);
-        const keyValueOfYamlObj: string = YamlTaskOperations.getYamlKeyValue(yamlObj)
-        const keyValueWithSpaces = this.addSpacesInKey(keyValueOfYamlObj, yamlKeys);
-        const docOftheLink = await vscode.workspace.openTextDocument(fileUri);
-        const cleanKeyValue = StringOperation.escapeSpecialCharacters(keyValueWithSpaces)
-        const taskSummaryRegex = new RegExp("^\s*" + cleanKeyValue, "im") // what are those magic strings
-        await this.findTheTask(taskSummaryRegex, docOftheLink);
+        try {
+            const { filePath, yamlPath } = StringOperation.parseF2yamlLink(yamlLink);
+            const fileUri: vscode.Uri = await VsCodeUtils.getFileUri(filePath);
+            const yamlKeys: string[] = StringOperation.parseYamlPath(yamlPath);
+            const yamlObj: any = await YamlTaskOperations.getYamlObj(yamlKeys, fileUri);
+            const keyValueOfYamlObj: string = YamlTaskOperations.getYamlKeyValue(yamlObj)
+            const keyValueWithSpaces = this.addSpacesInKey(keyValueOfYamlObj, yamlKeys);
+            const docOftheLink = await vscode.workspace.openTextDocument(fileUri);
+            const cleanKeyValue = StringOperation.escapeSpecialCharacters(keyValueWithSpaces)
+            const taskSummaryRegex = new RegExp("^\s*" + cleanKeyValue, "im") // what are those magic strings
+            await this.findTheTask(taskSummaryRegex, docOftheLink);
+        } catch (error: any) {
+            Message.err(error.message);
+        }
     }
 
     static addSpacesInKey(keyValueOfYamlObj: string, yamlKeys: string[]) {

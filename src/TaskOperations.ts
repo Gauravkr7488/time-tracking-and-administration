@@ -18,44 +18,37 @@ export class TaskCommands {
     private static srEntry?: yaml.YAMLMap<unknown, unknown>;
 
     public static async specifyStandupReport() {
-        if (Timer.isTaskRunnig()) await this.stopTask();
-        const srDoc = VsCodeUtils.getActiveDoc();
-        const srCode = StringOperation.extractSrCode();
+        try {
+            if (Timer.isTaskRunnig()) await this.stopTask();
+            const srDoc = VsCodeUtils.getActiveDoc();
+            const srCode = StringOperation.extractSrCode(srDoc);
+            this.srDocUri = srDoc.uri;
+            this.srCode = srCode;
 
-        this.srDocUri = srDoc.uri;
-        this.srCode = srCode;
-
-        Message.info(Data.MESSAGES.INFO.SR_SPECIFIED(srCode));
+            Message.info(Data.MESSAGES.INFO.SR_SPECIFIED(srCode));
+        } catch (error: any) {
+            Message.err(error.message);
+        }
     }
 
     public static async selectTask(): Promise<void> {
         try {
             const activeDoc = VsCodeUtils.getActiveDoc();
             const cursorPosition = VsCodeUtils.getCursorPosition();
-            // if (!activeDoc || !cursorPosition) return;
-
-            // let checkDocStructure = await YamlTaskOperations.parseYaml(activeDoc.uri);
-            // if (!checkDocStructure) return;
-            let operationStatus = true;
             if (!this.srCode || !this.srDocUri) throw new Error(Data.MESSAGES.ERRORS.RUN_SPECIFY_SR_FIRST);
 
-            if (Timer.isTaskRunnig()) operationStatus = await this.stopTask();
-            if (!operationStatus) return
+            if (Timer.isTaskRunnig()) await this.stopTask();
             let yamlLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
             if (!yamlLink) yamlLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
 
             const isthisTask = StringOperation.isThisTask(yamlLink);
-            // if (isthisTask === undefined) return;
-            // if (!isthisTask) yamlLink = await YamlTaskOperations.getTaskYamlLink(yamlLink);
 
             if (!isthisTask) throw new Error(Data.MESSAGES.ERRORS.NOT_A_TASK);
 
             await Timer.startTimer();
             const startTime = await Timer.giveStartTime();
-            if (!startTime) return;
             const srEntry = YamlTaskOperations.createSrEntry(yamlLink, startTime);
 
-            // if (!this.srDocUri) return;
             let srEntryIndex = await YamlTaskOperations.checkIfTaskIsAlreadyInSr(srEntry, this.srCode, this.srDocUri);
             if (srEntryIndex == -1) await YamlTaskOperations.moveEntryToWasInSr(srEntry, this.srCode, this.srDocUri);
 
@@ -78,37 +71,18 @@ export class TaskCommands {
 
     public static async stopTask() {
         try {
-            if (!this.srDocUri) return false;
-            let checkDocStructure = await YamlTaskOperations.parseYaml(this.srDocUri);
-            if (!checkDocStructure) return false;
-            let operationStatus;
-            if (!Timer.isTaskRunnig()) {
-                Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
-                return false;
-            }
+            if (!this.srDocUri || !this.srEntry || !this.srCode) throw new Error("run specify sr first");
+            if (!Timer.isTaskRunnig()) throw new Error(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
             const duration = Timer.stopTimer();
-            if (duration === undefined) return false;
-            if (!this.srEntry) return false;
-            if (!this.srCode) return false;
-            operationStatus = await YamlTaskOperations.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
-            if (!operationStatus) return false;
-            return true;
+            await YamlTaskOperations.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
         } catch (error: any) {
             Message.err(error.message);
-            return false;
         }
     }
 
     public static async generateWorkLogs() {
         const srDoc = VsCodeUtils.getActiveDoc();
-        if (!srDoc) return;
-
-        const srCode = StringOperation.extractSrCode();
-        if (!srCode) {
-            Message.err(Data.MESSAGES.ERRORS.NO_SR_CODE);
-            return;
-        }
-
+        const srCode = StringOperation.extractSrCode(srDoc);
         try {
             if (srCode == this.srCode) {
                 if (Timer.isTaskRunnig()) await this.stopTask();
@@ -122,67 +96,57 @@ export class TaskCommands {
     }
 
     static async generateCSV() {
-        const activeDoc = VsCodeUtils.getActiveDoc();
-        const cursorPosition = VsCodeUtils.getCursorPosition();
-        if (!activeDoc || !cursorPosition) return;
-
-        const csvEntry = await CSVOperations.generateCSV(activeDoc, cursorPosition);
-        if (!csvEntry) return;
-        Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(csvEntry));
-        vscode.env.clipboard.writeText(csvEntry);
+        try {
+            const activeDoc = VsCodeUtils.getActiveDoc();
+            const cursorPosition = VsCodeUtils.getCursorPosition();
+            const csvEntry = await CSVOperations.generateCSV(activeDoc, cursorPosition);
+            Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(csvEntry));
+            vscode.env.clipboard.writeText(csvEntry);
+        } catch (error: any) {
+            Message.err(error.message);
+        }
     }
 
 }
 
 export class LinkCommands {
 
-    // private static yamlLink?: string;
-    // private static linkFollower = new LinkFollower();
-
     public static async extractF2YamlSummaryLink() {
-        const activeDoc = VsCodeUtils.getActiveDoc();
-        const cursorPosition = VsCodeUtils.getCursorPosition();
-        if (!activeDoc || !cursorPosition) return;
-
-        let f2YamlSymmaryLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
-        if (!f2YamlSymmaryLink) f2YamlSymmaryLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
-        Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlSymmaryLink));
-        vscode.env.clipboard.writeText(f2YamlSymmaryLink);
+        try {
+            const activeDoc = VsCodeUtils.getActiveDoc();
+            const cursorPosition = VsCodeUtils.getCursorPosition();
+            let f2YamlSymmaryLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
+            if (!f2YamlSymmaryLink) f2YamlSymmaryLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
+            Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlSymmaryLink));
+            vscode.env.clipboard.writeText(f2YamlSymmaryLink);
+        } catch (error: any) {
+            Message.err(error.message);
+        }
     }
 
     static async extractF2YamlIdLink() {
-        const activeDoc = VsCodeUtils.getActiveDoc();
-        const cursorPosition = VsCodeUtils.getCursorPosition();
-        if (!activeDoc || !cursorPosition) return;
-
-        let f2YamlIdLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
-        if (!f2YamlIdLink) f2YamlIdLink = await F2yamlLinkExtractor.createF2YamlIdLink(activeDoc, cursorPosition);
-        Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlIdLink));
-        vscode.env.clipboard.writeText(f2YamlIdLink);
+        try {
+            const activeDoc = VsCodeUtils.getActiveDoc();
+            const cursorPosition = VsCodeUtils.getCursorPosition();
+            let f2YamlIdLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
+            if (!f2YamlIdLink) f2YamlIdLink = await F2yamlLinkExtractor.createF2YamlIdLink(activeDoc, cursorPosition);
+            Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlIdLink));
+            vscode.env.clipboard.writeText(f2YamlIdLink);
+        } catch (error: any) {
+            Message.err(error.message);
+        }
     }
 
-    // public static async generateOrCopyF2yamlReference() {
-    //     this.yamlLink = TextUtils.isThisYamlReference();
-    //     if (!this.yamlLink) return;
-    //     let cleanLink = this.yamlLink.slice(2, -2);
-
-    //     if (!this.yamlLink) {
-    //         this.yamlLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
-    //         cleanLink = this.yamlLink.slice(3, -1);
-    //     }
-    //     const f2YamlRef = `$@${cleanLink}@$`;
-    //     Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlRef));
-    //     vscode.env.clipboard.writeText(f2YamlRef);
-    // }
-
-
     public static async followF2yamlLink() {
-        const activeDoc = VsCodeUtils.getActiveDoc();
-        const cursorPosition = VsCodeUtils.getCursorPosition();
-        if (!activeDoc || !cursorPosition) return;
-        let yamlLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
-        if (!yamlLink) throw new Error("there is no link"); // TODO Fix this ie there should always be a link and if there is not then we should do try catch here
-        if(activeDoc.languageId == "csv") yamlLink = StringOperation.removeExtraQuotes(yamlLink); 
-        LinkFollower.followF2yamlLink(yamlLink);
+        try {
+            const activeDoc = VsCodeUtils.getActiveDoc();
+            const cursorPosition = VsCodeUtils.getCursorPosition();
+            let yamlLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
+            if(!yamlLink) throw new Error(Data.MESSAGES.ERRORS.NO_LINK_FOUND);
+            if (activeDoc.languageId == "csv") yamlLink = StringOperation.removeExtraQuotes(yamlLink);
+            LinkFollower.followF2yamlLink(yamlLink);
+        } catch (error: any) {
+            Message.err(error.message);
+        }
     }
 }

@@ -8,7 +8,8 @@ import * as vscode from 'vscode';
 
 
 export class CSVOperations extends YamlTaskOperations {
-    static async generateCSV(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) { // TODO clean this thing
+
+    static async generateCSV(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         let csvEntry = "";
         const csvFields = CSVOperations.getCsvFields();
         let f2yamlSummaryLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
@@ -30,14 +31,12 @@ export class CSVOperations extends YamlTaskOperations {
 
             if (field == "IdLink") {
                 let idLink = await F2yamlLinkExtractor.createF2YamlIdLink(activeDoc, cursorPosition);
-                if (!idLink) return;
                 idLink = StringOperation.escapeCharacter(idLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
                 idLink = "\"" + idLink + "\"";
                 csvEntry += idLink + ", ";
                 continue;
             }
 
-            // let taskProperty: any;
             let taskObj = await this.getTaskObj(f2yamlSummaryLink);
             for (const taskProperty of taskObj.value.items) {
                 if (taskProperty.key.value == field) {
