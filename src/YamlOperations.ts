@@ -563,6 +563,7 @@ export class YamlTaskOperations {
             if (!yamlKeyValue) {
                 const yamlKeySummary = StringOperation.wrapInQuotesIfMultiWord(yamlKey);
                 yamlKeyValues.push(yamlKeySummary);
+                parentYamlObj = yamlObj;
                 continue;
             }
             yamlKeyValues.push(yamlKeyValue);
@@ -600,7 +601,7 @@ export class YamlTaskOperations {
                 }
             }
         } catch (error: any) {
-            Message.err(error.message);
+            // Message.err(error.message);
         }
         return yamlKeyValue;
     }

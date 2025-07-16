@@ -116,9 +116,10 @@ export class StringOperation {
                     buffer = '';
                     buffer += "."
                 }
-
+                
                 if (i != 0 && buffer.length > 1) {
                     yamlParts.push(buffer);
+                    buffer = '';
                     continue;
                 }
             }
