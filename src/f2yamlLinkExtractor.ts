@@ -123,7 +123,9 @@ export class F2yamlLinkExtractor { // parsing should be used
         }
 
         if (filePath.startsWith(rootPath)) {
-            return filePath.substring(rootPath.length);
+            let shortFilePath = filePath.substring(rootPath.length);
+            shortFilePath = shortFilePath.slice(1);
+            return shortFilePath;
         } else {
             return filePath;
         }

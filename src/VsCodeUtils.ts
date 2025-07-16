@@ -9,12 +9,12 @@ export class VsCodeUtils {
         let fileUri: vscode.Uri;
         const rootPath = VsCodeUtils.getRootPath();
         try {
-            const filePathFromRoot = rootPath + filePath + ".yaml";
+            const filePathFromRoot = rootPath + "\\" + filePath + ".yaml";
             fileUri = vscode.Uri.file(path.resolve(filePathFromRoot));
             await vscode.workspace.fs.stat(fileUri);
         } catch (error: any) {
             try {
-                const filePathFromRoot = rootPath + filePath + ".yml";
+                const filePathFromRoot = rootPath + "\\" + filePath + ".yml";
                 fileUri = vscode.Uri.file(path.resolve(filePathFromRoot));
                 await vscode.workspace.fs.stat(fileUri);
             } catch (e) {
