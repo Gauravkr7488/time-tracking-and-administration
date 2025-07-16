@@ -96,6 +96,9 @@ Bugs:
 
 ### 2.0.1
     - The full file path is coming in the link
+
+### 2.0.2
+    - removed the rootPath setting
     
 ### Next
 Bugs:
