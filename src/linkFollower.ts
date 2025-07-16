@@ -37,7 +37,7 @@ export class LinkFollower {
     async followLink(yamlLink: string) {
         let summaryWithSpaces = await this.giveExactSummaryWithSpaces(yamlLink);
         if (!summaryWithSpaces) return;
-        summaryWithSpaces = SimpleStringTools.escapeSpecialCharacters(summaryWithSpaces);
+        summaryWithSpaces = StringOperation.escapeCharacter(summaryWithSpaces, "\\", "\\");
         const taskDoc = await vscode.workspace.openTextDocument(YamlTaskOperations.taskFileUri);
         const taskSummaryRegex = new RegExp("^" + summaryWithSpaces, "im") // what are those magic strings
         await LinkFollower.findTheTask(taskSummaryRegex, taskDoc);
