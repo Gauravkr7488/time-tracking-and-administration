@@ -98,11 +98,6 @@
           "description": "The separator to use in the extracted YAML path.",
           "default": "."
         },
-        "f2tools.pathFromRoot": {
-          "type": "string",
-          "description": "Enter the file path of the root directory",
-          "default": "folderPath"
-        },
         "f2tools.csvFields": {
           "type": "array",
           "description": "Fields of the csv generated.",

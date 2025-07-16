@@ -18,7 +18,7 @@ export class VsCodeUtils {
                 fileUri = vscode.Uri.file(path.resolve(filePathFromRoot));
                 await vscode.workspace.fs.stat(fileUri);
             } catch (e) {
-                throw new Error(`${filePath} not found`);
+                throw new Error(`${filePath} not found \n check if you have entered the correct rootPath or the fileName is Wrong`);
             }
         }
         return fileUri;
@@ -29,12 +29,8 @@ export class VsCodeUtils {
     }
 
     static getRootPath() {
-        const config = this.getConfig();
-        let rootPath = config.get<string>(Data.CONFIG.ROOT_PATH);
-        if (!rootPath) throw new Error(Data.MESSAGES.ERRORS.NO_ROOT_PATH);
-        let lastChar = rootPath[rootPath.length - 1]
-        if (lastChar != "\\") rootPath = rootPath + "\\";
-        return rootPath;
+        const rootFolder = vscode.workspace.workspaceFolders?.[0];
+        return rootFolder?.uri.fsPath;
     }
 
     static getActiveDoc() {
