@@ -216,8 +216,8 @@ export class YamlTaskOperations {
 
     public static async updateSrEntryDuration(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri, duration: number) {
         const yamlDoc = await this.parseYaml(srDocUri);
-        let srEntryObj = await this.findSrEntry(srEntry, yamlDoc, srCode);
-        await this.updateDuration(srEntryObj, duration, yamlDoc, srCode);
+        let srEntryIndex = await this.findSrEntry(srEntry, yamlDoc, srCode);
+        await this.updateDuration(srEntryIndex, duration, yamlDoc, srCode);
         const doc = await vscode.workspace.openTextDocument(srDocUri);
         this.applyEditToDoc(yamlDoc, doc);
     }

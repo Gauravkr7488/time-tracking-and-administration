@@ -54,6 +54,9 @@ export class Data {
         DOUBLE_QUOTE: "\"",
         PATH_SEPERATOR: ".",
     }
+    public static readonly CONFIG = {
+        ROOT_PATH: "pathFromRoot",
+    }
 
     public static readonly TIME_KEYS = {
         START_TIME_KEY: 'timerStartTime',

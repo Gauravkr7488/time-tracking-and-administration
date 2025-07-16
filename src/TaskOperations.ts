@@ -75,6 +75,8 @@ export class TaskCommands {
             if (!Timer.isTaskRunnig()) throw new Error(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
             const duration = Timer.stopTimer();
             await YamlTaskOperations.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
+            this.srEntry = undefined;
+            
         } catch (error: any) {
             Message.err(error.message);
         }

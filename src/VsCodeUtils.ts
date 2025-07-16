@@ -28,9 +28,9 @@ export class VsCodeUtils {
         return vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
     }
 
-    private static getRootPath() {
+    static getRootPath() {
         const config = this.getConfig();
-        let rootPath = config.get<string>('rootPath');
+        let rootPath = config.get<string>(Data.CONFIG.ROOT_PATH);
         if (!rootPath) throw new Error(Data.MESSAGES.ERRORS.NO_ROOT_PATH);
         let lastChar = rootPath[rootPath.length - 1]
         if (lastChar != "\\") rootPath = rootPath + "\\";
