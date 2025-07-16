@@ -100,6 +100,10 @@ Bugs:
 ### 2.0.2
     - removed the rootPath setting
     
+### 2.0.4
+    - there was a \ coming before the link
+    - the id link was not working
+    
 ### Next
 Bugs:
     - closing the vscode should stop the task
