@@ -94,7 +94,9 @@ Bugs:
 ### 2.0.0
     - removed the reliance on the ignorewords setting.
 
-
+### 2.0.1
+    - The full file path is coming in the link
+    
 ### Next
 Bugs:
     - closing the vscode should stop the task
