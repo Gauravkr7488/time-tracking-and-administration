@@ -24,15 +24,15 @@
       },
       {
         "command": "f2tools.taskSelection",
-        "title": "Select Task"
+        "title": "Start timer on Task"
       },
       {
         "command": "f2tools.pauseResumeTimer",
-        "title": "Pause/Resume Timer"
+        "title": "Pause/Resume Task"
       },
       {
         "command": "f2tools.stopTimer",
-        "title": "Stop Task/Timer"
+        "title": "Stop timer on Task"
       },
       {
         "command": "f2tools.generateWorkLogs",
