@@ -104,6 +104,9 @@ Bugs:
     - there was a \ coming before the link
     - the id link was not working
     
+### 2.0.5
+    - BugFix: Command do not match from the commands from requirement
+    
 ### Next
 Bugs:
     - closing the vscode should stop the task
