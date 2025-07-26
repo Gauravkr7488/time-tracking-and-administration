@@ -106,6 +106,9 @@ Bugs:
     
 ### 2.0.5
     - BugFix: Command do not match from the commands from requirement
+
+### 2.0.6
+    - BugFix: Command do not match from the commands from requirement
     
 ### Next
 Bugs:
