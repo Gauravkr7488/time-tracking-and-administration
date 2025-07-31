@@ -1,69 +1,54 @@
 import * as vscode from 'vscode';
-import { YamlModifier } from './ymlModifier';
-import { Utils } from './utils'; 
-import { YamlKeyExtractor } from './ymlReferenceExtractor';
-import { Timer } from './timer';
+import { LinkCommands, TaskCommands } from './TaskOperations';
+export function activate(context: vscode.ExtensionContext) { // TODO remove async if not needed // TODO maybe remove all regex
 
-export function activate(context: vscode.ExtensionContext) {
-    const timer = new Timer(context);
-    const utils = new Utils(context); 
-    const extractor = new YamlKeyExtractor();
-
-    // Store yamlModifier to make it accessible across commands
-    let yamlModifier: YamlModifier | undefined;
-
-    const disposableA = vscode.commands.registerCommand('time-tracking-and-administration.specifyStandupReport', async () => {
-        await utils.extractYamlKey(); // Extracts the SR Id
-        vscode.window.showInformationMessage("Please select a task");
+    const disposableForSr = vscode.commands.registerCommand('f2tools.specifyStandupReport', async () => {
+        await TaskCommands.specifyStandupReport();
     });
 
-    const disposableB = vscode.commands.registerCommand('time-tracking-and-administration.taskSelection', async () => {
-        const isALink = await utils.isThisALink();
-        let formattedText: string;
-
-        if (isALink) {
-            // If cursor is in a link, use the link from global state
-            formattedText = context.globalState.get('detectedYamlLink') as string || '';
-            if (!formattedText) {
-                vscode.window.showErrorMessage("No link found in global state.");
-                return;
-            }
-            vscode.window.showInformationMessage(`Using existing link: ${formattedText}`);
-        } else {
-            await extractor.extractYamlKey(); // Creates the ymlLink
-            formattedText = extractor.createYmlReference();
-        }
-        
-        const extractedKey = context.globalState.get("extractedYamlKey") as string; // This is the saved srcode
-        if (!extractedKey) {
-            vscode.window.showErrorMessage("Run 'Specify Standup Report' first.");
-            return;
-        }
-        timer.startTimer();
-        yamlModifier = new YamlModifier(extractedKey, formattedText, context);
-        await yamlModifier.modify(); // Modifies the doc
-        // await yamlModifier.addTimerString(timer.startTimer()); // Adds start time to YAML
+    const disposableForTaskSelection = vscode.commands.registerCommand('f2tools.taskSelection', async () => {
+        await TaskCommands.selectTask();
     });
 
-    const disposableC = vscode.commands.registerCommand('time-tracking-and-administration.startTimer', () => {
-        const result = timer.startTimer();
-        vscode.window.showInformationMessage(result); // Show start time or error
-        return result;
+    const disposableForPauseResumeTimer = vscode.commands.registerCommand('f2tools.pauseResumeTimer', async () => {
+        TaskCommands.pauseOrResumeTask();
     });
 
-    const disposableD = vscode.commands.registerCommand('time-tracking-and-administration.pauseTimer', () => {
-        timer.pauseResumeTimer(); // Currently returns void
+    const disposableForStopTimer = vscode.commands.registerCommand('f2tools.stopTimer', async () => {
+        await TaskCommands.stopTask();
     });
 
-    const disposableE = vscode.commands.registerCommand('time-tracking-and-administration.stopTimer', async () => {
-        if (!yamlModifier) {
-            vscode.window.showErrorMessage("Run 'Task Selection' first to initialize the YAML modifier.");
-            return;
-        }
-        await yamlModifier.addTimerString(timer.stopTimer()); // Adds stop time (e.g., "[10.50m]") to YAML
+    const disposableForWorkLogGenerator = vscode.commands.registerCommand('f2tools.generateWorkLogs', async () => {
+        await TaskCommands.generateWorkLogs();
     });
 
-    context.subscriptions.push(disposableA, disposableB, disposableC, disposableD, disposableE);
+    const disposableForF2yamlSummaryLinkExtractor = vscode.commands.registerCommand('f2tools.extractF2YamlSummaryLink', async () => {
+        await LinkCommands.extractF2YamlSummaryLink();
+    });
+   
+    const disposableForF2yamlIdLinkExtractor = vscode.commands.registerCommand('f2tools.extractF2YamlIdLink', async () => {
+        await LinkCommands.extractF2YamlIdLink();
+    });
+
+    const disposableForF2yamlLinkFollower = vscode.commands.registerCommand('f2tools.followF2yamlLink', async () => {
+        await LinkCommands.followF2yamlLink();
+    });
+    
+    const disposableForCSVGeneration = vscode.commands.registerCommand('f2tools.generateCSV', async () => {
+        await TaskCommands.generateCSV();
+    });
+
+    context.subscriptions.push(
+        disposableForSr,
+        disposableForTaskSelection, 
+        disposableForPauseResumeTimer, 
+        disposableForStopTimer, 
+        disposableForWorkLogGenerator, 
+        disposableForF2yamlSummaryLinkExtractor, 
+        disposableForF2yamlIdLinkExtractor,
+        disposableForF2yamlLinkFollower,
+        disposableForCSVGeneration
+    );
 }
 
-export function deactivate() {}
+export function deactivate() { }

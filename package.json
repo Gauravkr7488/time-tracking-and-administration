@@ -1,8 +1,13 @@
 {
-  "name": "time-tracking-and-administration",
-  "displayName": "Time Tracking and Administration",
+  "name": "f2tools",
+  "displayName": "F2Tools",
   "description": "",
-  "version": "0.0.1",
+  "publisher": "tf2p",
+  "version": "2.0.6",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Gauravkr7488/time-tracking-and-administration"
+  },
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -14,26 +19,105 @@
   "contributes": {
     "commands": [
       {
-        "command": "time-tracking-and-administration.specifyStandupReport",
+        "command": "f2tools.specifyStandupReport",
         "title": "Specify Standup Report"
       },
       {
-        "command": "time-tracking-and-administration.taskSelection",
-        "title": "Select task"
+        "command": "f2tools.taskSelection",
+        "title": "Start timer on Task"
       },
       {
-        "command": "time-tracking-and-administration.startTimer",
-        "title": "Start Timer"
+        "command": "f2tools.pauseResumeTimer",
+        "title": "Pause/Resume Task"
       },
       {
-        "command": "time-tracking-and-administration.pauseTimer",
-        "title": "Pause Timer"
+        "command": "f2tools.stopTimer",
+        "title": "Stop timer on Task"
       },
       {
-        "command": "time-tracking-and-administration.stopTimer",
-        "title": "Stop Timer"
+        "command": "f2tools.generateWorkLogs",
+        "title": "Generate WorkLogs from SR"
+      },
+      {
+        "command": "f2tools.extractF2YamlSummaryLink",
+        "title": "Extract F2Yaml Summary Link"
+      },
+      {
+        "command": "f2tools.extractF2YamlIdLink",
+        "title": "Extract F2Yaml Id Link"
+      },
+      {
+        "command": "f2tools.followF2yamlLink",
+        "title": "Follow the F2Yaml Link"
+      },
+      {
+        "command": "f2tools.generateCSV",
+        "title": "Generate CSV Line from Task"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "F2tools",
+      "properties": {
+        "f2tools.userName": {
+          "type": "string",
+          "default": "YourUserName",
+          "description": "Your username"
+        },
+        "f2tools.ignoreWords": {
+          "type": "array",
+          "description": "Words to remove from the extracted YAML path.",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "EstimatedTODO",
+            "DraftingTODO",
+            "TODO",
+            "Estimated",
+            "OnGoing",
+            "OnHold",
+            "Cancelled",
+            "Paused",
+            "InProgress",
+            "Done",
+            "CurrentFocus",
+            "Blocked",
+            "Drafting",
+            "Draft",
+            "Reviewed",
+            "InDev",
+            "Developing",
+            "InQA",
+            "BugFixing",
+            "QAPassed",
+            "Closed"
+          ]
+        },
+        "f2tools.PathSeparator": {
+          "type": "string",
+          "description": "The separator to use in the extracted YAML path.",
+          "default": "."
+        },
+        "f2tools.csvFields": {
+          "type": "array",
+          "description": "Fields of the csv generated.",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "UpdateStatus",
+            "TaskStatus",
+            "Milestone",
+            "IdLink",
+            "By",
+            "Priority",
+            "RemHrs",
+            "SummaryLink",
+            "BlockedBy"
+          ]
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -56,8 +140,6 @@
     "typescript": "^5.7.3"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0",
-    "yaml": "^2.7.1",
-    "yaml-ast-parser": "^0.0.43"
+    "yaml": "^2.7.1"
   }
 }
