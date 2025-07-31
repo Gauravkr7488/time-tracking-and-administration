@@ -8,19 +8,6 @@ import { StringOperation } from './StringOperations';
 export class F2yamlLinkExtractor { // parsing should be used
     protected static extractedSymbols: Array<string> = [];
 
-    // protected static async extractAllYamlKeys() {
-    //     const doc = ActiveDocAndEditor.getActiveDoc();
-    //     if (!doc) return;
-    //     const cursorPosition = ActiveDocAndEditor.getCursorPosition();
-    //     if (!cursorPosition) return;
-    //     let yamlKeys = await vscode.commands.executeCommand<vscode.DocumentSymbol[]>(
-    //         'vscode.executeDocumentSymbolProvider',
-    //         doc.uri
-    //     );
-    //     if (yamlKeys === undefined) return;
-    //     this.extractYamlKeysToCursor(yamlKeys, cursorPosition);
-    // }
-
     private static fullPath(): string { // TODO simplify this
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
         const separator = config.get<string>('pathSeparator', '.');
@@ -36,15 +23,6 @@ export class F2yamlLinkExtractor { // parsing should be used
         const pathFromRoot = filteredSymbols.join(separator);
         return `${pathFromRoot}`;
     }
-
-    // public static async createF2YamlSummaryLink() {
-    //     await this.extractAllYamlKeys();
-    //     let fullPath = this.fullPath();
-    //     if (!fullPath) return '';
-    //     let yamlLink = `-->${fullPath}<`;
-    //     this.extractedSymbols = [];
-    //     return yamlLink;
-    // }
 
     public static async createF2YamlSummaryLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         let F2YamlSummaryLink = '';
@@ -93,11 +71,11 @@ export class F2yamlLinkExtractor { // parsing should be used
                 VsCodeUtils.sleep(5000);
                 allYamlKeys = await F2yamlLinkExtractor.getVsCodeDocSymbols(activeDoc);
                 tries++;
-                if(tries >= 3){
-      
+                if (tries >= 3) {
+
                     Message.err("executeDocumentSymbolProvider failed \n check if there is some error in yaml like +: { }:")
                     return;
-                }else if(allYamlKeys) break;
+                } else if (allYamlKeys) break;
             }
         }
 
@@ -115,7 +93,7 @@ export class F2yamlLinkExtractor { // parsing should be used
     static removeRootPath(filePath: string) {
         const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME); // todo replace with method in the vscode utils
         // const rootPath = config.get<string>('pathFromRoot') + "\\"; 
-        const rootPath = VsCodeUtils.getRootPath(); 
+        const rootPath = VsCodeUtils.getRootPath();
 
         if (!rootPath) {
             Message.err(Data.MESSAGES.ERRORS.NO_ROOT_PATH);

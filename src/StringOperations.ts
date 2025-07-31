@@ -6,7 +6,7 @@ import * as vscode from 'vscode';
 export class StringOperation {
 
     static isThisTask(yamlLink: string) {
-        const {yamlPath} = this.parseF2yamlLink(yamlLink);
+        const { yamlPath } = this.parseF2yamlLink(yamlLink);
         const keys: string[] = this.parseYamlPath(yamlPath);
         const lastKey = keys[keys.length - 1];
         const firstCharOfLastKey = lastKey[0];
@@ -116,7 +116,7 @@ export class StringOperation {
                     buffer = '';
                     buffer += "."
                 }
-                
+
                 if (i != 0 && buffer.length > 1) {
                     yamlParts.push(buffer);
                     buffer = '';
@@ -196,9 +196,9 @@ export class StringOperation {
 
     private static removeLinkSymbolsFromLink(yamlLink: string) {
         let cleanLink = ''
-        if(yamlLink[0] + yamlLink[1] + yamlLink[2] == Data.PATTERNS.START_OF_F2YAML_LINK) cleanLink = yamlLink.slice(3);
-        if(yamlLink[yamlLink.length - 1] == Data.PATTERNS.END_OF_F2YAML_LINK) cleanLink = cleanLink.slice(0, -1);
-        if(cleanLink) return cleanLink;
+        if (yamlLink[0] + yamlLink[1] + yamlLink[2] == Data.PATTERNS.START_OF_F2YAML_LINK) cleanLink = yamlLink.slice(3);
+        if (yamlLink[yamlLink.length - 1] == Data.PATTERNS.END_OF_F2YAML_LINK) cleanLink = cleanLink.slice(0, -1);
+        if (cleanLink) return cleanLink;
         return yamlLink;
     }
 
@@ -215,7 +215,7 @@ export class StringOperation {
         return result;
     }
 
-    public static extractSrCode(doc : vscode.TextDocument) {
+    public static extractSrCode(doc: vscode.TextDocument) {
         const cursorPosition = VsCodeUtils.getCursorPosition();
         const wordRange = doc.getWordRangeAtPosition(cursorPosition);
         return doc.getText(wordRange).replace(Data.PATTERNS.COLON, Data.MISC.EMPTY_STRING);;
@@ -300,5 +300,18 @@ export class StringOperation {
             return `"${trimmed}"`;
         }
         return trimmed;
+    }
+
+    static isMultiWord(str: string): boolean {
+        return str.trim().includes(' ');
+    }
+
+    static wrapInQuotes(str: string): string{
+        return `"${str}"`;
+    }
+
+    static isFirstCharDot(str: string): boolean{
+        if (str[0] == ".") return true;
+        return false;
     }
 }
