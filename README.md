@@ -109,6 +109,9 @@ Bugs:
 
 ### 2.0.6
     - BugFix: Command do not match from the commands from requirement
+
+### 2.0.7
+    - BugFix: Start timer on task" command gives error "This is not a task"
     
 ### Next
 Bugs:
