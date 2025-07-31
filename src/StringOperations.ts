@@ -293,7 +293,12 @@ export class StringOperation {
 
     static wrapInQuotesIfMultiWord(str: string): string {
         const trimmed = str.trim();
-        if (trimmed.includes(' ') && !trimmed.startsWith('"') && !trimmed.endsWith('"')) return `"${trimmed}"`;
+        if (trimmed.includes(' ')) {
+            if (trimmed.startsWith('"') && trimmed.endsWith('"')) {
+                return trimmed;
+            }
+            return `"${trimmed}"`;
+        }
         return trimmed;
     }
 }
