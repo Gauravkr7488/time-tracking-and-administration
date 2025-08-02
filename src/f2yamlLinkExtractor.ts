@@ -47,7 +47,7 @@ export class F2yamlLinkExtractor { // parsing should be used
 
         let summaryYamlParts = [];
         for (const key of yamlKeys) {
-            if (StringOperation.isFirstCharDot(key)) { // TODO: This is just a quick and dirty fix
+            if (StringOperation.isFirstCharDot(key) && StringOperation.isMultiWord(key)) { // TODO: This is just a quick and dirty fix there can be edge cases
                 let keyString = key.slice(1);
                 keyString = "." + StringOperation.wrapInQuotes(keyString)
                 summaryYamlParts.push(keyString);

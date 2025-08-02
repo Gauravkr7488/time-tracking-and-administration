@@ -25,6 +25,23 @@ export class YamlTaskOperations {
             parentYamlObj = yamlDoc.get(parentKey);
         }
 
+        if (!parentYamlObj) { // TODO fix this
+            if(yaml.isMap(yamlDoc.contents)){
+                let itemsOfTheContent = yamlDoc.contents.items;
+                for (let index = 0; index < itemsOfTheContent.length; index++) {
+                    const element = itemsOfTheContent[index];
+                    let  taskSummryElement = (element.key as yaml.Scalar).value;
+                    let editedtaskSummaryElement = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElement as string);
+                    if (editedtaskSummaryElement == yamlKeys[0]) {
+                        parentYamlObj = element;
+                        yamlObj = element;
+                        break;
+                    }
+                           
+                }
+            }
+        }
+
         for (let index = 1; index < yamlKeys.length; index++) {
             const yamlKey = yamlKeys[index];
             if (yamlKey.startsWith(".")) {

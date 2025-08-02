@@ -271,7 +271,7 @@ export class StringOperation {
     }
 
 
-    static removeFirstWordIfFollowedBySpaceAndDotIfWrappendInQuotes(str: string): string {
+    static removeFirstWordIfFollowedBySpaceAndDotIfWrappendInQuotes(str: string): string { // TODO: simplify
         if (!str.startsWith('"') || !str.endsWith('"')) return str; // not a quoted string
 
         const inner = str.slice(1, -1); // Remove outer quotes
@@ -282,6 +282,16 @@ export class StringOperation {
 
         if (trimmed[firstSpaceIndex + 1] === '.') {
             const newInner = trimmed.substring(firstSpaceIndex + 2);
+            return `${Data.MISC.PATH_SEPERATOR}"${newInner}"`; // Re-wrap in quotes with dot
+        }
+        return str;
+    }
+
+    static removeFirstWordIfFollowedBySpaceAndDot(str: string): string { // TODO: simplify
+        const firstSpaceIndex = str.indexOf(' ');
+        if (firstSpaceIndex === -1) return str;
+        if (str[firstSpaceIndex + 1] === '.') {
+            const newInner = str.substring(firstSpaceIndex + 2);
             return `${Data.MISC.PATH_SEPERATOR}"${newInner}"`; // Re-wrap in quotes with dot
         }
         return str;
