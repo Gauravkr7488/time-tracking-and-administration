@@ -1,5 +1,4 @@
 import { Data } from "./Data";
-import { SimpleStringTools } from "./SimpleStringTools";
 import { StringOperation } from "./StringOperations";
 import { Message, VsCodeUtils } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";

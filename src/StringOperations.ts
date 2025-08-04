@@ -33,7 +33,6 @@ export class StringOperation {
         let statusCode = ''
         const line = activeDoc.lineAt(cursorPosition.line);
         const { status } = this.seperateStatusCodeAndTask(line.text)
-        // statusCode = seperatedTask[0];
         let cleanStatus = status.trim();
         return cleanStatus;
     }
@@ -74,21 +73,6 @@ export class StringOperation {
 
         return yamlKey;
     }
-
-
-
-    // static parseYamlPath(yamlPath: string): string[] {
-    //     const rawParts = yamlPath.split(Data.MISC.PATH_SEPERATOR);
-    //     const yamlParts: string[] = [];
-
-    //     for (let i = 0; i < rawParts.length; i++) {
-    //         if (rawParts[i] !== "") {
-    //             yamlParts.push(rawParts[i]);
-    //         }
-    //     }
-
-    //     return yamlParts;
-    // }
 
     static parseYamlPath(yamlPath: string): string[] {
         const yamlParts: string[] = [];
