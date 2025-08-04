@@ -21,9 +21,8 @@ export class YamlTaskOperations {
         let parentYamlObj: any = yamlDoc.get(yamlKeys[0]);
 
         if (!parentYamlObj) {
-            parentYamlObj = YamlTaskOperations.getTopLevelTaskObj(yamlDoc, yamlKeys, parentYamlObj, yamlObj);
+            parentYamlObj = YamlTaskOperations.getTopLevelTaskObj(yamlDoc, yamlKeys, yamlObj);
             yamlObj = parentYamlObj; // because we are looking for this
-
         }
 
         if (yamlKeys.length > 1) {
@@ -31,6 +30,12 @@ export class YamlTaskOperations {
                 const yamlKey = yamlKeys[index];
                 yamlObj = await this.getYamlSummaryObjFromParent(yamlKey, parentYamlObj);
                 if (!yamlObj) yamlObj = await this.getYamlIdObjFromParentObj(yamlKey, parentYamlObj);
+
+                if (!yamlObj) {
+                    let editedKey = yamlKey.slice(1);
+                    yamlObj = await this.getYamlIdObjFromParentObj(editedKey, parentYamlObj);
+                }
+
                 parentYamlObj = yamlObj;
             }
         }
@@ -39,24 +44,25 @@ export class YamlTaskOperations {
         return yamlObj;
     }
 
-    private static getTopLevelTaskObj(yamlDoc: yaml.Document<yaml.Node, true>, yamlKeys: string[], parentYamlObj: any, yamlObj: any) { // TODO fix this
+    private static getTopLevelTaskObj(yamlDoc: yaml.Document<yaml.Node, true>, yamlKeys: string[], yamlObj: any) { // TODO fix this
+        let parentYamlObj;
         if (yaml.isMap(yamlDoc.contents)) {
             let itemsOfTheContent = yamlDoc.contents.items;
             for (let index = 0; index < itemsOfTheContent.length; index++) {
                 const element = itemsOfTheContent[index];
-                if (StringOperation.isFirstCharDot(yamlKeys[0])) {
-                    let taskSummryElementKey = (element.key as yaml.Scalar).value;
-                    let editedTaskSummaryElementKey = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElementKey as string);
-                    if (editedTaskSummaryElementKey == yamlKeys[0]) {
-                        parentYamlObj = element;
-                        break;
-                    }
-                }else{
+                let taskSummryElementKey = (element.key as yaml.Scalar).value;
+                let editedTaskSummaryElementKey = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElementKey as string);
+                if (editedTaskSummaryElementKey == yamlKeys[0]) {
+                    parentYamlObj = element;
+                    break;
+                }
+                if (!parentYamlObj) {
                     let x = (element.value as yaml.YAMLMap).items;
-                    if(!x) x = (element as unknown as yaml.YAMLMap).items;
+                    if (!x) x = (element as unknown as yaml.YAMLMap).items;
                     for (let index = 0; index < x.length; index++) {
                         const e = x[index];
-                        if((e.key as yaml.Scalar).value == "Id" && (e.value as yaml.Scalar).value == yamlKeys[0]){
+                        const yamlKey = yamlKeys[0].slice(1);
+                        if ((e.key as yaml.Scalar).value == "Id" && (e.value as yaml.Scalar).value == yamlKey) {
                             return element;
                         }
                     }
@@ -576,7 +582,6 @@ export class YamlTaskOperations {
     static async getYamlKeyValues(yamlKeys: string[], yamlKeyType: string, activeDoc: vscode.TextDocument): Promise<string[]> {
         let yamlKeyValues: string[] = [];
         const yamlDoc = await this.parseYaml(activeDoc.uri);
-        // if (!yamlDoc) return;
         let parentYamlObj: any = yamlDoc.get(yamlKeys[0]);
         let parentKeyValue = YamlTaskOperations.getParentValue(parentYamlObj, yamlKeyType, yamlKeys);
         yamlKeyValues.push(parentKeyValue);
@@ -639,6 +644,7 @@ export class YamlTaskOperations {
                 Message.err(error1.message + error2.message);
             }
         }
+        if (yamlKeyType == "Id" && yamlKeyValue != undefined) return "." + yamlKeyValue; // a temp mesue
         return yamlKeyValue;
     }
 
