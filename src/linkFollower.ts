@@ -48,10 +48,7 @@ export class LinkFollower {
         const text = taskDoc.getText();
         const match = taskSummaryRegex.exec(text);
         
-        if (!match || match.index === undefined) {
-            Message.err(Data.MESSAGES.ERRORS.LINK_ITEM_NOT_FOUND);
-            return;
-        }
+        if (!match || match.index === undefined) throw new Error(Data.MESSAGES.ERRORS.LINK_ITEM_NOT_FOUND);
 
         const startPos = taskDoc.positionAt(match.index);
         const endPos = taskDoc.positionAt(match.index + match[0].length);

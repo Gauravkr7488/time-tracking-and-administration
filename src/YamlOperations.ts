@@ -26,7 +26,7 @@ export class YamlTaskOperations {
 
         }
 
-        if (!yamlObj) {
+        if (yamlKeys.length > 1) {
             for (let index = 1; index < yamlKeys.length; index++) {
                 const yamlKey = yamlKeys[index];
                 yamlObj = await this.getYamlSummaryObjFromParent(yamlKey, parentYamlObj);
@@ -44,13 +44,23 @@ export class YamlTaskOperations {
             let itemsOfTheContent = yamlDoc.contents.items;
             for (let index = 0; index < itemsOfTheContent.length; index++) {
                 const element = itemsOfTheContent[index];
-                let taskSummryElement = (element.key as yaml.Scalar).value;
-                let editedtaskSummaryElement = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElement as string);
-                if (editedtaskSummaryElement == yamlKeys[0]) {
-                    parentYamlObj = element;
-                    break;
+                if (StringOperation.isFirstCharDot(yamlKeys[0])) {
+                    let taskSummryElementKey = (element.key as yaml.Scalar).value;
+                    let editedTaskSummaryElementKey = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElementKey as string);
+                    if (editedTaskSummaryElementKey == yamlKeys[0]) {
+                        parentYamlObj = element;
+                        break;
+                    }
+                }else{
+                    let x = (element.value as yaml.YAMLMap).items;
+                    if(!x) x = (element as unknown as yaml.YAMLMap).items;
+                    for (let index = 0; index < x.length; index++) {
+                        const e = x[index];
+                        if((e.key as yaml.Scalar).value == "Id" && (e.value as yaml.Scalar).value == yamlKeys[0]){
+                            return element;
+                        }
+                    }
                 }
-
             }
         }
         return parentYamlObj;
@@ -72,7 +82,6 @@ export class YamlTaskOperations {
                     return idObj;
                 }
             }
-
         }
         return idObj;
     }
