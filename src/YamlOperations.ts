@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { VsCodeUtils } from './VsCodeUtils';
+import { Message, VsCodeUtils } from './VsCodeUtils';
 import { Data } from './Data';
 import { StringOperation } from './StringOperations';
 
@@ -593,8 +593,10 @@ export class YamlTaskOperations {
     private static getParentValue(parentYamlObj: any, yamlKeyType: string, yamlKeys: string[]) {
         let parentKeyValue = this.getYamlKeyValueBasedOnKeyType(parentYamlObj, yamlKeyType);
         let parentKeySummary;
-        if (!parentKeyValue) parentKeySummary = StringOperation.wrapInQuotesIfMultiWord(yamlKeys[0]);
-        parentKeyValue = parentKeySummary;
+        if (!parentKeyValue) {
+            parentKeySummary = StringOperation.wrapInQuotesIfMultiWord(yamlKeys[0]);
+            parentKeyValue = parentKeySummary;
+        }
         return parentKeyValue;
     }
 
@@ -616,8 +618,17 @@ export class YamlTaskOperations {
                     yamlKeyValue = item.value.value;
                 }
             }
-        } catch (error: any) {
-            // Message.err(error.message);
+        } catch (error1: any) {
+            try {
+
+                for (const item of yamlObj.items) {
+                    if (item.key.value == yamlKeyType) {
+                        yamlKeyValue = item.value.value;
+                    }
+                }
+            } catch (error2: any) {
+                Message.err(error1.message + error2.message);
+            }
         }
         return yamlKeyValue;
     }
