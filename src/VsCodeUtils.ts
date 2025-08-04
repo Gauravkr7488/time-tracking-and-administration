@@ -62,6 +62,10 @@ export class VsCodeUtils {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
 
+    static pasteIntoClipboard(str: string){
+        return vscode.env.clipboard.writeText(str);
+    }
+
 }
 
 export class Message {

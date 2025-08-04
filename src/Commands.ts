@@ -11,7 +11,7 @@ import { Data } from "./Data";
 import { CSVOperations } from "./CSV-Operations";
 
 
-export class TaskCommands {
+export class Commands {
 
     private static srCode?: string;
     private static srDocUri?: vscode.Uri;
@@ -65,18 +65,16 @@ export class TaskCommands {
             Message.err(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
             return;
         }
-
         Timer.pauseResumeTimer();
     }
 
     public static async stopTask() {
         try {
-            if (!this.srDocUri || !this.srEntry || !this.srCode) throw new Error("run specify sr first");
-            if (!Timer.isTaskRunnig()) throw new Error(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
+            if (!this.srDocUri || !this.srEntry || !this.srCode || !Timer.isTaskRunnig()) throw new Error(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
+            // if (!Timer.isTaskRunnig()) throw new Error(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
             const duration = Timer.stopTimer();
             await YamlTaskOperations.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
             this.srEntry = undefined;
-            
         } catch (error: any) {
             Message.err(error.message);
         }
@@ -86,12 +84,10 @@ export class TaskCommands {
         const srDoc = VsCodeUtils.getActiveDoc();
         const srCode = StringOperation.extractSrCode(srDoc);
         try {
-            if (srCode == this.srCode) {
-                if (Timer.isTaskRunnig()) await this.stopTask();
-            }
+            if (srCode == this.srCode && Timer.isTaskRunnig()) await this.stopTask();
             let workLogGenerated = await YamlTaskOperations.generateWorkLogs(srCode, srDoc.uri);
             if (!workLogGenerated) return
-            Message.info("Worklog Generated");
+            Message.info(Data.MESSAGES.INFO.WORKLOG_GENERATED);
         } catch (error: any) {
             Message.err(error.message);
         }
@@ -103,16 +99,12 @@ export class TaskCommands {
             const cursorPosition = VsCodeUtils.getCursorPosition();
             const csvEntry = await CSVOperations.generateCSV(activeDoc, cursorPosition);
             Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(csvEntry));
-            vscode.env.clipboard.writeText(csvEntry);
+            VsCodeUtils.pasteIntoClipboard(csvEntry);
         } catch (error: any) {
             Message.err(error.message);
         }
     }
-
-}
-
-export class LinkCommands {
-
+    
     public static async extractF2YamlSummaryLink() {
         try {
             const activeDoc = VsCodeUtils.getActiveDoc();
@@ -120,7 +112,7 @@ export class LinkCommands {
             let f2YamlSymmaryLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
             if (!f2YamlSymmaryLink) f2YamlSymmaryLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
             Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlSymmaryLink));
-            vscode.env.clipboard.writeText(f2YamlSymmaryLink);
+            VsCodeUtils.pasteIntoClipboard(f2YamlSymmaryLink);
         } catch (error: any) {
             Message.err(error.message);
         }
@@ -133,7 +125,7 @@ export class LinkCommands {
             let f2YamlIdLink = await StringOperation.getYamlLink(activeDoc, cursorPosition);
             if (!f2YamlIdLink) f2YamlIdLink = await F2yamlLinkExtractor.createF2YamlIdLink(activeDoc, cursorPosition);
             Message.info(Data.MESSAGES.INFO.COPIED_TO_CLIPBOARD(f2YamlIdLink));
-            vscode.env.clipboard.writeText(f2YamlIdLink);
+            VsCodeUtils.pasteIntoClipboard(f2YamlIdLink);
         } catch (error: any) {
             Message.err(error.message);
         }

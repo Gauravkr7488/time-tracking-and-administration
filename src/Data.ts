@@ -17,7 +17,6 @@ export class Data {
             NO_ROOT_PATH: "Please enter the root path in the settings",
             NOT_VALID_LINK: "Not a valid link",
             NOT_A_TASK: "This is not a   task",
-
         },
         INFO: {
             COPIED_TO_CLIPBOARD: (something: string) => `'${something}' copied to your clipboard`,
@@ -25,7 +24,8 @@ export class Data {
             TIMER_PAUSED: "Timer paused.",
             TIMER_STOPPED: (durationMinutes: number) => `Timer stopped. Duration: ${durationMinutes} minutes`,
             TASK_SELECTED: (f2YamlLink: string) => `The timer has started on Task: ${f2YamlLink}`,
-            SR_SPECIFIED: (srCode: string) => `${srCode} is selected as the Standup Report. Please select a Task and issue the Start timer on Task command`
+            SR_SPECIFIED: (srCode: string) => `${srCode} is selected as the Standup Report. Please select a Task and issue the Start timer on Task command`,
+            WORKLOG_GENERATED: "Worklog Generated",
         }
     }
 
