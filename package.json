@@ -115,6 +115,10 @@
             "SummaryLink",
             "BlockedBy"
           ]
+        },
+        "f2tools.workspacePath": {
+          "type": "string",
+          "description": "If you are using the extension without workspace enter the workspace path here"
         }
       }
     }

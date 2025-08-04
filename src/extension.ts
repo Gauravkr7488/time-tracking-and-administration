@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { Commands } from './Commands';
-export function activate(context: vscode.ExtensionContext) { // TODO remove async if not needed // TODO maybe remove all regex
+export function activate(context: vscode.ExtensionContext) {
 
     const disposableForSr = vscode.commands.registerCommand('f2tools.specifyStandupReport', async () => {
         await Commands.specifyStandupReport();

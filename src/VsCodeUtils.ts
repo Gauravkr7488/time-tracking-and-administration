@@ -29,8 +29,13 @@ export class VsCodeUtils {
     }
 
     static getRootPath() {
-        const rootFolder = vscode.workspace.workspaceFolders?.[0];
-        return rootFolder?.uri.fsPath;
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if(!workspaceFolders) {
+            Message.err(Data.MESSAGES.ERRORS.NO_WORKSPACE);
+            return;
+        }
+        const rootFolder = workspaceFolders[0];
+        return rootFolder.uri.fsPath;
     }
 
     static getActiveDoc() {

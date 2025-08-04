@@ -17,6 +17,9 @@ export class Data {
             NO_ROOT_PATH: "Please enter the root path in the settings",
             NOT_VALID_LINK: "Not a valid link",
             NOT_A_TASK: "This is not a   task",
+            NO_WORKSPACE: "No workspace found",
+            DOCUMENT_SYMBOL_PROVIDER_FAILED: "executeDocumentSymbolProvider failed",
+            FILE_PATH_DOES_NOT_START_WITH_ROOTPATH: "File path does not start with the rootPath",
         },
         INFO: {
             COPIED_TO_CLIPBOARD: (something: string) => `'${something}' copied to your clipboard`,
@@ -57,6 +60,7 @@ export class Data {
     public static readonly CONFIG = {
         ROOT_PATH: "pathFromRoot",
         CSV_FIELDS: "csvFields",
+        WORKSPACE_PATH: "workspacePath",
     }
 
     public static readonly TIME_KEYS = {

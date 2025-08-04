@@ -5,24 +5,8 @@ import { YamlTaskOperations } from './YamlOperations';
 import { StringOperation } from './StringOperations';
 
 
-export class F2yamlLinkExtractor { // parsing should be used
+export class F2yamlLinkExtractor {
     protected static extractedSymbols: Array<string> = [];
-
-    private static fullPath(): string { // TODO simplify this
-        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
-        const separator = config.get<string>('pathSeparator', '.');
-        const ignoreWords: string[] = config.get<string[]>('ignoreWords', []);
-
-        let filteredSymbols = this.extractedSymbols.map(symbol => {
-            ignoreWords.forEach(word => {
-                symbol = symbol.replace(new RegExp(`\\b${word}\\b`, 'g'), '').trim();
-            });
-            return symbol;
-        }).filter(symbol => symbol !== '');
-
-        const pathFromRoot = filteredSymbols.join(separator);
-        return `${pathFromRoot}`;
-    }
 
     public static async createF2YamlSummaryLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         let F2YamlSummaryLink = '';
@@ -36,18 +20,17 @@ export class F2yamlLinkExtractor { // parsing should be used
     static async getYamlPath(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position, yamlKeyType: string = "summary") {
         let yamlPath = '';
         let yamlKeys = await this.getYamlKeys(activeDoc, cursorPosition)
-        if (!yamlKeys) return;
         let yamlKeyValues;
         if (yamlKeyType != "summary") {
             yamlKeyValues = await YamlTaskOperations.getYamlKeyValues(yamlKeys, yamlKeyType, activeDoc)
-            if (!yamlKeyValues) return;
+            // if (!yamlKeyValues) return;
             let yamlParts: string[] = this.removeStatus(yamlKeyValues);
             return yamlPath = yamlParts.join('.');
         }
 
         let summaryYamlParts = [];
         for (const key of yamlKeys) {
-            if (StringOperation.isFirstCharDot(key) && StringOperation.isMultiWord(key)) { // TODO: This is just a quick and dirty fix there can be edge cases
+            if (StringOperation.isFirstCharDot(key) && StringOperation.isMultiWord(key)) { // TODO: This is just a quick and dirty fix there can be edge cases // trying to triger the edgecases
                 let keyString = key.slice(1);
                 keyString = "." + StringOperation.wrapInQuotes(keyString)
                 summaryYamlParts.push(keyString);
@@ -78,9 +61,7 @@ export class F2yamlLinkExtractor { // parsing should be used
                 allYamlKeys = await F2yamlLinkExtractor.getVsCodeDocSymbols(activeDoc);
                 tries++;
                 if (tries >= 3) {
-
-                    Message.err("executeDocumentSymbolProvider failed \n check if there is some error in yaml like +: { }:")
-                    return;
+                    throw new Error(Data.MESSAGES.ERRORS.DOCUMENT_SYMBOL_PROVIDER_FAILED);
                 } else if (allYamlKeys) break;
             }
         }
@@ -97,21 +78,20 @@ export class F2yamlLinkExtractor { // parsing should be used
     }
 
     static removeRootPath(filePath: string) {
-        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME); // todo replace with method in the vscode utils
-        // const rootPath = config.get<string>('pathFromRoot') + "\\"; 
-        const rootPath = VsCodeUtils.getRootPath();
+        let rootPath = VsCodeUtils.getRootPath();
 
         if (!rootPath) {
-            Message.err(Data.MESSAGES.ERRORS.NO_ROOT_PATH);
-            return filePath;
+            const config = VsCodeUtils.getConfig();
+            rootPath = config.get<string>(Data.CONFIG.WORKSPACE_PATH);
         }
 
+        if(!rootPath) throw new Error(Data.MESSAGES.ERRORS.NO_ROOT_PATH);
         if (filePath.startsWith(rootPath)) {
             let shortFilePath = filePath.substring(rootPath.length);
             shortFilePath = shortFilePath.slice(1);
             return shortFilePath;
         } else {
-            return filePath;
+            throw new Error(Data.MESSAGES.ERRORS.FILE_PATH_DOES_NOT_START_WITH_ROOTPATH);
         }
     }
 
@@ -135,23 +115,6 @@ export class F2yamlLinkExtractor { // parsing should be used
         return [];
     }
 
-
-    // public static async createF2YamlIdLink() {
-    //     await this.extractAllYamlKeys();
-    //     const doc = ActiveDocAndEditor.getActiveDoc();
-    //     if (!doc) return;
-    //     const yamlDoc = await YamlTaskOperations.parseYaml(doc.uri);
-    //     if (!yamlDoc) return;
-    //     const idValues: string[] = await YamlTaskOperations.getIdValues(this.extractedSymbols, yamlDoc);
-    //     if (!yamlDoc || !yamlDoc.contents) return;
-    //     const fileAndFolderName = this.extractedSymbols[0];
-    //     this.extractedSymbols = [];
-    //     let idLink = idValues.join(".");
-    //     idLink = fileAndFolderName + idLink;
-    //     return `-->${idLink}<`;
-
-    // }
-
     static async createF2YamlIdLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         let F2YamlIdLink = '';
         let filePath = activeDoc.uri.fsPath;
@@ -159,6 +122,5 @@ export class F2yamlLinkExtractor { // parsing should be used
         filePath = StringOperation.removeExtension(filePath);
         let yamlPath = await this.getYamlPath(activeDoc, cursorPosition, "Id");
         return F2YamlIdLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + "." + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
-
     }
 }
