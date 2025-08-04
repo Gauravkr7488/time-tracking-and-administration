@@ -11,7 +11,7 @@ export class F2yamlLinkExtractor {
     public static async createF2YamlSummaryLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         let F2YamlSummaryLink = '';
         let filePath = activeDoc.uri.fsPath;
-        filePath = this.removeRootPath(filePath);
+        filePath = await this.removeRootPath(filePath);
         filePath = StringOperation.removeExtension(filePath);
         let yamlPath = await this.getYamlPath(activeDoc, cursorPosition);
         return F2YamlSummaryLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + "." + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
@@ -76,11 +76,12 @@ export class F2yamlLinkExtractor {
         );
     }
 
-    static removeRootPath(filePath: string) {
+    static async removeRootPath(filePath: string) {
         let rootPath = VsCodeUtils.getRootPath();
+        const config = VsCodeUtils.getConfig();
+        await config.update(Data.CONFIG.WORKSPACE_PATH, rootPath, vscode.ConfigurationTarget.Global);
 
         if (!rootPath) {
-            const config = VsCodeUtils.getConfig();
             rootPath = config.get<string>(Data.CONFIG.WORKSPACE_PATH);
         }
 
@@ -107,17 +108,15 @@ export class F2yamlLinkExtractor {
                 const childKeys = this.extractYamlKeysToCursor(key.children, cursorPosition);
                 yamlKeys.push(...childKeys);
             }
-
             return yamlKeys; // return only the first matching path
         }
-
         return [];
     }
 
     static async createF2YamlIdLink(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position) {
         let F2YamlIdLink = '';
         let filePath = activeDoc.uri.fsPath;
-        filePath = this.removeRootPath(filePath);
+        filePath = await this.removeRootPath(filePath);
         filePath = StringOperation.removeExtension(filePath);
         let yamlPath = await this.getYamlPath(activeDoc, cursorPosition, "Id");
         return F2YamlIdLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + "." + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
