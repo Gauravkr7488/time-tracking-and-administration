@@ -56,6 +56,7 @@ export class Data {
     }
     public static readonly CONFIG = {
         ROOT_PATH: "pathFromRoot",
+        CSV_FIELDS: "csvFields",
     }
 
     public static readonly TIME_KEYS = {

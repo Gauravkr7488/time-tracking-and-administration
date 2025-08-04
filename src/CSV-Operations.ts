@@ -1,7 +1,6 @@
-import { escape } from "querystring";
 import { Data } from "./Data";
 import { StringOperation } from "./StringOperations";
-import { VsCodeUtils, Message } from "./VsCodeUtils";
+import { VsCodeUtils } from "./VsCodeUtils";
 import { YamlTaskOperations } from "./YamlOperations";
 import { F2yamlLinkExtractor } from "./f2yamlLinkExtractor";
 import * as vscode from 'vscode';
@@ -16,24 +15,24 @@ export class CSVOperations extends YamlTaskOperations {
 
 
         for (const field of csvFields) {
-            if (field === "TaskStatus") { // for status
+            if (field === "TaskStatus") {
                 let statusCode = StringOperation.getStatusCode(activeDoc, cursorPosition);
                 csvEntry += statusCode + ", ";
                 continue;
             }
 
-            if (field === "SummaryLink") { // for link
+            if (field === "SummaryLink") {
                 let Escapedf2yamlSummaryLink = StringOperation.escapeCharacter(f2yamlSummaryLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
-                Escapedf2yamlSummaryLink = "\"" + Escapedf2yamlSummaryLink + "\"";
-                csvEntry += Escapedf2yamlSummaryLink + ", ";
+                let linkWrappedInQuotes = StringOperation.wrapInQuotes(Escapedf2yamlSummaryLink);
+                csvEntry += linkWrappedInQuotes + ", ";
                 continue;
             }
 
-            if (field == "IdLink") {
+            if (field === "IdLink") {
                 let idLink = await F2yamlLinkExtractor.createF2YamlIdLink(activeDoc, cursorPosition);
-                idLink = StringOperation.escapeCharacter(idLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
-                idLink = "\"" + idLink + "\"";
-                csvEntry += idLink + ", ";
+                let escapedIdLink = StringOperation.escapeCharacter(idLink, Data.MISC.DOUBLE_QUOTE, Data.MISC.DOUBLE_QUOTE);
+                let linkWrappedInQuotes = StringOperation.wrapInQuotes(escapedIdLink);
+                csvEntry += linkWrappedInQuotes + ", ";
                 continue;
             }
 
@@ -50,33 +49,7 @@ export class CSVOperations extends YamlTaskOperations {
             csvEntry += ", ";
         }
 
-
-        // // let yamlLink = await TextUtils.isThisYamlLink(activeDoc, cursorPosition);
-        // // if (!yamlLink) yamlLink = await F2yamlLinkExtractor.createF2YamlSummaryLink(activeDoc, cursorPosition);
-        // const isthisTask = await YamlTaskOperations.isThisTask(yamlLink);
-        // if (isthisTask === undefined) return;
-        // if (!isthisTask) yamlLink = await YamlTaskOperations.getTaskYamlLink(yamlLink);
-
-        // if (!yamlLink) {
-        //     Message.err("nope not a task");
-        //     return;
-        // }
-        // const taskObj = await this.getTaskObj(yamlLink);
-        // for (let index = 0; index < csvFields.length; index++) {
-        //     const csvField = csvFields[index];
-
-
-        //     for (let i = 0; i < taskObj.value.items.length; i++) { // for every other field
-        //         const item = taskObj.value.items[i];
-        //         if (item.key.value == csvField) {
-        //             csvEntry += item.value.value;
-        //         }
-        //     }
-
-
-        //     csvEntry += ", ";
-        // }
-        csvEntry = csvEntry.slice(0, -2); // Now just format the csv properly
+        csvEntry = csvEntry.slice(0, -2); // for removing the trailing space and comma in the end
 
         return csvEntry;
     }
@@ -84,8 +57,8 @@ export class CSVOperations extends YamlTaskOperations {
 
 
     private static getCsvFields() {
-        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
-        const csvFields = config.get<string[]>('csvFields', []);
+        const config = VsCodeUtils.getConfig()
+        const csvFields = config.get<string[]>(Data.CONFIG.CSV_FIELDS, []);
         return csvFields;
     }
 }
