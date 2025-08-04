@@ -23,7 +23,6 @@ export class F2yamlLinkExtractor {
         let yamlKeyValues;
         if (yamlKeyType != "summary") {
             yamlKeyValues = await YamlTaskOperations.getYamlKeyValues(yamlKeys, yamlKeyType, activeDoc)
-            // if (!yamlKeyValues) return;
             let yamlParts: string[] = this.removeStatus(yamlKeyValues);
             return yamlPath = yamlParts.join('.');
         }

@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import * as yaml from 'yaml';
-import { Message, VsCodeUtils } from './VsCodeUtils';
+import { VsCodeUtils } from './VsCodeUtils';
 import { Data } from './Data';
 import { StringOperation } from './StringOperations';
 
@@ -20,41 +20,40 @@ export class YamlTaskOperations {
         this.taskYamlDoc = yamlDoc;
         let parentYamlObj: any = yamlDoc.get(yamlKeys[0]);
 
-        if (!parentYamlObj) { // TODO resolve this : this is happening because the parent keys have "." before them
-            let parentKey = "." + yamlKeys[0];
-            parentYamlObj = yamlDoc.get(parentKey);
+        if (!parentYamlObj) {
+            parentYamlObj = YamlTaskOperations.getTopLevelTaskObj(yamlDoc, yamlKeys, parentYamlObj, yamlObj);
+            yamlObj = parentYamlObj; // because we are looking for this
+
         }
 
-        if (!parentYamlObj) { // TODO fix this
-            if(yaml.isMap(yamlDoc.contents)){
-                let itemsOfTheContent = yamlDoc.contents.items;
-                for (let index = 0; index < itemsOfTheContent.length; index++) {
-                    const element = itemsOfTheContent[index];
-                    let  taskSummryElement = (element.key as yaml.Scalar).value;
-                    let editedtaskSummaryElement = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElement as string);
-                    if (editedtaskSummaryElement == yamlKeys[0]) {
-                        parentYamlObj = element;
-                        yamlObj = element;
-                        break;
-                    }
-                           
-                }
-            }
-        }
-
-        for (let index = 1; index < yamlKeys.length; index++) {
-            const yamlKey = yamlKeys[index];
-            if (yamlKey.startsWith(".")) {
+        if (!yamlObj) {
+            for (let index = 1; index < yamlKeys.length; index++) {
+                const yamlKey = yamlKeys[index];
                 yamlObj = await this.getYamlSummaryObjFromParent(yamlKey, parentYamlObj);
+                if (!yamlObj) yamlObj = await this.getYamlIdObjFromParentObj(yamlKey, parentYamlObj);
                 parentYamlObj = yamlObj;
-                continue;
             }
-            yamlObj = await this.getYamlIdObjFromParentObj(yamlKey, parentYamlObj);
-            parentYamlObj = yamlObj;
-
         }
+
         if (!yamlObj) throw new Error("Unable to find the Item");
         return yamlObj;
+    }
+
+    private static getTopLevelTaskObj(yamlDoc: yaml.Document<yaml.Node, true>, yamlKeys: string[], parentYamlObj: any, yamlObj: any) { // TODO fix this
+        if (yaml.isMap(yamlDoc.contents)) {
+            let itemsOfTheContent = yamlDoc.contents.items;
+            for (let index = 0; index < itemsOfTheContent.length; index++) {
+                const element = itemsOfTheContent[index];
+                let taskSummryElement = (element.key as yaml.Scalar).value;
+                let editedtaskSummaryElement = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElement as string);
+                if (editedtaskSummaryElement == yamlKeys[0]) {
+                    parentYamlObj = element;
+                    break;
+                }
+
+            }
+        }
+        return parentYamlObj;
     }
 
     static getYamlIdObjFromParentObj(yamlKey: string, parentYamlObj: any): any {
