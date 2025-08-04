@@ -37,15 +37,25 @@ export class CSVOperations extends YamlTaskOperations {
             }
 
             let taskObj = await this.getTaskObj(f2yamlSummaryLink);
-            if (taskObj.value.items != null){
+            if (taskObj.value.items != null) {
                 for (const taskProperty of taskObj.value.items) {
                     if (taskProperty.key.value == field) {
                         const propertyValue = StringOperation.wrapInQuotesIfMultiWord(taskProperty.value.value);
                         csvEntry += propertyValue + ", ";
                         continue;
+                    } else if (taskProperty.key.value == "+") {
+                        let properties = taskProperty.value.items;
+                        for (const property of properties) {
+                            if (property.key.value == field) {
+                                const propertyValue = StringOperation.wrapInQuotesIfMultiWord(property.value.value);
+                                csvEntry += propertyValue + ", ";
+                                continue;
+                            }
+                        }
+                        break;
                     }
                 }
-            } 
+            }
             csvEntry += ", ";
         }
 
