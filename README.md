@@ -113,6 +113,14 @@ Bugs:
 ### 2.0.7
     - BugFix: Start timer on task" command gives error "This is not a task"
     
+### 2.0.14
+    - BugFix: Wrongly placed dot in the link
+    - BugFix: CSV Line generation not working
+    - BugFix: Non-Bug:_ No "Root path" in settings
+    - BugFix: Ignore Words in settings
+    - BugFix: Misleading error message when Stopping Timer on Task without Starting one
+    - BugFix: Non-Bug:_ CSV line generator does not take properties in the "+:" section into account
+
 ### Next
 Bugs:
     - closing the vscode should stop the task
