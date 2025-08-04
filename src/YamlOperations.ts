@@ -357,18 +357,6 @@ export class YamlTaskOperations {
         return cleanYamlLink;
     }
 
-    public static async cleanStatusCodesFromKeys(key: string) {
-        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
-        const ignoredWords: string[] = config.get<string[]>('ignoreWords', []);
-        for (let index = 0; index < ignoredWords.length; index++) {
-            if (key.startsWith(ignoredWords[index])) {
-                let cleanedKey = key.slice(ignoredWords[index].length).trimStart();
-                return cleanedKey;
-            }
-        }
-        return key;
-    }
-
     private static createWorkLogObj() {
 
         const workLogObj = new yaml.Pair(
@@ -482,25 +470,6 @@ export class YamlTaskOperations {
         return workLogAddedToTask;
     }
 
-    static async isThisTask(yamlLink: string) {
-        const cleanYamlLink = this.removeSeqNumberFromYamlLink(yamlLink);
-        if (!cleanYamlLink) return;
-        const taskObj = await this.getTaskObj(cleanYamlLink);
-        if (!taskObj) return;
-        const taskKey = taskObj.key.value;
-        const taskKeyForSingleLineTask = taskObj.key;
-        const config = vscode.workspace.getConfiguration(Data.MISC.EXTENSION_NAME);
-        const arrayOfStatusCodes: string[] = config.get<string[]>('ignoreWords', []);
-        for (let index = 0; index < arrayOfStatusCodes.length; index++) {
-            const element = arrayOfStatusCodes[index];
-            const statusCode = new RegExp(element, "i");
-            const match1 = statusCode.exec(taskKey);
-            const match2 = statusCode.exec(taskKeyForSingleLineTask);
-            if (match1 || match2) return true;
-        }
-        return false;
-    }
-
     static removeLastKeyOfYamlLink(cleanYamlLink: string) {
         const arrayOfYamlKeys = this.getCleanYamlKeys(cleanYamlLink);
         for (let index = 0; index < arrayOfYamlKeys.length; index++) {
@@ -529,55 +498,6 @@ export class YamlTaskOperations {
         // If no number is found, return the original string
         return yamlLink;
     }
-
-    static async getTaskYamlLink(yamlLink: string): Promise<string> {
-        let newYamlLink = this.removeLastKeyOfYamlLink(yamlLink);
-        const isThisTask = await this.isThisTask(newYamlLink);
-        if (!isThisTask) newYamlLink = await this.getTaskYamlLink(newYamlLink);
-        return newYamlLink;
-    }
-
-    // static async getIdValues(yamlKeys: string[], yamlDoc: yaml.Document) { // todo
-    //     let idValues = []
-    //     const fileAndFolderName = yamlKeys[0];
-    //     const topLevelObj: any = yamlDoc.get(fileAndFolderName);
-    //     let parentObj = topLevelObj;
-    //     let idObj;
-    //     let idValue;
-
-    //     for (let index = 1; index < yamlKeys.length; index++) {
-    //         let currentYamlKey = yamlKeys[index];
-    //         for (const item of parentObj.items) {
-    //             if (currentYamlKey == item.key.value) {
-    //                 try {
-    //                     for (const i of item.value.items) {
-    //                         if (i.key.value == "Id") {
-    //                             idObj = i;
-    //                             idValue = idObj.value.value;
-    //                         }
-    //                     }
-    //                 } catch (error: any) {
-    //                     Message.err(error);
-    //                 }
-    //                 currentYamlKey = await this.cleanStatusCodesFromKeys(currentYamlKey);
-    //                 if (!idValue) {
-    //                     if (/^\S+$/.test(currentYamlKey)) {
-    //                         idValue = currentYamlKey;
-    //                     } else {
-    //                         idValue = `"${currentYamlKey}"`;
-    //                     }
-    //                 }
-    //                 idValues.push(idValue);
-    //                 idValue = null;
-
-    //                 parentObj = item.value;
-    //                 break;
-    //             }
-    //         }
-
-    //     }
-    //     return idValues;
-    // }
 
     static async getYamlKeyValues(yamlKeys: string[], yamlKeyType: string, activeDoc: vscode.TextDocument): Promise<string[]> {
         let yamlKeyValues: string[] = [];

@@ -63,36 +63,6 @@
           "default": "YourUserName",
           "description": "Your username"
         },
-        "f2tools.ignoreWords": {
-          "type": "array",
-          "description": "Words to remove from the extracted YAML path.",
-          "items": {
-            "type": "string"
-          },
-          "default": [
-            "EstimatedTODO",
-            "DraftingTODO",
-            "TODO",
-            "Estimated",
-            "OnGoing",
-            "OnHold",
-            "Cancelled",
-            "Paused",
-            "InProgress",
-            "Done",
-            "CurrentFocus",
-            "Blocked",
-            "Drafting",
-            "Draft",
-            "Reviewed",
-            "InDev",
-            "Developing",
-            "InQA",
-            "BugFixing",
-            "QAPassed",
-            "Closed"
-          ]
-        },
         "f2tools.PathSeparator": {
           "type": "string",
           "description": "The separator to use in the extracted YAML path.",
