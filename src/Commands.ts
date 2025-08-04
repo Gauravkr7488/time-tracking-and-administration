@@ -71,7 +71,6 @@ export class Commands {
     public static async stopTask() {
         try {
             if (!this.srDocUri || !this.srEntry || !this.srCode || !Timer.isTaskRunnig()) throw new Error(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
-            // if (!Timer.isTaskRunnig()) throw new Error(Data.MESSAGES.ERRORS.NO_ACTIVE_TASK);
             const duration = Timer.stopTimer();
             await YamlTaskOperations.updateSrEntryDuration(this.srEntry, this.srCode, this.srDocUri, duration);
             this.srEntry = undefined;
