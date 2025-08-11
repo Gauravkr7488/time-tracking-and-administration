@@ -14,7 +14,7 @@ export class YamlTaskOperations {
         return yamlObj.key.value;;
     }
 
-    static async getYamlObj(yamlKeys: string[], fileUri: vscode.Uri): Promise<any> { // TODO
+    static async getYamlObj(yamlKeys: string[], fileUri: vscode.Uri): Promise<any> { // TODO replace the strings with constants
         let yamlObj: any;
         const yamlDoc = await this.parseYaml(fileUri);
         this.taskYamlDoc = yamlDoc;
@@ -550,7 +550,7 @@ export class YamlTaskOperations {
         return yamlObj;
     }
 
-    static getYamlKeyValueBasedOnKeyType(yamlObj: any, yamlKeyType: string) { // TODO
+    static getYamlKeyValueBasedOnKeyType(yamlObj: any, yamlKeyType: string) { // TODO 
         let yamlKeyValue;
         try {
             for (const item of yamlObj.value.items) {

@@ -24,22 +24,6 @@ export class F2yamlLinkExtractor {
         yamlKeyValues = await YamlTaskOperations.getYamlKeyValues(yamlKeys, yamlKeyType, activeDoc)
         let yamlParts: string[] = this.removeStatus(yamlKeyValues);
         return yamlPath = yamlParts.join('.');
-        
-        // if (yamlKeyType != "summary") {
-        // }
-
-        // let summaryYamlParts = [];
-        // for (const key of yamlKeys) {
-        //     if (StringOperation.isFirstCharDot(key) && StringOperation.isMultiWord(key)) { // TODO: This is just a quick and dirty fix there can be edge cases // trying to triger the edgecases
-        //         let keyString = key.slice(1);
-        //         keyString = "." + StringOperation.wrapInQuotes(keyString)
-        //         summaryYamlParts.push(keyString);
-        //         continue;
-        //     }
-        //     summaryYamlParts.push(StringOperation.wrapInQuotesIfMultiWord(key));
-        // }
-        // let cleanSymmaryKeys = this.removeStatus(summaryYamlParts);
-        // return yamlPath = cleanSymmaryKeys.join('.');
     }
 
     static removeStatus(yamlKeys: string[]): string[] {

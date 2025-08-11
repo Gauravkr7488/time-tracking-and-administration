@@ -1,7 +1,7 @@
 import { Message } from './VsCodeUtils';
 import { Data } from './Data';
 
-export class Timer { // TODO 
+export class Timer { // TODO replace the strings with constants
 
     private static startTime?: number;
     private static accumulatedTime: number = 0;
