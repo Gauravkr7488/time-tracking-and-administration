@@ -14,7 +14,7 @@ export class YamlTaskOperations {
         return yamlObj.key.value;;
     }
 
-    static async getYamlObj(yamlKeys: string[], fileUri: vscode.Uri): Promise<any> {
+    static async getYamlObj(yamlKeys: string[], fileUri: vscode.Uri): Promise<any> { // TODO
         let yamlObj: any;
         const yamlDoc = await this.parseYaml(fileUri);
         this.taskYamlDoc = yamlDoc;
@@ -102,7 +102,7 @@ export class YamlTaskOperations {
             const valueOfKey = item.key.value;
             let { task } = StringOperation.seperateStatusCodeAndTask(valueOfKey); // TODO clean this
             // const valueOfKeyWithoutStatus = a[1] //
-            if (cleanYamlKey == task) {
+            if (cleanYamlKey == task || cleanYamlKey == valueOfKey) { // cause task is undefined sometimes
                 summaryObj = item;
                 break;
             }
