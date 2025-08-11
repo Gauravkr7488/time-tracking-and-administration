@@ -121,6 +121,11 @@ Bugs:
     - BugFix: Misleading error message when Stopping Timer on Task without Starting one
     - BugFix: Non-Bug:_ CSV line generator does not take properties in the "+:" section into account
 
+### 2.0.17
+    - BugFix: Double quotes are placed in between the dots in ID links (and maybe Summary links as well)
+    - BugFix: Follow Link command does not work, giving the error "Cannot read properties of undefined (reading 'length')"
+    - BugFix: Follow Link command does not work (on a link which might not be supported), giving the error "Cannot read properties of undefined (reading 'length')"
+
 ### Next
 Bugs:
     - closing the vscode should stop the task
