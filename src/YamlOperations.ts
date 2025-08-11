@@ -52,13 +52,14 @@ export class YamlTaskOperations {
                 const element = itemsOfTheContent[index];
                 let taskSummryElementKey = (element.key as yaml.Scalar).value;
                 let editedTaskSummaryElementKey = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElementKey as string);
-                if (editedTaskSummaryElementKey == yamlKeys[0]) {
+                if (editedTaskSummaryElementKey == yamlKeys[0] || StringOperation.wrapInQuotes(editedTaskSummaryElementKey) == yamlKeys[0]) { // cause for somereason one on them is wrapped in quotes.
                     parentYamlObj = element;
                     break;
                 }
                 if (!parentYamlObj) {
                     let x = (element.value as yaml.YAMLMap).items;
                     if (!x) x = (element as unknown as yaml.YAMLMap).items;
+                    if (!x) continue;
                     for (let index = 0; index < x.length; index++) {
                         const e = x[index];
                         const yamlKey = yamlKeys[0].slice(1);
