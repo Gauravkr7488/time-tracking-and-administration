@@ -17,28 +17,29 @@ export class F2yamlLinkExtractor {
         return F2YamlSummaryLink = Data.PATTERNS.START_OF_F2YAML_LINK + filePath + "\\" + "." + yamlPath + Data.PATTERNS.END_OF_F2YAML_LINK;
     }
 
-    static async getYamlPath(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position, yamlKeyType: string = "summary") {
+    static async getYamlPath(activeDoc: vscode.TextDocument, cursorPosition: vscode.Position, yamlKeyType: string = '') {
         let yamlPath = '';
         let yamlKeys = await this.getYamlKeys(activeDoc, cursorPosition)
         let yamlKeyValues;
-        if (yamlKeyType != "summary") {
-            yamlKeyValues = await YamlTaskOperations.getYamlKeyValues(yamlKeys, yamlKeyType, activeDoc)
-            let yamlParts: string[] = this.removeStatus(yamlKeyValues);
-            return yamlPath = yamlParts.join('.');
-        }
+        yamlKeyValues = await YamlTaskOperations.getYamlKeyValues(yamlKeys, yamlKeyType, activeDoc)
+        let yamlParts: string[] = this.removeStatus(yamlKeyValues);
+        return yamlPath = yamlParts.join('.');
+        
+        // if (yamlKeyType != "summary") {
+        // }
 
-        let summaryYamlParts = [];
-        for (const key of yamlKeys) {
-            if (StringOperation.isFirstCharDot(key) && StringOperation.isMultiWord(key)) { // TODO: This is just a quick and dirty fix there can be edge cases // trying to triger the edgecases
-                let keyString = key.slice(1);
-                keyString = "." + StringOperation.wrapInQuotes(keyString)
-                summaryYamlParts.push(keyString);
-                continue;
-            }
-            summaryYamlParts.push(StringOperation.wrapInQuotesIfMultiWord(key));
-        }
-        let cleanSymmaryKeys = this.removeStatus(summaryYamlParts);
-        return yamlPath = cleanSymmaryKeys.join('.');
+        // let summaryYamlParts = [];
+        // for (const key of yamlKeys) {
+        //     if (StringOperation.isFirstCharDot(key) && StringOperation.isMultiWord(key)) { // TODO: This is just a quick and dirty fix there can be edge cases // trying to triger the edgecases
+        //         let keyString = key.slice(1);
+        //         keyString = "." + StringOperation.wrapInQuotes(keyString)
+        //         summaryYamlParts.push(keyString);
+        //         continue;
+        //     }
+        //     summaryYamlParts.push(StringOperation.wrapInQuotesIfMultiWord(key));
+        // }
+        // let cleanSymmaryKeys = this.removeStatus(summaryYamlParts);
+        // return yamlPath = cleanSymmaryKeys.join('.');
     }
 
     static removeStatus(yamlKeys: string[]): string[] {

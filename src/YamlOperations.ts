@@ -528,6 +528,11 @@ export class YamlTaskOperations {
         let parentKeyValue = this.getYamlKeyValueBasedOnKeyType(parentYamlObj, yamlKeyType);
         let parentKeySummary;
         if (!parentKeyValue) {
+            if (yamlKeys[0].startsWith('.')) {
+                let withoutdot = yamlKeys[0].slice(1);
+                let someting = StringOperation.wrapInQuotesIfMultiWord(withoutdot);
+                return parentKeyValue = '.' + someting;
+            }
             parentKeySummary = StringOperation.wrapInQuotesIfMultiWord(yamlKeys[0]);
             parentKeyValue = parentKeySummary;
         }
