@@ -52,7 +52,7 @@ export class YamlTaskOperations {
                 const element = itemsOfTheContent[index];
                 let taskSummryElementKey = (element.key as yaml.Scalar).value;
                 let editedTaskSummaryElementKey = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElementKey as string);
-                if (editedTaskSummaryElementKey == yamlKeys[0] || StringOperation.wrapInQuotes(editedTaskSummaryElementKey) == yamlKeys[0]) { // cause for somereason one on them is wrapped in quotes.
+                if (editedTaskSummaryElementKey == yamlKeys[0] || StringOperation.wrapInQuotes(editedTaskSummaryElementKey) == yamlKeys[0] || StringOperation.removeDot(editedTaskSummaryElementKey) == StringOperation.removeQuoteWrapping(StringOperation.removeDot(yamlKeys[0]))) { // cause for somereason one on them is wrapped in quotes. // TODO Fix this monstrosity
                     parentYamlObj = element;
                     break;
                 }
@@ -70,6 +70,7 @@ export class YamlTaskOperations {
                 }
             }
         }
+        if (!parentYamlObj) throw new Error("Unable to find the parentObj")
         return parentYamlObj;
     }
 
