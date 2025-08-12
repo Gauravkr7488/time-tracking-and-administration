@@ -4,6 +4,15 @@ import { VsCodeUtils } from './VsCodeUtils';
 import * as vscode from 'vscode';
 
 export class StringOperation {
+    static removeDot(a: string): string {
+        if(a.startsWith('.')) return a.slice(1);
+        return a;
+    }
+
+    static removeQuoteWrapping(keyValue: string) {
+        if(keyValue.startsWith('"') && keyValue.endsWith('"')) return keyValue.slice(1, -1);
+        return keyValue
+    }
 
     static isThisTask(yamlLink: string) {
         const { yamlPath } = this.parseF2yamlLink(yamlLink);

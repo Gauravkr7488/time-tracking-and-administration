@@ -504,7 +504,7 @@ export class YamlTaskOperations {
         let yamlKeyValues: string[] = [];
         const yamlDoc = await this.parseYaml(activeDoc.uri);
         let parentYamlObj: any = yamlDoc.get(yamlKeys[0]);
-        let parentKeyValue = YamlTaskOperations.getParentValue(parentYamlObj, yamlKeyType, yamlKeys);
+        let parentKeyValue = YamlTaskOperations.getParentValue(parentYamlObj, yamlKeyType, yamlKeys[0]);
         yamlKeyValues.push(parentKeyValue);
 
         for (let index = 1; index < yamlKeys.length; index++) {
@@ -525,19 +525,25 @@ export class YamlTaskOperations {
         return yamlKeyValues;
     }
 
-    private static getParentValue(parentYamlObj: any, yamlKeyType: string, yamlKeys: string[]) {
+    private static getParentValue(parentYamlObj: any, yamlKeyType: string, yamlKey: string) {
         let parentKeyValue = this.getYamlKeyValueBasedOnKeyType(parentYamlObj, yamlKeyType);
         let parentKeySummary;
         if (!parentKeyValue) {
-            if (yamlKeys[0].startsWith('.')) {
-                let withoutdot = yamlKeys[0].slice(1);
-                let someting = StringOperation.wrapInQuotesIfMultiWord(withoutdot);
-                return parentKeyValue = '.' + someting;
+            if (yamlKey.startsWith('.')) {
+                parentKeyValue = YamlTaskOperations.TheDotSettelment(yamlKey);
+                return parentKeyValue
             }
-            parentKeySummary = StringOperation.wrapInQuotesIfMultiWord(yamlKeys[0]);
+            parentKeySummary = StringOperation.wrapInQuotesIfMultiWord(yamlKey);
             parentKeyValue = parentKeySummary;
         }
         return parentKeyValue;
+    }
+
+     static TheDotSettelment(yamlKey: string) { // TODO move to stringOperations
+        let withoutdot = yamlKey.slice(1); 
+        let newWord = StringOperation.wrapInQuotesIfMultiWord(withoutdot);
+        newWord = '.' + newWord;
+        return newWord;
     }
 
     static getYamlObjFromParentObj(yamlKey: string, yamlDoc: yaml.Document<yaml.Node, true>, parentYamlObj: any) {

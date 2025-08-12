@@ -21,9 +21,25 @@ export class F2yamlLinkExtractor {
         let yamlPath = '';
         let yamlKeys = await this.getYamlKeys(activeDoc, cursorPosition)
         let yamlKeyValues;
-        yamlKeyValues = await YamlTaskOperations.getYamlKeyValues(yamlKeys, yamlKeyType, activeDoc)
-        let yamlParts: string[] = this.removeStatus(yamlKeyValues);
+        yamlKeyValues = await YamlTaskOperations.getYamlKeyValues(yamlKeys, yamlKeyType, activeDoc);
+        let betterDots = this.moveDots(yamlKeyValues);
+        let yamlParts: string[] = this.removeStatus(betterDots);
         return yamlPath = yamlParts.join('.');
+    }
+    static moveDots(yamlKeyValues: string[]) { // TODO move this from here
+        let betterDots = []
+        for(const keyValue of yamlKeyValues){
+            if (keyValue.startsWith('".')) {
+                let a = StringOperation.removeQuoteWrapping(keyValue);
+                a = StringOperation.removeDot(a);
+                a = StringOperation.wrapInQuotes(a);
+                a = '.' + a;
+                betterDots.push(a);
+                continue;
+            }
+            betterDots.push(keyValue);
+        }
+        return betterDots;
     }
 
     static removeStatus(yamlKeys: string[]): string[] {
