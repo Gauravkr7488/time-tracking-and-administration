@@ -11,7 +11,13 @@ export class YamlTaskOperations {
     static taskYamlLink: string;
 
     static getYamlKeyValue(yamlObj: any): string {
-        return yamlObj.key.value;;
+        let value;
+        try {
+            value = yamlObj.key.value;
+        } catch (error) {
+            return '';
+        }
+        return value
     }
 
     static async getYamlObj(yamlKeys: string[], fileUri: vscode.Uri): Promise<any> { // TODO replace the strings with constants
@@ -22,8 +28,8 @@ export class YamlTaskOperations {
 
         if (!parentYamlObj) {
             parentYamlObj = YamlTaskOperations.getTopLevelTaskObj(yamlDoc, yamlKeys, yamlObj);
-            yamlObj = parentYamlObj; // because we are looking for this
         }
+        yamlObj = parentYamlObj; // because we are looking for this
 
         if (yamlKeys.length > 1) {
             for (let index = 1; index < yamlKeys.length; index++) {

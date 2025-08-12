@@ -30,6 +30,7 @@ export class LinkFollower {
             spaces += "  ";
         }
         keyWithSpaces = spaces + keyValueOfYamlObj;
+        if(!keyValueOfYamlObj) keyWithSpaces = yamlKeys[0]; // becaue the parent obj dosent come with keyvalue
         return keyWithSpaces;
     }
 
