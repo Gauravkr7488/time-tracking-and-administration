@@ -565,6 +565,7 @@ export class YamlTaskOperations {
 
     static getYamlKeyValueBasedOnKeyType(yamlObj: any, yamlKeyType: string) { // TODO 
         let yamlKeyValue;
+        if(!yamlKeyType) return;
         try {
             for (const item of yamlObj.value.items) {
                 if (item.key.value == yamlKeyType) {
