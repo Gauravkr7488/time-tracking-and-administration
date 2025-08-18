@@ -118,7 +118,7 @@ export class YamlTaskOperations {
     }
 
 
-    public static async parseYaml(docUri: vscode.Uri): Promise<yaml.Document<yaml.Node, true>> {
+    public static async parseYaml(docUri: vscode.Uri): Promise<yaml.Document<yaml.Node, true>> { // TODO chage name to parseYamlDoc
         const doc = await vscode.workspace.openTextDocument(docUri);
         const text = doc.getText();
         try {
