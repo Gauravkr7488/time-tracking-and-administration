@@ -9,6 +9,7 @@ export class YamlTaskOperations {
     public static taskFileUri: vscode.Uri;
     private static taskYamlDoc: yaml.Document<yaml.Node, true>
     static taskYamlLink: string;
+    public static lineCounter: any;
 
     static getYamlKeyValue(yamlObj: any): string {
         let value;
@@ -22,9 +23,9 @@ export class YamlTaskOperations {
 
     static async getYamlObj(yamlKeys: string[], fileUri: vscode.Uri): Promise<any> { // TODO replace the strings with constants
         let yamlObj: any;
-        const yamlDoc = await this.parseYaml(fileUri);
+        const yamlDoc = await this.parseYamlDoc(fileUri);
         this.taskYamlDoc = yamlDoc;
-        let parentYamlObj: any = yamlDoc.get(yamlKeys[0]);
+        let parentYamlObj: any = yamlDoc.get(yamlKeys[0], true);
 
         if (!parentYamlObj) {
             parentYamlObj = YamlTaskOperations.getTopLevelTaskObj(yamlDoc, yamlKeys, yamlObj);
@@ -50,6 +51,36 @@ export class YamlTaskOperations {
         return yamlObj;
     }
 
+    // private static getTopLevelTaskObj(yamlDoc: yaml.Document<yaml.Node, true>, yamlKeys: string[], yamlObj: any) { // TODO fix this
+    //     let parentYamlObj;
+    //     if (yaml.isMap(yamlDoc.contents)) {
+    //         let itemsOfTheContent = yamlDoc.contents.items;
+    //         for (let index = 0; index < itemsOfTheContent.length; index++) {
+    //             const element = itemsOfTheContent[index];
+    //             let taskSummryElementKey = (element.key as yaml.Scalar).value;
+    //             let editedTaskSummaryElementKey = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElementKey as string);
+    //             if (editedTaskSummaryElementKey == yamlKeys[0] || StringOperation.wrapInQuotes(editedTaskSummaryElementKey) == yamlKeys[0] || StringOperation.removeDot(editedTaskSummaryElementKey) == StringOperation.removeQuoteWrapping(StringOperation.removeDot(yamlKeys[0]))) { // cause for somereason one on them is wrapped in quotes. // TODO Fix this monstrosity
+    //                 parentYamlObj = element;
+    //                 break;
+    //             }
+    //             if (!parentYamlObj) {
+    //                 let x = (element.value as yaml.YAMLMap).items;
+    //                 if (!x) x = (element as unknown as yaml.YAMLMap).items;
+    //                 if (!x) continue;
+    //                 for (let index = 0; index < x.length; index++) {
+    //                     const e = x[index];
+    //                     const yamlKey = yamlKeys[0].slice(1);
+    //                     if ((e.key as yaml.Scalar).value == "Id" && (e.value as yaml.Scalar).value == yamlKey) {
+    //                         return element;
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     if (!parentYamlObj) throw new Error("Unable to find the parentObj")
+    //     return parentYamlObj;
+    // }
+
     private static getTopLevelTaskObj(yamlDoc: yaml.Document<yaml.Node, true>, yamlKeys: string[], yamlObj: any) { // TODO fix this
         let parentYamlObj;
         if (yaml.isMap(yamlDoc.contents)) {
@@ -59,7 +90,8 @@ export class YamlTaskOperations {
                 let taskSummryElementKey = (element.key as yaml.Scalar).value;
                 let editedTaskSummaryElementKey = StringOperation.removeFirstWordIfFollowedBySpaceAndDot(taskSummryElementKey as string);
                 if (editedTaskSummaryElementKey == yamlKeys[0] || StringOperation.wrapInQuotes(editedTaskSummaryElementKey) == yamlKeys[0] || StringOperation.removeDot(editedTaskSummaryElementKey) == StringOperation.removeQuoteWrapping(StringOperation.removeDot(yamlKeys[0]))) { // cause for somereason one on them is wrapped in quotes. // TODO Fix this monstrosity
-                    parentYamlObj = element;
+                    // parentYamlObj = element;
+                    parentYamlObj = yamlDoc.get(taskSummryElementKey, true);
                     break;
                 }
                 if (!parentYamlObj) {
@@ -100,7 +132,7 @@ export class YamlTaskOperations {
         return idObj;
     }
 
-    static getYamlSummaryObjFromParent(yamlKey: string, parentYamlObj: any) {
+    static getYamlSummaryObjFromParent(yamlKey: string, parentYamlObj: any) { // TODO fix
         let summaryObj: any;
         let cleanYamlKey = StringOperation.removeQuotesWrappingAndDot(yamlKey);
         let yamlObjItems = parentYamlObj.items;
@@ -110,7 +142,8 @@ export class YamlTaskOperations {
             let { task } = StringOperation.seperateStatusCodeAndTask(valueOfKey); // TODO clean this
             // const valueOfKeyWithoutStatus = a[1] //
             if (cleanYamlKey == task || cleanYamlKey == valueOfKey) { // cause task is undefined sometimes
-                summaryObj = item;
+                // summaryObj = item;
+                summaryObj = parentYamlObj.get(valueOfKey, true);
                 break;
             }
         }
@@ -118,11 +151,13 @@ export class YamlTaskOperations {
     }
 
 
-    public static async parseYaml(docUri: vscode.Uri): Promise<yaml.Document<yaml.Node, true>> { // TODO chage name to parseYamlDoc
+    public static async parseYamlDoc(docUri: vscode.Uri): Promise<yaml.Document<yaml.Node, true>> { // TODO chage name to parseYamlDoc
         const doc = await vscode.workspace.openTextDocument(docUri);
         const text = doc.getText();
         try {
-            const yamlDoc: yaml.Document = yaml.parseDocument(text);
+            const lineCounter = new yaml.LineCounter();
+            const yamlDoc: yaml.Document = yaml.parseDocument(text, { lineCounter });
+            this.lineCounter = lineCounter;
             if (yamlDoc.errors.length > 0) {
                 let error = yamlDoc.errors[0];
                 throw new Error(Data.MESSAGES.ERRORS.PARSING_ERROR(error.message))
@@ -217,7 +252,7 @@ export class YamlTaskOperations {
     }
 
     public static async moveEntryToWasInSr(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri) {
-        const yamlDoc = await this.parseYaml(srDocUri);
+        const yamlDoc = await this.parseYamlDoc(srDocUri);
         // if (!yamlDoc) return;
         const wasNode = await this.getWasObj(yamlDoc, srCode);
         // if (!wasNode) return;
@@ -254,7 +289,7 @@ export class YamlTaskOperations {
     }
 
     public static async updateSrEntryDuration(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri, duration: number) {
-        const yamlDoc = await this.parseYaml(srDocUri);
+        const yamlDoc = await this.parseYamlDoc(srDocUri);
         let srEntryIndex = await this.findSrEntry(srEntry, yamlDoc, srCode);
         await this.updateDuration(srEntryIndex, duration, yamlDoc, srCode);
         const doc = await vscode.workspace.openTextDocument(srDocUri);
@@ -447,7 +482,7 @@ export class YamlTaskOperations {
     }
 
     public static async checkIfTaskIsAlreadyInSr(srEntry: yaml.YAMLMap<unknown, unknown>, srCode: string, srDocUri: vscode.Uri) {
-        const yamlDoc = await this.parseYaml(srDocUri);
+        const yamlDoc = await this.parseYamlDoc(srDocUri);
         // if (!yamlDoc) return;
         const wasNode = await this.getWasObj(yamlDoc, srCode);
         // if (!wasNode) return;
@@ -457,7 +492,7 @@ export class YamlTaskOperations {
     }
 
     public static async generateWorkLogs(srCode: string, srDocUri: vscode.Uri) {
-        const yamlDoc = await this.parseYaml(srDocUri);
+        const yamlDoc = await this.parseYamlDoc(srDocUri);
         // if (!yamlDoc) return;
         const wasNode = await this.getWasObj(yamlDoc, srCode);
         // if (!wasNode) return;
@@ -509,7 +544,7 @@ export class YamlTaskOperations {
 
     static async getYamlKeyValues(yamlKeys: string[], yamlKeyType: string, activeDoc: vscode.TextDocument): Promise<string[]> {
         let yamlKeyValues: string[] = [];
-        const yamlDoc = await this.parseYaml(activeDoc.uri);
+        const yamlDoc = await this.parseYamlDoc(activeDoc.uri);
         let parentYamlObj: any = yamlDoc.get(yamlKeys[0]);
         let parentKeyValue = YamlTaskOperations.getParentValue(parentYamlObj, yamlKeyType, yamlKeys[0]);
         yamlKeyValues.push(parentKeyValue);
@@ -546,8 +581,8 @@ export class YamlTaskOperations {
         return parentKeyValue;
     }
 
-     static TheDotSettelment(yamlKey: string) { // TODO move to stringOperations
-        let withoutdot = yamlKey.slice(1); 
+    static TheDotSettelment(yamlKey: string) { // TODO move to stringOperations
+        let withoutdot = yamlKey.slice(1);
         let newWord = StringOperation.wrapInQuotesIfMultiWord(withoutdot);
         newWord = '.' + newWord;
         return newWord;
@@ -565,7 +600,7 @@ export class YamlTaskOperations {
 
     static getYamlKeyValueBasedOnKeyType(yamlObj: any, yamlKeyType: string) { // TODO 
         let yamlKeyValue;
-        if(!yamlKeyType) return;
+        if (!yamlKeyType) return;
         try {
             for (const item of yamlObj.value.items) {
                 if (item.key.value == yamlKeyType) {
